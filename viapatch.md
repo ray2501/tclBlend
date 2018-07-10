@@ -101,3 +101,8 @@ so I add libdir option to handle this case:
 And execute `make` and `make install`.
 
 Tcl 8.6.1-8.6.5 maybe need patch, please check [tclBlend](http://wiki.tcl.tk/1313).
+
+Notice:
+Now requires JDK >= 8,
+For JEP 313: Remove the Native-Header Generation Tool update
+
