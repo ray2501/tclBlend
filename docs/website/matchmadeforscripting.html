@@ -1,0 +1,605 @@
+<HTML>
+<HEAD>
+   <TITLE>Tcl/Java Project</TITLE>
+</HEAD>
+<BODY BGCOLOR="#FFFFFF">
+
+Originally published in November, 1999.
+
+<center>
+<h1>
+Tcl + Java = A match made for scripting&nbsp;</h1></center>
+
+<center>
+<h3>
+Latest releases of Tcl Blend and Jacl simplify development and maintenance
+of Java-based applications&nbsp;</h3></center>
+
+<blockquote><b>Summary</b>
+<br>Many savvy Java programmers get their best results by harnessing Sun's
+object-oriented programming language in combination with the Tcl scripting
+language. The announcement this month of the final iteration of Tcl Blend
+and Jacl, both in version 1.2.5 makes, it timely for <i>SunWorld</i> to
+update its 1997 report on the original releases (see <a href="#resources">Resources</a>).&nbsp;
+<p>The lead developer for Tcl Blend and Jacl has collaborated with one
+of <i>SunWorld</i>'s scripting specialists to present this tutorial on
+Tcl Blend and Jacl. The examples here demonstrate the effective teamwork
+possible between Tcl and Java. <i>(3,900 words)</i></blockquote>
+<b>By Moses DeJong and Cameron Laird</b>
+<p>Let's start by getting to know the players. While many people met Java
+first as the source for Web browser "applets" (dancing bears, Web-based
+chat, and so on), its current position is largely that of a safer C++.
+That is, development teams choose Java over C++ because coding in Java
+seems to lead to more reliable and easily ported results.&nbsp;
+<p>Tcl is a "scripting language," reminiscent of Visual Basic or Perl.
+It's generally used interpretively. When programmers work with C/C++ or
+Java, they typically write source code, then compile the texts into applications
+that can be executed. With Tcl, in contrast, the language processor executes
+native code immediately, without a separate compilation step visible to
+the user. Interpretive interaction feels much more "intimate" and encourages
+swift learning and program development.&nbsp;
+<p>Tcl also contrasts with C/C++ and Java in its "typing." Java is strongly
+typed; variables must be defined (integer, string, etc.) and used consistently.
+Tcl is more relaxed in this regard, and assigns the responsibility for
+managing such distinctions to the computer, rather than the developer.
+If <tt>my_variable</tt> holds the value "1234," Tcl knows how to operate
+on <tt>my_variable</tt> as either a string or a numeric value, depending
+on context.&nbsp;
+<p>Tcl's current home is Scriptics Corp. John Ousterhout, Tcl's creator,
+spun Scriptics off from Sun in January 1998, to produce commercial development
+tools based on Tcl. Scriptics also maintains Tcl's open source core and
+supports several of its extensions -- third-party libraries that augment
+the functionality of the Tcl core.&nbsp;
+<p>One such extension is Tcl Blend. With Tcl Blend, a Tcl programmer can
+allocate Java objects and invoke Java methods inside Tcl. If a developer
+needs, for example, cryptographic functionality already coded in Java,
+he simply invokes the Java methods from within his Tcl-coded application.
+Internally, Tcl Blend uses the Java Native Interface (JNI) to reach Java
+from Tcl.&nbsp;
+<p>Jacl is an implementation of Tcl written in 100 percent pure Java. It
+isn't a Tcl extension, for it doesn't add new commands to the Tcl interpreter.
+It is simply a rewrite of the Tcl interpreter using Java source code instead
+of C source code. Using Jacl, Tcl programmers can define variables and
+procedures as well as interact with Java objects. This interaction is made
+possible by the <tt>java</tt> package, which is a set of Tcl commands shared
+by Jacl and Tcl Blend that provide access to Java's reflection API.&nbsp;
+<p>Another way to look at Jacl is in terms of platforms. "Classic" Tcl
+is highly portable; standard versions are available for Unix, Win*, and
+Mac OS, along with several specialty operating systems, including OpenVMS,
+OS/400, and VxWorks. Jacl is simply an implementation that extends this
+list to Java virtual machines (JVMs). We'll demonstrate below how this
+brings Java developers an opportunity to embed scripting functionality
+in their Java applications. One of the original goals of Tcl was to create
+a technology that could be embedded inside of an existing program to add
+scripting functionality to the embedding program. The Tcl library is written
+in C in a way that makes it easy for any application written in C or C++
+to embed a Tcl interpreter. Jacl provides this same type of embeddable
+scripting library for applications written in Java. With Jacl, developers
+can add powerful scripting functionality to their Java applications without
+sacrificing Java's platform independence.&nbsp;
+<p>Jacl was originally created by software engineer Ioi Lam while he was
+a student at Cornell. During its time as a division of Sun, Ousterhout's
+core Tcl development team released versions 1.0 of Jacl and Tcl Blend.
+Since then, article coauthor Moses DeJong has been the lead developer on
+the project, with considerable help from Christopher Hylands of the University
+of California at Berkeley and other Tcl-Java users. (Tcl-Java is used throughout
+this article to mean the combination of Tcl and Java with Tcl Blend or
+Jacl.) Scriptics sponsors the official "Tcl-Java Integration" page on its
+Web site, maintains a CVS repository and problem-report facility for the
+Jacl and Tcl Blend source code, and provides support services for corporate
+customers of Tcl Blend.&nbsp;
+<p>Versions 1.2 of both Tcl Blend and Jacl are based on release 1.1 of
+the Java Developer Kit (JDK), and also support several features new with
+JDK 1.2. Versions 1.2 of Tcl Blend and Jacl also include Tcl-Java language
+features not present in earlier releases. Perhaps the most important of
+these is Unicode, crucial for management of international character sets.
+Other upgrades present in versions 1.2 include import capabilities, exception
+handling, and, for Jacl specifically, namespaces. Version 1.2 expands platform
+support to include Linux and Silicon Graphics's IRIX. Also with 1.2, Jacl
+gains Tcl's handy <tt>clock</tt> command for parsing and formatting times.&nbsp;
+<p>Tcl, Tcl Blend, and Jacl are like Linux or Perl in that all are freely
+available for commercial and noncommercial use. Source code and binaries
+are available for free download. A "BSD-style" license governs all three.
+Note also that Jacl includes a regular expression package licensed from
+ORO Inc. for use only with Jacl, and only in the form of a binary class
+file.&nbsp;
+<p><b><font size=+1>Preparing the stage</font></b>
+<br>It doesn't take long to become a Jacl or Tcl Blend user. The 1.2 releases
+of both Jacl and Tcl Blend come in two flavors: a source release and a
+binary release. The Tcl Blend binary release is currently provided for
+Solaris SPARC and Windows Intel systems using Tcl version 8.2 and the JDK
+version 1.2. The binary release of Jacl should work on any system with
+a properly implemented JVM.&nbsp;
+<p>It's reasonable to expect that downloading a binary release is the safer
+choice for beginners. However, we've found that the opposite is true, just
+as Sun freeware expert Steve Christensen told <i>SunWorld</i> last year.
+Binary installations too often conflict in subtle ways with other Java
+or Tcl software installed on a local machine. Unless you're quite sure
+you're working on a host with existing Java and Tcl installations that
+exactly match the versions the binary release was compiled against, we
+recommend that you download source code and generate an installation locally.
+The source release comes with a sophisticated configure process that detects
+the versions of Tcl and Java you have installed, and then compiles with
+all necessary options.&nbsp;
+<p>Perhaps the biggest immediate challenge is to keep release designations
+straight: Jacl and Tcl Blend are both at version 1.2.5, compatible with
+version 8.2 of Tcl and Java Development Kit (JDK) 1.1 and 1.2.2x. While
+it's possible to generate Tcl Blend and Jacl with earlier base releases
+of Tcl and Java, the community of Tcl developers generally regards 8.2
+as superior to 8.0 and 8.1 for its improved Windows integration, Unicode
+support, and so on. Notice also that both Tcl Blend and Jacl have been
+tested with JVMs other than Sun's, including the IBM JVM, the TowerJ JVM,
+and the Kaffe open source JVM designed for embedded systems.&nbsp;
+<p>The documentation bundled with Tcl Blend and Jacl has been overhauled
+for the 1.2 releases. It is formatted in HTML, and is also available for
+browsing at the Scriptics Web site. See <a href="#resources">Resources</a>
+for details.&nbsp;
+<p>Support for Tcl Blend and Jacl ranges across the usual options for open
+sourced software. The comp.lang.tcl newsgroup is a convivial and useful
+meeting place for programmers working with Tcl; it boasts an excellent
+signal-to-noise ratio. Scriptics recently adopted from the Tcl Consortium
+a low-volume mailing list devoted to Tcl Blend and Jacl. Scriptics writes
+contracts for enterprise support of commercial application of Tcl Blend.
+Unbundled support of open source products is still a young and developing
+market; for current information on support arrangements, contact Scriptics.&nbsp;
+<p><b><font size=+1>Make Tcl Blend and Jacl work for you</font></b>
+<br>One of the attractions of Tcl, particularly for those coming from Java,
+is how little effort it takes before you start seeing results. A complete
+source distribution for Tcl is only about 1 MB. Once it's installed, you
+can immediately pop into the interpreter to experiment with different Tcl
+commands. Links in the <a href="#resources">Resources</a> section point
+to several standard tutorials that explain Tcl concepts.&nbsp;
+<p>One of the goals of this article is to contrast different styles of
+coding with Tcl and Java combinations. Our first example is a comparison
+of the use of Tcl-Java to create and control Java Abstract Windowing Toolkit
+(AWT) widgets. You'll see for yourself the differences between the Java
+code to create and manipulate these graphical user interface (GUI) elements
+and the equivalent Tcl-Java code.
+<p>Java source code:</p>
+<code>
+<pre>
+import java.awt.Button;
+import java.awt.Frame;
+
+public class TestAWT {
+    public static void main(String[] argv) {
+        Frame f = new Frame();
+        Button b = new Button("Press Me");
+        f.setSize(300,300);
+        f.add(b);
+        f.show();
+    }
+}
+</pre>
+</code>
+<p>
+Tcl-Java source code:
+<code>
+<pre>package require java
+java::import java.awt.Button
+java::import java.awt.Frame
+
+set f [java::new Frame]
+set b [java::new Button "Press Me"]
+
+$f setSize 300 300
+$f add $b
+$f show
+</pre>
+</code>
+
+This minimal example requires 11 lines of Java source code, but only 8
+of Tcl-Java code. In contrast to the pure Java alternative, the Tcl-Java
+example does <i>not</i> require a programmer to take any of the following
+steps:&nbsp;
+<ul>Define a <tt>TestAWT</tt> class simply to test a tiny fragment of code&nbsp;
+<p>Create an explicit <tt>main()</tt> method of <tt>TestAWT</tt>
+<p>Compile the <tt>TestAWT</tt> class&nbsp;
+<p>Invoke the external <tt>java</tt> executable to interpret byte-compiled
+Java classes&nbsp;</ul>
+This economy of expression encourages adept Tcl-Java users to concentrate
+on more essential problems. Users find it clearer to dispense with the
+wrapper class and syntactic overhead Java demands.&nbsp;
+<p>Notice that combining Java with Tcl does require one "additional" step
+of the programmer: the <tt>package require java</tt> command explicitly
+introduces Java capabilities in the Tcl interpretive context. Even this
+can be automated, though; it's easy enough to fold this command into an
+initialization script, which guarantees you'll have Java available whenever
+you launch your personal copy of the Tcl interpreter.&nbsp;
+<p><b><font size=+1>Exceptional code</font></b>
+<br>Our second example demonstrates Tcl's ability to manage Java exceptions.
+Notice first the <tt>java::throw</tt> command, a Tcl binding to Java's
+<tt>throw</tt>
+construct. Its natural complement is <tt>java::try</tt>, which binds Java's
+try-catch-finally construct, and therefore traps the exceptions <tt>java::throw</tt>
+raises. With this pair of commands, Tcl programmers can raise Java exceptions
+and respond to them.
+<p>Java source code:</p>
+<code>
+<pre>
+public class Test {
+    static void doSomething() throws Exception {
+        throw new Exception("some error");
+    }
+
+    public static void main(String[] argv) {
+        try {
+            doSomething();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+}
+</pre>
+</code>
+<p>Tcl-Java source code:</p>
+<code>
+<pre>
+package require java
+
+proc doSomething {} {
+    java::throw [java::new Exception "some error"]
+}
+
+java::try {
+    doSomething
+} catch {Exception e} {
+    $e printStackTrace
+}
+</pre>
+</code>
+Java's exception-handling has the reputation of being powerful and a bit
+difficult. This example shows, though, how natural it is to express Java
+exceptions correctly and concisely in Tcl-Java. This can come in very handy
+for prototyping work -- Tcl-Java's interactivity encourages quick "experimental"
+coding.&nbsp;
+<p><b><font size=+1>Regression testing</font></b>
+<br>One showcase for the capabilities of Tcl-Java is regression testing.
+A well-run project begins with explicit specification of deliverables.
+With this in hand, it's possible to validate programs and detect errors
+early in the development cycle. Particularly effective is construction
+of a bundle of small tests that can automatically be applied against an
+implementation during its growth and maintenance. Tcl has a long history
+of demonstrated success in this role of "regression testing": Oracle, Sybase,
+and dozens of other high-profile corporations rely on Tcl scripting of
+their regression tests.&nbsp;
+<p>Both Tcl Blend and Jacl expand this role. Typical Java-coded programs
+depend on the teamwork of hundreds or even thousands of "objects." Failure
+of any one can, of course, doom the whole application. One response to
+this reality is to test all the objects separately. The next example shows
+how easy it is to write simple regression tests in Tcl.&nbsp;
+<p>The following test for a <tt>java.lang.String</tt> object ensures that
+its <tt>charAt</tt> method returns an expected result:
+<p><b>Simple Tcl-Java regression test</b>
+<code>
+<pre>
+# "1.1" is the name, or identifier, of the test.
+
+test 1.1 {make sure the java.lang.String.charAt() method works} {
+    set s [java::new String "I am a Java String"]
+    $s charAt 7
+} J
+</pre>
+</code>
+The <tt>test</tt> command used here is part of a refined <tt>tcltest</tt>
+package, originally developed at Sun early in the decade and now distributed
+as part of the core Tcl release. The formal signature of <tt>test</tt>
+is approximately&nbsp;
+<code>
+<pre>
+test ID DESCRIPTION {
+    TCL_CODE
+} EXPECTED_RESULT
+</pre>
+</code>
+there are a few variations on this form, but they're insignificant to this
+article.&nbsp;
+<p>The <tt>tcltest</tt> package makes it astonishingly easy to write <i>and</i>
+use regression tests. Notice how readable the example here is: it allocates
+a Java string, extracts its eighth character, and verifies that it's the
+letter <i>J,</i> as expected.&nbsp;
+<p>Consider for a moment how useful this type of validation would be in
+development of Enterprise JavaBeans (EJBs). Requirements for an EJB can
+first be declared as a collection of regression tests. A corporation seeking
+to purchase an EJB would simply include the regression tests in the information
+given bidders. There's tremendous potential in ideas such as this to streamline
+the workflow of software development.&nbsp;
+<p>Keep in mind that Jacl and Tcl Blend can boost your productivity even
+if the product you deliver doesn't include them. Your Java development
+process probably involves debuggers, monitors, and development environments
+your end users never see. In a similar manner, Tcl Blend and Jacl have
+a lot to offer even if used only in regression testing of each component
+or object included in your product.&nbsp;
+<p><b><font size=+1>Industrial strength scripting</font></b>
+<br>Perhaps the most dramatic demonstration of Tcl Blend's fitness for
+mission-critical application is its adoption by the Vignette Corporation
+for its flagship StoryServer product. Vignette is a rapidly growing publicly-traded
+company marketing primarily to the largest organizations. Vignette's StoryServer
+product "provides a platform for building customer-facing Web, Internet,
+and online applications," in the words of Ahmed Moin, product manager for
+Vignette StoryServer. Reliability and security are paramount for Vignette
+clients. The "value proposition" StoryServer offers them, Moin tells us,
+is as an "integration platform" that manages content, personalization,
+and syndication in applications that can be quickly delivered to market.
+StoryServer's scripting language has always been Tcl, and certainly Ousterhout
+has made explicit that, "The goal for Scriptics is to make Tcl the premier
+integration platform." Java capabilities are a natural realization of these
+themes.&nbsp;
+<p>StoryServer 5x, due for release early next year, will include Tcl Blend
+1.2. This means that the implementation language for StoryServer application
+builders will expose&nbsp;
+<ul>Native Tcl capabilities&nbsp;
+<p>Vignette content services
+<p>Connections to Java resources such as external application servers and
+databases in a uniform, succinct syntax&nbsp;</ul>
+As Moin told us, "Scripting is a minor part of the value proposition. Tcl
+for Vignette is first a way of accessing services. We charge for the functional
+services, not the scripting language." Tcl Blend makes it easy to integrate
+and unify those services in a package that makes sense to StoryServer customers.&nbsp;
+<p><b><font size=+1>Happy Jacl users</font></b>
+<br>One of Jacl's primary design goals is to provide an embeddable scripting
+language for applications written in Java. Microcosm Technologies Inc.
+provides a great example of Jacl's use in its new Java-based micro-electro-mechanical
+systems (MEMS)/microsystems technology (MST) layout design (also mechanical
+computer-assisted design -- MCAD) tool called Catapult. Catapult is a 2D
+design tool used to layout graphical representations of microscopic mechanical
+devices that are fabricated with the same process used to create integrated
+circuits. Catapult uses Jacl to provide a scripting interface. Catapult
+gives users the ability to create custom menus, toolbars, and macros.&nbsp;
+<p>Microcosm chose Tcl for its developmental scalability: simple syntax
+for novice programmers and full programming capabilities for advanced users.
+Jacl was selected because it, like Catapult itself, is written in 100 percent
+Java. Catapult's designers also stress that Jacl and Tcl Blend's open source
+development model leads to a better product because users have full access
+to the source code, so they can improve the product to meet their own needs.
+In fact, one of the new features in Jacl and Tcl Blend 1.2 -- the ability
+to source a Tcl script from any URL -- was added by Thomas McKay, Catapult's
+project manager. With version 1.2, all a Tcl-Java programmer needs to do
+to include source located on the Web is to specify the <tt>-url</tt> flag.
+Here's an example:&nbsp;
+<pre>% source -url http://www.memcad.com/scripts/clean.tcl
+
+</pre>
+McKay is enthusiastic about Jacl. He told us, "As someone using Jacl in
+a commercial MCAD application ... it's great! Honestly, I have absolutely
+no complaints and only praise for all involved."&nbsp;
+<p>Also putting Jacl to good use is HMS Software Inc. From its home office
+in Boston, Mass., HMS focuses on development and implementation of Computer-Aided
+Process Planning (CAPP), shop floor control (manufacturing execution system
+-- MES), Non-Conformance Management (NCM) and other software systems used
+to generate, manage, and distribute information for manufacturing and assembly
+processes. All the existing HMS products are client/server applications
+that use Tcl as their core and primary development language. This presented
+a challenge when HMS decided to move to a new architecture founded on Java
+and EJBs, as it would take a very long time to rewrite all their business
+logic in Java.&nbsp;
+<p>The solution made for an interesting story. Jacl seemed at first to
+be perfect: HMS could reuse all existing Tcl scripts in a 100 percent Java
+environment. Unfortunately, the 1.1 version of Jacl did not support the
+"namespace" features of Tcl 8, and HMS makes frequent use of namespaces.
+The source code to Jacl was available, so HMS investigated the effort required
+to add the namespace features to Jacl. The complexity of adding these namespace
+features convinced HMS that it would take too much time to bring one of
+its developers up to speed on Jacl and port the namespace features from
+the C version of Tcl over to Jacl.&nbsp;
+<p>At this point, HMS posted a message to the Tcl-Java mailing list announcing
+its desire to contract out the project. Moses DeJong decided to take on
+this project; part of his motivation was the realization that namespace
+features would benefit many other Jacl users. The result was a version
+of Jacl that passed all of the namespace related regression tests for Tcl
+8. These changes were then integrated into the 1.2 version of Jacl and
+made available to the user community.&nbsp;
+<p>Large industry players are also integrating Jacl into their products.
+Sun has embedded Jacl in a product called Embedded Server, to provide a
+scripting interface to its Java-coded Web server. IBM also includes Jacl
+as part of its Bean Scripting Framework (BSF). BSF is an interface which
+embeds a number of scripting engines in a Java program with a single API.&nbsp;
+<p><b><font size=+1>Reservations</font></b>
+<br>The mixed marriage between strongly typed Java and Tcl, with its tradition
+that "everything is a string," produces a predictable burden of tensions
+between the two. Tcl-Java programmers have the mild annoyance of having
+to specify each argument in an overloaded Java method that involves primitive
+types, because otherwise the resolver can't disambiguate them. For example,
+assume a Java object with the following overloaded method is invoked from
+Tcl with a single argument.&nbsp;
+<p>Java source code:</p>
+<code>
+<pre>
+public class Overloaded {
+    public String foo(int i) {return "i";}
+    public String foo(char c) {return "c";}
+    public String foo(byte b) {return "b";}
+}
+</pre>
+</code>
+<p>Tcl-Java code that uses the <tt>Overloaded</tt> class:</p>
+<code>
+<pre>
+% package require java
+% set obj [java::new Overloaded]
+% $obj foo 1
+ambiguous method signature, could not choose between {foo byte} {foo char} {foo int}
+</pre>
+</code>
+The problem here is that in Tcl "everything is a string," and no one representation
+is better than any other; so there is no way for the system to know which
+method you intend to invoke. To solve this problem it is necessary for
+the Tcl-Java programmer to provide a method signature for an ambiguous
+method invocation.&nbsp;
+<p>Tcl-Java code simply requires a fully qualified method signature:</p>
+<code>
+<pre>
+% package require java
+% set obj [java::new Overloaded]
+% $obj {foo int} 1
+i
+% $obj {foo char} 1
+c
+</pre>
+</code>
+There's also a small list of programming features that haven't yet been
+coded for the Tcl-Java combination, even though they appear technically
+feasible. Jacl, for example, implements only the core Tcl language, and
+not its Tk graphical user interface extension. It's notoriously difficult
+to get two separate GUI toolkits to cooperate well together. This shows
+up in Tcl Blend, which does have the ability to use either the Tk or AWT
+GUIs, but not both together in the same top-level window.
+<p>Jacl does not yet implement all of the new features of Tcl 8.1 and 8.2.
+For instance, the <tt>lindex</tt> command was extended in 8.2 to support
+such index arithmetic as <tt>lindex $list end-1</tt>. Jacl doesn't yet
+perform Tcl 8.0's byte-code compilation, so it's slower -- sometimes much
+slower -- than standard Tcl.&nbsp;
+<p>Some programmers want to load Tcl Blend native code dynamically into
+an already running Java process. This is a common technique in the Tcl
+world for managing application-specific extensions. Remember that Tcl was
+originally designed as "glue" between disparate code pieces, some scripted
+in Tcl, some compiled in other languages. Once it works, the ability to
+load modules at runtime will also provide a handy native-code interface
+that is an alternative to the JNI. Alden Dima of the National Institute
+of Standards and Technology has created a Tcl extension to support this
+dynamic loading, and has agreed to integrate his code into the next generation
+of Tcl Blend.&nbsp;
+<p>The development team working on Tcl Blend and Jacl knows of these limitations.
+It has already begun plans for a version 1.3 that will improve performance
+and support additional Java 2 features. Also, the current binary-only regular
+expression facility in Jacl is scheduled to be rewritten to use the open
+sourced <tt>gnu.regexp</tt> library.&nbsp;
+<p><b><font size=+1>Final notes</font></b>
+<br>If you want to implement an extension to a Java application more rapidly
+and conveniently than with C, or combine applications written in such different
+languages as C/C++, Tcl, Java, Pascal, Python, Perl, and Fortran, use Tcl
+Blend. If you need to add scripting to an existing Java application, use
+Jacl.&nbsp;
+<p>Many more programmers deserve to learn about Tcl-Java combinations.
+If you are developing in or learning Java, you'll want regression testing
+abilities as well as a command-line oriented interactive experimentation
+workbench. Tcl Blend and Jacl offer both. In interactive development of
+Java classes, programmers use Tcl-Java to allocate Java objects and call
+Java methods without ever having to write Java code or invoke the Java
+compiler directly. This makes it possible to prototype Java code in much
+the same way developers currently prototype GUIs with Tk.&nbsp;
+<p>Finally, if you're a Tcl developer who needs access to Java capabilities,
+both Tcl Blend and Jacl make the connection natural.&nbsp;
+<center>
+<p>About the authors,</center>
+
+<p>Mo DeJong is the project maintainer for Tcl Blend and Jacl. He received
+a BS in computer science from the Institute of Technology at the University
+of Minnesota and is on his way to the San Francisco Bay Area to pursue
+a career in the technology sector.
+<ul>
+<li>
+Cameron Laird is vice president of Phaseit Inc. and a frequent contributor
+to <i>SunWorld.</i> He writes <i>SunWorld</i>'s biweekly <b><a href="http://software.audela.free.fr/sunworldonline/common/swol-backissues-columns.html#regex">Regular
+Expressions</a></b> column about scripting languages.&nbsp;</li>
+
+<br>&nbsp;
+<li>
+"Sun releases scripting technology for Java," (<i>SunWorld,</i> October
+1997):&nbsp;</li>
+
+<br><a href="http://www.sunworld.com/swol-10-1997/swol-10-jacl.html">http://www.sunworld.com/swol-10-1997/swol-10-jacl.html</a>
+<li>
+Scriptics:&nbsp;</li>
+
+<br><a href="http://www.scriptics.com/">http://www.scriptics.com/</a>
+<li>
+Tcl-Java integration:&nbsp;</li>
+
+<br><a href="http://www.scriptics.com/java/">http://www.scriptics.com/java/</a>
+<li>
+Online Tcl-Java docs:&nbsp;</li>
+
+<br><a href="http://www.scriptics.com/java/man/contents.htm">http://www.scriptics.com/java/man/contents.htm</a>
+<li>
+"CVS in the scripting landscape," (<i>SunWorld</i>, October 1999):&nbsp;</li>
+
+<br><a href="http://www.sunworld.com/swol-10-1999/swol-10-regex.html">http://www.sunworld.com/swol-10-1999/swol-10-regex.html</a>
+<li>
+"Works great, costs less," (<i>SunWorld</i>, October 1998). A look at freeware
+for Sun:&nbsp;</li>
+
+<br><a href="http://www.sunworld.com/swol-10-1998/swol-10-freeware.html">http://www.sunworld.com/swol-10-1998/swol-10-freeware.html</a>
+<li>
+Silicon Graphics Inc.:&nbsp;</li>
+
+<br><a href="http://www.sgi.com/">http://www.sgi.com/</a>
+<li>
+QuaTeams ORO Software:&nbsp;</li>
+
+<br><a href="http://www.quateams.com/oro/index.html">http://www.quateams.com/oro/index.html&nbsp;</a>
+<li>
+Tower Technology:&nbsp;</li>
+
+<br><a href="http://www.towerj.com/">http://www.towerj.com/&nbsp;</a>
+<li>
+Kaffe:&nbsp;</li>
+
+<br><a href="http://www.kaffe.org">http://www.kaffe.org</a>
+<li>
+Cameron Laird's personal notes on Tcl tutorials:&nbsp;</li>
+
+<br><a href="http://starbase.neosoft.com/~claird/comp.lang.tcl/tcl_tutorials.html">http://starbase.neosoft.com/~claird/comp.lang.tcl/tcl_tutorials.html</a>
+<li>
+Tcl Consortium:&nbsp;</li>
+
+<br><a href="http://www.tclconsortium.org">http://www.tclconsortium.org</a>
+<li>
+Tcl-Java mailing list:&nbsp;</li>
+
+<br><a href="http://www.mail-archive.com/tcljava@scriptics.com">http://www.mail-archive.com/tcljava@scriptics.com</a>
+<li>
+Vignette:&nbsp;</li>
+
+<br><a href="http://www.vignette.com/">http://www.vignette.com/</a>
+<li>
+Microcosm Technologies Inc., CAD for MEMS microsystems:&nbsp;</li>
+
+<br><a href="http://www.memcad.com/">http://www.memcad.com/</a>
+<li>
+HMS Software, manufacturing management information systems:&nbsp;</li>
+
+<br><a href="http://www.hmssoftware.com/">http://www.hmssoftware.com/</a>
+<li>
+Java Embedded Server: How does the Java Embedded Server integrate with
+Tcl?&nbsp;</li>
+
+<br><a href="http://www.sun.com/software/embeddedserver/techinfo/tech-faq.html#390">http://www.sun.com/software/embeddedserver/techinfo/tech-faq.html#390</a>
+<li>
+Bean Scripting Framework:&nbsp;</li>
+
+<br><a href="http://www.alphaworks.ibm.com/tech/bsf">http://www.alphaworks.ibm.com/tech/bsf</a>
+<li>
+Feather (dynamic Tcl Blend embedding from Alden Dima):&nbsp;</li>
+
+<br><a href="http://www.itl.nist.gov/div897/ctg/java/feather">http://www.itl.nist.gov/div897/ctg/java/feather</a></ul>
+<b>Additional SunWorld resources</b>
+<ul>
+<li>
+Full listing of past <b>Regular Expressions</b> columns:&nbsp;</li>
+
+<br><a href="http://www.sunworld.com/common/swol-backissues-columns.html#regex">http://www.sunworld.com/common/swol-backissues-columns.html#regex</a>
+<li>
+The <i>SunWorld</i> Topical Index -- a comprehensive listing of all <i>SunWorld</i>
+articles by subject:&nbsp;</li>
+
+<br><a href="http://www.sunworld.com/common/swol-siteindex.html">http://www.sunworld.com/common/swol-siteindex.html</a>
+<li>
+Visit sunWHERE -- launchpad to hundreds of online resources for Sun users:&nbsp;</li>
+
+<br><a href="http://www.sunworld.com/sunwhere.html">http://www.sunworld.com/sunwhere.html</a>
+<li>
+Explore <i>SunWorld</i>'s back issues:&nbsp;</li>
+
+<br><a href="http://www.sunworld.com/common/swol-backissues.html">http://www.sunworld.com/common/swol-backissues.html</a>
+<li>
+IDG.net, your one-stop IT resource:&nbsp;</li>
+
+<br><a href="http://www.idg.net">http://www.idg.net</a></ul>
+&nbsp;</td>
+
+<td WIDTH="20">&nbsp;</td>
+</tr>
+
+</BODY>
+</HTML>

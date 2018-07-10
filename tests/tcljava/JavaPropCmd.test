@@ -1,0 +1,94 @@
+# javaPropCmd.test --
+#
+#	Tests the java::prop command.
+#
+# Copyright (c) 1997 by Sun Microsystems, Inc.
+#
+# See the file "license.terms" for information on usage and redistribution
+# of this file, and for a DISCLAIMER OF ALL WARRANTIES.
+#
+# RCS: @(#) $Id: JavaPropCmd.test,v 1.3 2000/12/22 09:47:15 mdejong Exp $
+
+if {[lsearch [namespace children] ::tcltest] == -1} {
+    package require tcltest
+    namespace import -force ::tcltest::*
+}
+
+setupJavaPackage
+
+set usage {1 {wrong # args: should be "java::prop ?-noconvert? javaObj property ?value property value ...?"}}
+
+test javaPropCmd-1.1 {err message} {
+    list [catch {java::prop} msg] $msg
+} $usage
+
+test javaPropCmd-1.2 {err message} {
+    list [catch {java::prop a} msg] $msg
+} $usage
+
+test javaPropCmd-1.3 {err message} {
+    list [catch {java::prop -noconvert a} msg] $msg
+} $usage
+
+test javaPropCmd-1.4 {err message} {
+    list [catch {java::prop -noconvert a b c} msg] $msg
+} $usage
+
+test javaPropCmd-1.5 {err message} {
+    set x [java::new pkg1.MyClass]
+    list [catch {java::prop -noconvert $x foo 1 foo 1} msg] $msg
+} $usage
+
+test javaPropCmd-1.6 {err message} {
+    set x [java::new pkg1.MyClass]
+    list [catch {java::prop -noconvert $x foo 1 foo} msg] $msg
+} $usage
+
+test javaPropCmd-1.7 {err message} {
+    set x [java::new pkg1.MyClass]
+    list [catch {java::prop -noconvert $x foo 1} msg] $msg
+} $usage
+
+test javaPropCmd-1.8 {err message} {
+    set x [java::new pkg1.MyClass]
+    list [catch {java::prop -n $x foo 1} msg] $msg
+} $usage
+
+test javaPropCmd-1.9 {err message} {
+    set x [java::new pkg1.MyClass]
+    list [catch {java::prop $x foo 1 foo} msg] $msg
+} $usage
+
+test javaPropCmd-2.1 {get/set value} {
+    set x [java::new pkg1.MyClass]
+    java::prop $x foo 12345
+    list [catch {[java::prop -noconvert $x foo] toString} msg] $msg
+} {0 12345}
+
+test javaPropCmd-2.2 {get/set value} {
+    set x [java::new pkg1.MyClass]
+    java::prop $x foo 22334 foo 12333
+    list [catch {[java::prop -noconvert $x foo] toString} msg] $msg
+} {0 12333}
+
+test javaPropCmd-2.3 {get/set value} {
+    set x [java::new pkg1.MyClass]
+    java::prop $x foo 22334
+    list [catch {[java::prop -n $x foo] toString} msg] $msg
+} {0 22334}
+
+test javaPropCmd-2.4 {get/set value} {
+    set x [java::new pkg1.MyClass]
+    java::prop $x foo 22334
+    list [catch {[java::prop -n $x foo] intValue} msg] $msg
+} {0 22334}
+
+test javaPropCmd-2.5 {get/set value} {
+    set x [java::new pkg1.MyClass]
+    java::prop $x foo 22334
+    list [catch {java::prop $x foo} msg] $msg
+} {0 22334}
+
+# cleanup
+::tcltest::cleanupTests
+return

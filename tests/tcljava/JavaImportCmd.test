@@ -1,0 +1,409 @@
+# JavaImportCmd.test --
+#
+#	Tests the implementation of the JavaImportCmd.java file.
+#
+# Copyright (c) 1999 by Mo DeJong.
+#
+# See the file "license.terms" for information on usage and redistribution
+# of this file, and for a DISCLAIMER OF ALL WARRANTIES.
+#
+# RCS: @(#) $Id: JavaImportCmd.test,v 1.4 2006/04/13 07:36:51 mdejong Exp $
+
+if {[lsearch [namespace children] ::tcltest] == -1} {
+    package require tcltest
+    namespace import -force ::tcltest::*
+}
+
+setupJavaPackage
+
+
+# Forget all imports
+proc forget_all {} {
+  eval {java::import -forget} [java::import]
+}
+
+set usage "java::import ?-forget? ?-package pkg? ?class ...?"
+
+# Test usage errors
+
+test JavaImportCmd-1.1 {-package needs an argument} {
+    list [catch {java::import -package} msg] $msg
+} [list 1 $usage]
+
+test JavaImportCmd-1.2 {-forget -package makes no sense} {
+    list [catch {java::import -forget -package} msg] $msg
+} [list 1 $usage]
+
+test JavaImportCmd-1.3 {-package does not accept the empty string} {
+    list [catch {java::import -package ""} msg] $msg
+} [list 1 $usage]
+
+test JavaImportCmd-1.4 {-package given, cannot import class in package} {
+    list [catch {java::import -package java.util pkg.Hashtable} msg] $msg
+} {1 {class argument must not contain a package specifier when the -package pkg arguments are given}}
+
+test JavaImportCmd-1.5 {-package given, cannot forget class in package} {
+    list [catch {java::import -forget -package java.util pkg.Hashtable} msg] $msg
+} {1 {class argument must not contain a package specifier when the -package pkg arguments are given}}
+
+
+
+# Test normal operation of the command
+
+test JavaImportCmd-2.1 {import a single class} {
+    forget_all
+    java::import java.util.Hashtable
+    java::import
+} {java.util.Hashtable}
+
+test JavaImportCmd-2.2 {import more than one class} {
+    forget_all
+    java::import java.util.Hashtable java.util.Vector
+    lsort [java::import]
+} [lsort {java.util.Hashtable java.util.Vector}]
+
+test JavaImportCmd-2.3 {import a single class from a package} {
+    forget_all
+    java::import -package java.util Hashtable
+    java::import
+} {java.util.Hashtable}
+
+test JavaImportCmd-2.4 {import more than one class from a package} {
+    forget_all
+    java::import -package java.util Hashtable Vector
+    lsort [java::import]
+} [lsort {java.util.Hashtable java.util.Vector}]
+
+test JavaImportCmd-2.5 {forget a class that was imported} {
+    forget_all
+    set l {}
+    java::import java.util.Hashtable
+    lappend l [java::import]
+    java::import -forget java.util.Hashtable
+    lappend l [java::import]
+} {java.util.Hashtable {}}
+
+test JavaImportCmd-2.6 {forget more than one class} {
+    forget_all
+    set l {}
+    java::import java.util.Hashtable java.util.Vector
+    lappend l [lsort [java::import]]
+    java::import -forget java.util.Hashtable java.util.Vector
+    lappend l [java::import]
+} [list [lsort {java.util.Hashtable java.util.Vector}] {}]
+
+test JavaImportCmd-2.7 {forget more than one class from a package} {
+    forget_all
+    set l {}
+    java::import -package java.util Hashtable Vector
+    lappend l [lsort [java::import]]
+    java::import -forget -package java.util Hashtable Vector
+    lappend l [java::import]
+} [list [lsort {java.util.Hashtable java.util.Vector}] {}]
+
+test JavaImportCmd-2.8 {forget an entire package} {
+    forget_all
+    set l {}
+    java::import java.util.Hashtable java.util.Vector java.net.Socket
+    lappend l [lsort [java::import]]
+    java::import -forget -package java.util
+    lappend l [java::import]
+} [list [lsort {java.util.Hashtable java.util.Vector java.net.Socket}] \
+	java.net.Socket]
+
+test JavaImportCmd-2.9 {return all imported classes, and those in a package} {
+    forget_all
+    set l {}
+    java::import java.util.Hashtable java.util.Vector java.net.Socket
+    lappend l [lsort [java::import]]
+    lappend l [java::import -package java.util]
+} [list [lsort {java.util.Hashtable java.util.Vector java.net.Socket}] \
+        [lsort {java.util.Hashtable java.util.Vector}]]
+
+test JavaImportCmd-2.10 {it is ok to import the same class more than once} {
+    forget_all
+    list [catch {java::import java.util.Hashtable}] \
+	 [catch {java::import java.util.Hashtable}] \
+	 [java::import]
+} {0 0 java.util.Hashtable}
+
+test JavaImportCmd-2.11 {-forget does not need arguments, supports empty eval!} {
+    catch {java::import -forget}
+} 0
+
+
+# Test runtime error conditions
+
+test JavaImportCmd-3.0 {error to forget a class that was not imported} {
+    forget_all
+    set l {}
+    java::import java.util.Hashtable
+    list [catch {java::import -forget java.util.Vector} err] $err
+} {1 {cannot forget class "java.util.Vector", it was never imported}}
+
+test JavaImportCmd-3.1 {error to forget a class that was not imported} {
+    forget_all
+    set l {}
+    java::import java.util.Hashtable
+    list [catch {java::import -forget -package java.util Vector} err] $err
+} {1 {cannot forget class "java.util.Vector", it was never imported}}
+
+test JavaImportCmd-3.2 {error to import a class in the java.lang package} {
+    forget_all
+    list [catch {java::import java.lang.String} err] $err
+} {1 {cannot import class "java.lang.String", it is in the java.lang package}}
+
+test JavaImportCmd-3.3 {error to import a class in the java.lang package} {
+    forget_all
+    list [catch {java::import java.lang.String} err] $err
+} {1 {cannot import class "java.lang.String", it is in the java.lang package}}
+
+test JavaImportCmd-3.4 {error to forget a class in the java.lang package} {
+    forget_all
+    list [catch {java::import -forget java.lang.String} err] $err
+} {1 {cannot forget class "java.lang.String", it is in the java.lang package}}
+
+test JavaImportCmd-3.5 {error to forget a class in the java.lang package} {
+    forget_all
+    list [catch {java::import -forget -package java.lang String} err] $err
+} {1 {cannot forget class "java.lang.String", it is in the java.lang package}}
+
+test JavaImportCmd-3.6 {error to import a class that is not on the CLASSPATH} {
+    forget_all
+    list [catch {java::import java.util.NOT_THERE} err] $err
+} {1 {cannot import class "java.util.NOT_THERE", it does not exist}}
+
+test JavaImportCmd-3.7 {error to import a primitive type} {
+    forget_all
+    list [catch {java::import int} err] $err
+} {1 {cannot import primitive type "int"}}
+
+test JavaImportCmd-3.8 {error to import a primitive type} {
+    forget_all
+    list [catch {java::import boolean} err] $err
+} {1 {cannot import primitive type "boolean"}}
+
+test JavaImportCmd-3.9 {error to import a primitive type} {
+    forget_all
+    list [catch {java::import long} err] $err
+} {1 {cannot import primitive type "long"}}
+
+test JavaImportCmd-3.10 {error to import a primitive type} {
+    forget_all
+    list [catch {java::import float} err] $err
+} {1 {cannot import primitive type "float"}}
+
+test JavaImportCmd-3.11 {error to import a primitive type} {
+    forget_all
+    list [catch {java::import double} err] $err
+} {1 {cannot import primitive type "double"}}
+
+test JavaImportCmd-3.12 {error to import a primitive type} {
+    forget_all
+    list [catch {java::import byte} err] $err
+} {1 {cannot import primitive type "byte"}}
+
+test JavaImportCmd-3.13 {error to import a primitive type} {
+    forget_all
+    list [catch {java::import short} err] $err
+} {1 {cannot import primitive type "short"}}
+
+test JavaImportCmd-3.14 {error to import a primitive type} {
+    forget_all
+    list [catch {java::import short} err] $err
+} {1 {cannot import primitive type "short"}}
+
+test JavaImportCmd-3.15 {error to import a primitive type} {
+    forget_all
+    list [catch {java::import char} err] $err
+} {1 {cannot import primitive type "char"}}
+
+test JavaImportCmd-3.16 {error to import a primitive type} {
+    forget_all
+    list [catch {java::import -package java.lang char} err] $err
+} {1 {cannot import primitive type "char"}}
+
+test JavaImportCmd-3.17 {error to forget a primitive type} {
+    forget_all
+    list [catch {java::import -forget char} err] $err
+} {1 {cannot forget primitive type "char"}}
+
+test JavaImportCmd-3.18 {error to give -package argument after class names} {
+    forget_all
+    list [catch {java::import java.util.Hashtable -package} err] $err [java::import]
+} [list 1 $usage {}]
+
+test JavaImportCmd-3.19 {error to give -forget argument after class names} {
+    forget_all
+    list [catch {java::import java.util.Hashtable -forget} err] $err [java::import]
+} [list 1 $usage {}]
+
+test JavaImportCmd-3.20 {good import followed by bad import invalidates them both} {
+    forget_all
+    list [catch {java::import java.util.Hashtable java.util.NOT_THERE} err] \
+	 $err [java::import]
+} {1 {cannot import class "java.util.NOT_THERE", it does not exist} {}}
+
+test JavaImportCmd-3.21 {importing from global package is not allowed} {
+    forget_all
+    list [catch {java::import GlobalClass} err] $err
+} {1 {cannot import from global package}}
+
+test JavaImportCmd-3.22 {forget from global package is not allowed} {
+    forget_all
+    list [catch {java::import -forget GlobalClass} err] $err
+} {1 {cannot forget from global package}}
+
+test JavaImportCmd-3.23 {importing the empty string is not allowed} {
+    forget_all
+    list [catch {java::import ""} err] \
+	 $err [java::import]
+} [list 1 $usage {}]
+
+test JavaImportCmd-3.24 {error to forget a package that was not imported} {
+    forget_all
+    set l {}
+    java::import java.util.Hashtable
+    list [catch {java::import -forget -package java.net} err] $err
+} {1 {cannot forget package "java.net", no classes were imported from it}}
+
+
+# Test the command combined with other java::* commands
+
+test JavaImportCmd-4.0 {import a class and create an instance with java::new} {
+    forget_all
+    java::import java.util.Hashtable
+    set h1 [java::new java.util.Hashtable]
+    set h2 [java::new Hashtable]
+    list [java::info class $h1] [java::info class $h2]
+} {java.util.Hashtable java.util.Hashtable}
+
+test JavaImportCmd-4.1 {import a class and create an array with java::new} {
+    forget_all
+    java::import java.util.Hashtable
+    set arr [java::new {Hashtable[]} {10}]
+    list [java::info class $arr] [$arr length]
+} {{java.util.Hashtable[]} 10}
+
+test JavaImportCmd-4.2 {import a class and call an overloaded constructor} {
+    forget_all
+    java::import java.util.Hashtable
+    set it [java::new {tests.ImportTest Hashtable} [java::null]]
+    $it getType
+} {Hashtable}
+
+test JavaImportCmd-4.3 {import a class and call a instance method} {
+    forget_all
+    set l {}
+    set it [java::new tests.ImportTest]
+    # Invocation with the argument "Hashtable" should fail
+    lappend l [catch {$it {call Hashtable} [java::null]}]
+    # Now import "Hashtable" and successfully invoke method
+    java::import java.util.Hashtable
+    lappend l [catch {$it {call Hashtable} [java::null]} err] $err
+    # Now forget the import of Hashtable and fail the invocation
+    java::import -forget java.util.Hashtable
+    lappend l [catch {$it {call Hashtable} [java::null]}]
+    set l
+} {1 0 Hashtable 1}
+
+test JavaImportCmd-4.4 {import a class and use the java::call command} {
+    forget_all
+    java::import java.util.Hashtable
+    java::import tests.ImportTest
+    java::call ImportTest {scall Hashtable} [java::null]
+} {Hashtable}
+
+test JavaImportCmd-4.5 {import a class and use the java::field command} {
+    forget_all
+    java::import tests.ImportTest
+    java::field ImportTest ten
+} {10}
+
+test JavaImportCmd-4.6 {import a class and use the java::cast command} {
+    forget_all
+    set h [java::new java.util.Hashtable]
+    set o [java::cast Object $h]
+    java::import java.util.Hashtable
+    set h2 [java::cast Hashtable $o]
+    java::info class $h2
+} {java.util.Hashtable}
+
+test JavaImportCmd-4.7 {import a class and use the java::instanceof command} {
+    forget_all
+    set h [java::new java.util.Hashtable]    
+    java::import java.util.Hashtable
+    java::instanceof $h Hashtable
+} {1}
+
+test JavaImportCmd-4.8 {import a class and use the java::info command} {
+    forget_all
+    java::import java.util.Hashtable
+    java::info dimensions {Hashtable[][]}
+} {2}
+
+
+test JavaImportCmd-5.0 {import a class, then allocate an inner class} {
+    forget_all
+    java::import tests.InnerTest
+    set o [java::new InnerTest.InnerClass1]
+    java::info class $o
+} {tests.InnerTest.InnerClass1}
+
+test JavaImportCmd-5.1 {import a class, then allocate an inner class} {
+    forget_all
+    java::import tests.InnerTest
+    set o [java::new InnerTest.InnerClass2]
+    set i [java::cast InnerTest.InnerInterface1 $o]
+    list [java::info class $o] [java::info class $i]
+} {tests.InnerTest.InnerClass2 tests.InnerTest.InnerInterface1}
+
+test JavaImportCmd-5.2 {import a class, then access an inner inerface} {
+    forget_all
+    java::import java.util.Map
+    set r [java::cast Map.Entry [java::null]]
+    list \
+        [java::info class $r] \
+        [java::info dimensions {Map.Entry[]}]
+} {java.util.Map.Entry 1}
+
+test JavaImportCmd-5.3 {import a class, then inner class inside inner class} {
+    forget_all
+    java::import tests.InnerTest
+    # Multiple levels of inner class names, InnerTest is imported.
+    set o [java::new InnerTest.InnerClass3.InnerClass4]
+    java::info class $o
+} {tests.InnerTest.InnerClass3.InnerClass4}
+
+test JavaImportCmd-5.4 {inner class can't be imported} {
+    forget_all
+    # Only toplevel classes can be imported.
+    list [catch {
+    java::import tests.InnerTest\$InnerClass1
+    } err] $err
+} {1 {can't import an inner class}}
+
+test JavaImportCmd-5.5 {inner class can't be imported} {
+    forget_all
+    # Only toplevel classes can be imported.
+    list [catch {
+    java::import tests.InnerTest.InnerClass1
+    } err] $err
+} {1 {can't import an inner class}}
+
+test JavaImportCmd-5.6 {inner class can't be imported} {
+    forget_all
+    # Only toplevel classes can be imported.
+    list [catch {
+    java::import java.util.Map.Entry
+    } err] $err
+} {1 {can't import an inner class}}
+
+# FIXME:
+# Be sure to check that when we forget a class, we remove that class
+# element from the list of elements in the package, and if the package
+# has zero elements, remove the package too.
+
+# cleanup
+::tcltest::cleanupTests
+return

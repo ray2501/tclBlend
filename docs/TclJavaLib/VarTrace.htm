@@ -1,0 +1,127 @@
+<HTML><HEAD><TITLE>TclJava Library Procedures - VarTrace manual page</TITLE></HEAD><BODY>
+<DL>
+<DD><A HREF="VarTrace.htm#M2" NAME="L265">INTERFACE</A>
+<DL><DD>tcl.lang.VarTrace -- Interface for montoring the access on Tcl variables.</DL>
+<DD><A HREF="VarTrace.htm#M3" NAME="L266">METHODS</A>
+<DL><DD>abstract void <B>traceProc</B>(Interp <I>interp</I>, String <I>name1</I>, String <I>name2</I>, int <I>flags</I>)</DL>
+<DD><A HREF="VarTrace.htm#M4" NAME="L267">ARGUMENTS</A>
+<DL>
+</DL>
+<DD><A HREF="VarTrace.htm#M5" NAME="L268">DESCRIPTION</A>
+<DD><A HREF="VarTrace.htm#M6" NAME="L269">ACCESSING VARIABLES DURING TRACES</A>
+<DD><A HREF="VarTrace.htm#M7" NAME="L270">ERROR RETURNS</A>
+<DD><A HREF="VarTrace.htm#M8" NAME="L271">TCL.TRACE_DESTROYED FLAG</A>
+<DD><A HREF="VarTrace.htm#M9" NAME="L272">TCL.INTERP_DESTROYED FLAG</A>
+<DD><A HREF="VarTrace.htm#M10" NAME="L273">EQUIVALENT C FUNCTIONS</A>
+<DD><A HREF="VarTrace.htm#M11" NAME="L274">SEE ALSO</A>
+<DD><A HREF="VarTrace.htm#M12" NAME="L275">KEYWORDS</A>
+</DL><HR>
+<H3><A NAME="M2">INTERFACE</A></H3>
+tcl.lang.VarTrace -- Interface for montoring the access on Tcl variables.
+<H3><A NAME="M3">METHODS</A></H3>
+<P>abstract void <B>traceProc</B>(Interp <I>interp</I>, String <I>name1</I>, String <I>name2</I>, int <I>flags</I>)
+<H3><A NAME="M4">ARGUMENTS</A></H3>
+<DL>
+<P><DT>Interp <B>interp</B> ()<DD>
+The interpreter accessing the variable.
+<P><DT>String <B>name1</B> ()<DD>
+If the trace occurs on a scalar variable, <I>name1</I> contains the
+name of the variable. If the trace occurs on an array element, or on a
+whole array, <I>name1</I> contains the name of the array.
+<P><DT>String <B>name2</B> ()<DD>
+If the trace occurs on an array element, <I>name2</I> contains the index of
+the element. Otherwise <I>name2</I> is <B>null</B>.
+<P><DT>int <B>flags</B> ()<DD>
+Specifies when action has be applied on the variable when the trace
+occurs. See below for details.
+<P></DL>
+<H3><A NAME="M5">DESCRIPTION</A></H3>
+The <B>VarTrace</B> interface is used for montoring the access on Tcl
+variables. A <B>VarTrace</B> instance can be registered for a Tcl
+variable using <I>interp</I>.<B><A HREF="../TclJavaLib/traceVar.htm">traceVar</A></B>. The <I>flags</I> parameter to
+<I>interp</I>.<B><A HREF="../TclJavaLib/traceVar.htm">traceVar</A></B> specifies which type(s) of access on the
+variable should cause the <B>VarTrace</B> instance to be activated.
+
+When the <B>VarTrace</B> instance is activated, its <B>traceProc</B>
+method is called. <I>name1</I> and <I>name2</I> give the name of the
+traced variable in the normal two-part form. <I>flags</I> is an OR-ed
+combination of bits providing several pieces of information. One of
+the bits <B>TCL</B>.<B>TRACE_READS</B>, <B>TCL</B>.<B>TRACE_WRITES</B>, or
+<B>TCL</B>.<B>TRACE_UNSETS</B> will be set in <I>flags</I> to indicate which
+operation is being performed on the variable. The bit
+<B>TCL</B>.<B>GLOBAL_ONLY</B> will be set whenever the variable being
+accessed is a global one not accessible from the current level of procedure
+call: <B>traceProc</B> will need to pass this flag back to
+variable-related procedures like <I>interp</I>.<B><A HREF="../TclJavaLib/setVar.htm">getVar</A></B> if it attempts
+to access the variable. The bit <B>TCL</B>.<B>TRACE_DESTROYED</B> will be set
+in <I>flags</I> if the trace is about to be destroyed; this information
+may be useful to <B>traceProc</B> so that it can clean up its own
+internal data structures (see the section <B>TCL</B>.<B>TRACE_DESTROYED</B>
+below for more details). Lastly, the bit <B>TCL</B>.<B>INTERP_DESTROYED</B>
+will be set if the entire interpreter is being destroyed. When this
+bit is set, <B>traceProc</B> must be especially careful in the things
+it does (see the section <B>TCL</B>.<B>INTERP_DESTROYED</B> below).
+
+<H3><A NAME="M6">ACCESSING VARIABLES DURING TRACES</A></H3>
+During read and write traces, <B>traceProc</B> can read, write, or
+unset the traced variable using <I>interp</I>.<B><A HREF="../TclJavaLib/setVar.htm">getVar</A></B>,
+<I>interp</I>.<B><A HREF="../TclJavaLib/setVar.htm">setVar</A></B>, and other procedures.  While
+<B>traceProc</B> is executing, traces are temporarily disabled for the
+variable, so that calls to <I>interp</I>.<B><A HREF="../TclJavaLib/setVar.htm">getVar</A></B> and
+<I>interp</I>.<B><A HREF="../TclJavaLib/setVar.htm">setVar</A></B> will not cause <B>traceProc</B> or other
+trace procedures to be invoked again.  Disabling only occurs for the
+variable whose trace procedure is active; accesses to other variables
+will still be traced.  However, if a variable is unset during a read
+or write trace then unset traces will be invoked.
+ 
+During unset traces the variable has already been completely expunged.
+It is possible for the trace procedure to read or write the variable,
+but this will be a new version of the variable.  Traces are not
+disabled during unset traces as they are for read and write traces,
+but existing traces have been removed from the variable before any
+trace procedures are invoked. If new traces are set by unset trace
+pro- cedures, these traces will be invoked on accesses to the variable
+by the trace procedures.
+ 
+<H3><A NAME="M7">ERROR RETURNS</A></H3>
+If <B>traceProc</B> throws a TclException, it signifies that an error
+occurred, in which case no further traces are invoked for the access
+and the traced access aborts with the message given by the
+TclException. Trace procedures can use this facility to make variables
+read-only, for example (but note that the value of the variable will
+already have been modified before the trace procedure is called, so
+the trace procedure will have to restore the correct value).
+ 
+The TclException is used only during read and write tracing. During
+unset traces, the TclException is ignored and all relevant trace
+procedures will always be invoked.
+
+<H3><A NAME="M8">TCL.TRACE_DESTROYED FLAG</A></H3>
+In an unset callback to <B>traceProc</B>, the
+<B>TCL</B>.<B>TRACE_DESTROYED</B> bit is set in <I>flags</I> if the trace
+is being removed as part of the deletion. Traces on a variable are
+always removed whenever the variable is deleted; the only time
+<B>TCL</B>.<B>TRACE_DESTROYED</B> isn't set is for a whole-array trace
+invoked when only a single element of an array is unset.
+ 
+<H3><A NAME="M9">TCL.INTERP_DESTROYED FLAG</A></H3>
+When an interpreter is destroyed, unset traces are called for all of
+its variables. The <B>TCL</B>.<B>INTERP_DESTROYED</B> bit will be set in the
+<I>flags</I> argument passed to the trace procedures. Trace procedures
+must be extremely careful in what they do if the
+<B>TCL</B>.<B>INTERP_DESTROYED</B> bit is set. It is not safe for the
+procedures to invoke any Tcl procedures on the interpreter, since its
+state is partially deleted.  All that trace procedures should do under
+these circumstances is to clean up and free their own internal data
+structures.
+
+<H3><A NAME="M10">EQUIVALENT C FUNCTIONS</A></H3>
+<A href="../cFunctions.html">Tcl_TraceProc</A>
+<H3><A NAME="M11">SEE ALSO</A></H3>
+<B><A HREF="../TclJavaLib/Interp.htm">Interp</A></B>, <B><A HREF="../TclJavaLib/setVar.htm">setVar</A></B>, <B><A HREF="../TclJavaLib/traceVar.htm">traceVar</A></B>
+<H3><A NAME="M12">KEYWORDS</A></H3>
+<A href="../Keywords/T.htm#trace">trace</A>, <A href="../Keywords/V.htm#variable">variable</A>
+<HR><PRE>
+<A HREF="../license.html">Copyright</A> &#169; 1998 Sun Microsystems, Inc.
+<A HREF="../license.html">Copyright</A> &#169; 1995-1997 Roger E. Critchlow Jr.</PRE>
+</BODY></HTML>

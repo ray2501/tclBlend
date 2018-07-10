@@ -1,0 +1,710 @@
+# This file tests ArrayObject.java.
+#
+# This file contains a collection of tests for one or more of the Tcl
+# built-in commands.  Sourcing this file into Tcl runs the tests and
+# generates output for errors.  No output means no errors were found.
+#
+# Copyright (c) 1997 by Sun Microsystems, Inc.
+#
+# See the file "license.terms" for information on usage and redistribution
+# of this file, and for a DISCLAIMER OF ALL WARRANTIES.
+#
+# RCS: @(#) $Id: ArrayObject.test,v 1.4 2002/12/30 02:30:54 mdejong Exp $
+
+if {[lsearch [namespace children] ::tcltest] == -1} {
+    package require tcltest
+    namespace import -force ::tcltest::*
+}
+
+setupJavaPackage
+
+set testArray1 [java::new {int[]} 5 {6 7 8 9 10}]
+set testArray3 [java::new {int[][][]} {2 3 4}]
+
+test ArrayObject-1.1 {cmdProc} {
+    list [catch {
+	$testArray1
+    } msg] $msg
+} "1 {wrong # args: should be \"$testArray1 ?-noconvert? option ?arg arg ...?\"}"
+test ArrayObject-1.2 {cmdProc default to ReflectObject.cmdProc} {
+    list [catch {$testArray1 equals $testArray1} msg] $msg
+} {0 1}
+test ArrayObject-1.3 {cmdProc} {
+    list [catch {$testArray1 junk} msg] $msg
+} {1 {bad option "junk": must be length, get, getrange, set, setrange, or a valid method signature}}
+test ArrayObject-1.4 {cmdProc} {
+    list [catch {$testArray1 len} msg] $msg
+} {1 {bad option "len": must be length, get, getrange, set, setrange, or a valid method signature}}
+test ArrayObject-1.5 {cmdProc} {
+    list [catch {$testArray1 ge} msg] $msg
+} {1 {bad option "ge": must be length, get, getrange, set, setrange, or a valid method signature}}
+test ArrayObject-1.6 {cmdProc} {
+    list [catch {$testArray1} msg] $msg
+} "1 {wrong # args: should be \"$testArray1 ?-noconvert? option ?arg arg ...?\"}"
+test ArrayObject-1.7 {cmdProc} {
+    list [catch {$testArray1 -noconvert} msg] $msg
+} "1 {wrong # args: should be \"$testArray1 ?-noconvert? option ?arg arg ...?\"}"
+test ArrayObject-1.8 {cmdProc} {
+    list [catch {$testArray1 -n} msg] $msg
+} "1 {wrong # args: should be \"$testArray1 ?-noconvert? option ?arg arg ...?\"}"
+test ArrayObject-1.9 {cmdProc} {
+    list [catch {$testArray1 -} msg] $msg
+} {1 {bad option "-": must be length, get, getrange, set, setrange, or a valid method signature}}
+test ArrayObject-1.10 {cmdProc} {
+    set errorCode ""
+    list [catch {$testArray1 ""} msg] $msg $errorCode
+} {1 {bad option "": must be length, get, getrange, set, setrange, or a valid method signature} NONE}
+test ArrayObject-1.11 {cmdProc} {
+    set errorCode ""
+    list [catch {$testArray1 {wait int}} msg] $msg $errorCode
+} {1 {bad option "wait int": must be length, get, getrange, set, setrange, or a valid method signature} NONE}
+test ArrayObject-1.12 {cmdProc} {
+    set errorCode ""
+    list [catch {$testArray1 {wait long}} msg] $msg $errorCode
+} {1 {wrong # args for calling method "wait long"} NONE}
+
+test ArrayObject-2.1 {cmdProc length} {
+    list [catch {
+	$testArray1 length junk
+    } msg] $msg
+} "1 {wrong # args: should be \"$testArray1 length\"}"
+test ArrayObject-2.2 {cmdProc length} {
+    list [catch {$testArray1 -noconvert length} msg] $msg
+} {1 {-noconvert flag not allowed for the "length" sub-command}}
+test ArrayObject-2.3 {cmdProc length} {
+    list [catch {
+	set a [java::new {int[]} 0]
+	$a length
+    } msg] $msg
+} {0 0}
+test ArrayObject-2.4 {cmdProc length} {
+    list [catch {
+	set a [java::new {int[]} 1]
+	$a length
+    } msg] $msg
+} {0 1}
+test ArrayObject-2.5 {cmdProc length} {
+    list [catch {
+	$testArray1 length
+    } msg] $msg
+} {0 5}
+test ArrayObject-2.6 {cmdProc length} {
+    list [catch {
+	$testArray3 length
+    } msg] $msg
+} {0 2}
+
+test ArrayObject-3.1 {cmdProc get} {
+    list [catch {
+	$testArray1 get
+    } msg] $msg
+} "1 {wrong # args: should be \"$testArray1 get indexList\"}"
+test ArrayObject-3.2 {cmdProc get} {
+    list [catch {
+	$testArray1 get indexList junk
+    } msg] $msg
+} "1 {wrong # args: should be \"$testArray1 get indexList\"}"
+test ArrayObject-3.3 {cmdProc get} {
+    list [catch {
+	$testArray1 get {}
+    } msg] $msg
+} {0 6}
+test ArrayObject-3.4 {cmdProc get} {
+    list [catch {
+	$testArray1 get 3
+    } msg] $msg
+} {0 9}
+test ArrayObject-3.5 {cmdProc get} {
+    list [catch {
+	$testArray3 get {1 0 2}
+    } msg] $msg
+} {0 0}
+test ArrayObject-3.6 {cmdProc get} {
+    list [catch {
+	set s1 [$testArray3 get 1]
+	set s2 [$testArray3 get {0 2}]
+	list [java::info class $s1] [java::info class $s2]
+    } msg] $msg
+} {0 {{int[][]} {int[]}}}
+test ArrayObject-3.7 {cmdProc get} {
+    list [catch {$testArray1 -noconvert get} msg] $msg
+} "1 {wrong # args: should be \"$testArray1 -noconvert get indexList\"}"
+test ArrayObject-3.8 {cmdProc get} {
+    list [catch {$testArray1 -n get} msg] $msg
+} "1 {wrong # args: should be \"$testArray1 -n get indexList\"}"
+test ArrayObject-3.9 {cmdProc get} {
+    list [catch {[$testArray1 -noconvert get 3] toString} msg] $msg
+} {0 9}
+test ArrayObject-3.10 {cmdProc get} {
+    list [catch {[$testArray1 -noconvert get 3] intValue} msg] $msg
+} {0 9}
+
+test ArrayObject-4.1 {cmdProc set} {
+    list [catch {$testArray1 set value} msg] $msg
+} "1 {wrong # args: should be \"$testArray1 set indexList value\"}"
+test ArrayObject-4.2 {cmdProc set} {
+    list [catch {
+	$testArray1 set indexList value junk
+    } msg] $msg
+} "1 {wrong # args: should be \"$testArray1 set indexList value\"}"
+test ArrayObject-4.3 {cmdProc set} {
+    list [catch {
+	$testArray1 -noconvert set indexList value junk
+    } msg] $msg
+} "1 {wrong # args: should be \"$testArray1 -noconvert set indexList value\"}"
+test ArrayObject-4.5 {cmdProc set} {
+    list [catch {
+	$testArray1 -noconvert set indexList value
+    } msg] $msg
+} {1 {-noconvert flag not allowed for the "set" sub-command}}
+test ArrayObject-4.6 {cmdProc set} {
+    list [catch {
+	set a [java::new {int[]} 5 {6 7 8 9 10}]
+	$a set {} 88
+	$a get 0
+    } msg] $msg
+} {0 88}
+test ArrayObject-4.7 {cmdProc set} {
+    list [catch {
+	set a [java::new {int[]} 5 {6 7 8 9 10}]
+	$a set 3 77
+	$a get 3
+    } msg] $msg
+} {0 77}
+test ArrayObject-4.8 {cmdProc set} {
+    list [catch {
+	set b [java::new {int[][][]} {2 3 4}]
+	$b set {1 0 2} 88
+	$b get {1 0 2}
+    } msg] $msg
+} {0 88}
+test ArrayObject-4.9 {cmdProc set} {
+    list [catch {
+	set b [java::new {int[][][]} {2 3 4}]
+	set subArray [$b get 1]
+	$b set 0 $subArray
+	$b set {1 1 1} 66
+	$b get {0 1 1}
+    } msg] $msg
+} {0 66}
+
+test ArrayObject-5.1 {cmdProc getrange} {
+    list [catch {
+	$testArray1 getrange indexList count junk
+    } msg] $msg
+} "1 {wrong # args: should be \"$testArray1 getrange ?indexList ?count??\"}"
+test ArrayObject-5.2 {cmdProc getrange} {
+    list [catch {
+	$testArray1 -noconvert getrange indexList count junk
+    } msg] $msg
+} "1 {wrong # args: should be \"$testArray1 -noconvert getrange ?indexList ?count??\"}"
+test ArrayObject-5.3 {cmdProc getrange} {
+    list [catch {
+	$testArray1 getrange
+    } msg] $msg
+} {0 {6 7 8 9 10}}
+test ArrayObject-5.4 {cmdProc getrange} {
+    list [catch {
+	$testArray1 getrange 1
+    } msg] $msg
+} {0 {7 8 9 10}}
+test ArrayObject-5.5 {cmdProc getrange} {
+    list [catch {
+	$testArray1 getrange 1 3
+    } msg] $msg
+} {0 {7 8 9}}
+test ArrayObject-5.6 {cmdProc getrange} {
+    list [catch {
+	$testArray1 getrange 1 5
+    } msg] $msg
+} {0 {7 8 9 10}}
+test ArrayObject-5.7 {cmdProc getrange} {
+    list [catch {
+	$testArray3 getrange {1 0 2}
+    } msg] $msg
+} {0 {0 0}}
+test ArrayObject-5.8 {cmdProc getrange} {
+    list [catch {
+	set s [$testArray3 getrange]
+	list [java::info class [lindex $s 0]] [llength $s]
+    } msg] $msg
+} {0 {{int[][]} 2}}
+test ArrayObject-5.9 {cmdProc getrange} {
+    list [catch {$testArray1 -noconvert getrange a a a} msg] $msg
+} "1 {wrong # args: should be \"$testArray1 -noconvert getrange ?indexList ?count??\"}"
+test ArrayObject-5.10 {cmdProc getrange} {
+    list [catch {$testArray1 -no getrange a a a} msg] $msg
+} "1 {wrong # args: should be \"$testArray1 -no getrange ?indexList ?count??\"}"
+test ArrayObject-5.11 {cmdProc get} {
+    set lst [$testArray1 -noconvert getrange]
+    list [[lindex $lst 0] intValue] [[lindex $lst 3] toString]
+} {6 9}
+
+test ArrayObject-6.1 {cmdProc setrange} {
+    list [catch {
+	$testArray1 setrange
+    } msg] $msg
+} "1 {wrong # args: should be \"$testArray1 setrange ?indexList ?count?? valueList\"}"
+test ArrayObject-6.2 {cmdProc setrange} {
+    list [catch {
+	$testArray1 setrange indexList count value junk
+    } msg] $msg
+} "1 {wrong # args: should be \"$testArray1 setrange ?indexList ?count?? valueList\"}"
+test ArrayObject-6.3 {cmdProc set} {
+    list [catch {
+	$testArray1 -noconvert setrange indexList count value
+    } msg] $msg
+} {1 {-noconvert flag not allowed for the "setrange" sub-command}}
+test ArrayObject-6.4 {cmdProc setrange} {
+    list [catch {
+	set a [java::new {int[]} 5]
+	$a setrange {6 7 8 9}
+	$a getrange 0
+    } msg] $msg
+} {0 {6 7 8 9 0}}
+test ArrayObject-6.5 {cmdProc setrange} {
+    list [catch {
+	set a [java::new {int[]} 5]
+	$a setrange 3 {6 7 8 9 10}
+	$a getrange 0
+    } msg] $msg
+} {0 {0 0 0 6 7}}
+test ArrayObject-6.6 {cmdProc setrange} {
+    list [catch {
+	set a [java::new {int[]} 5]
+	$a setrange 1 3 {6 7 8 9 10}
+	$a getrange 0
+    } msg] $msg
+} {0 {0 6 7 8 0}}
+test ArrayObject-6.7 {cmdProc setrange} {
+    list [catch {
+	set a [java::new {int[]} 5]
+	$a setrange 1 5 {6 7 8 9 10}
+	$a getrange 0
+    } msg] $msg
+} {0 {0 6 7 8 9}}
+test ArrayObject-6.8 {cmdProc setrange} {
+    list [catch {
+	set b [java::new {int[][][]} {2 4 6}]
+	$b setrange {1 0 2} {88 89 90}
+	$b getrange {1 0 3} 3
+    } msg] $msg
+} {0 {89 90 0}}
+test ArrayObject-6.9 {cmdProc setrange} {
+    list [catch {
+	set b [java::new {int[][][]} {2 3 4}]
+	set subArray [$b getrange {0 0}]
+	$b setrange {1 0} $subArray
+	$b setrange {1 0 0} {88 89 90 91}
+	$b getrange {0 0 0}
+    } msg] $msg
+} {0 {88 89 90 91}}
+
+test ArrayObject-7.1 {cmdProc dereferenceArrayDims} {
+    list [catch {
+	set a [java::new {int[]} 5 {6 7 8 9 10}]
+	$a get 3
+    } msg] $msg
+} {0 9}
+test ArrayObject-7.2 {cmdProc dereferenceArrayDims} {
+    list [catch {
+	set a [java::new {int[][]} {2 2} {{6 7} {8 9}}]
+	$a get {1 1}
+    } msg] $msg
+} {0 9}
+test ArrayObject-7.3 {cmdProc dereferenceArrayDims} {
+    list [catch {
+	set a [java::new {int[][][]} {2 2} {{{6 7} {8 9}} {{10 11} {12 13}}}]
+	$a get {1 0 1}
+    } msg] $msg
+} {0 11}
+test ArrayObject-7.4 {cmdProc dereferenceArrayDims} {
+    list [catch {
+	set a [java::new {int[][]} {2 2} {{6 7} {8 9}}]
+	$a get {2 1}
+    } msg] $msg
+} {1 {array index "2" is out of bounds: must be between 0 and 1}}
+test ArrayObject-7.5 {cmdProc dereferenceArrayDims} {
+    list [catch {
+	set a [java::new {int[][]} {2 2} {{6 7} {8 9}}]
+	$a get {-1 1}
+    } msg] $msg
+} {1 {array index "-1" is out of bounds: must be between 0 and 1}}
+test ArrayObject-7.6 {cmdProc dereferenceArrayDims} {
+    list [catch {
+	set a [java::new {int[][]} {2 2}]
+	$a set 0 [java::null]
+	$a get {0 0}
+    } msg] $msg
+} {1 {null value in dimension 0: can't dereference 2 dimensions}}
+test ArrayObject-7.7 {cmdProc dereferenceArrayDims} {
+    list [catch {
+	set a [java::new {int[]} 5]
+	$a get {2 3}
+    } msg] $msg
+} {1 {bad indexList "2 3": javaObj only has 1 dimension(s)}}
+test ArrayObject-7.8 {cmdProc dereferenceArrayDims} {
+    list [catch {
+	set a [java::new {int[][][]} {2 2 2}]
+	$a get {2 3 4 5}
+    } msg] $msg
+} {1 {bad indexList "2 3 4 5": javaObj only has 3 dimension(s)}}
+
+test ArrayObject-8.1 {cmdProc getArrayElts} {
+    list [catch {
+	set a [java::new {int[]} 5]
+	$a getrange {} 0
+    } msg] $msg
+} {0 {}}
+test ArrayObject-8.2 {cmdProc getArrayElts} {
+    list [catch {
+	set a [java::new {int[]} 5 {6 7 8 9 10}]
+	$a get 3
+    } msg] $msg
+} {0 9}
+test ArrayObject-8.3 {cmdProc getArrayElts} {
+    list [catch {
+	set a [java::new {int[]} 5 {6 7 8 9 10}]
+	$a getrange 1
+    } msg] $msg
+} {0 {7 8 9 10}}
+test ArrayObject-8.4 {cmdProc getArrayElts} {
+    list [catch {
+	set a [java::new {int[]} 5]
+	$a getrange -1
+    } msg] $msg
+} {1 {array index "-1" is out of bounds: must be between 0 and 4}}
+test ArrayObject-8.5 {cmdProc getArrayElts} {
+    list [catch {
+	set a [java::new {int[]} 5]
+	$a get 5
+    } msg] $msg
+} {1 {array index "5" is out of bounds: must be between 0 and 4}}
+test ArrayObject-8.6 {cmdProc getArrayElts} {
+    list [catch {
+	set a [java::new {String[]} 5]
+	if {[$a get 3] == [java::null]} {
+	    set x "null"
+	} else {
+	    set x "notNull"
+	}
+    } msg] $msg
+} {0 notNull}
+
+test ArrayObject-9.1 {cmdProc setarrayelts} {
+    list [catch {
+	set a [java::new {int[]} 5]
+	$a setrange {} 0 {a b c}
+    } msg] $msg
+} {0 {}}
+test ArrayObject-9.2 {cmdProc setarrayelts} {
+    list [catch {
+	set a [java::new {int[]} 5 {6 7 8 9 10}]
+	$a set 3 55
+	$a getrange
+    } msg] $msg
+} {0 {6 7 8 55 10}}
+test ArrayObject-9.3 {cmdProc setarrayelts} {
+    list [catch {
+	set a [java::new {int[]} 5 {6 7 8 9 10}]
+	$a setrange 1 {33 34 35 36}
+	$a getrange
+    } msg] $msg
+} {0 {6 33 34 35 36}}
+test ArrayObject-9.4 {cmdProc setarrayelts} {
+    list [catch {
+	set a [java::new {int[]} 5]
+	$a set -1 33
+    } msg] $msg
+} {1 {array index "-1" is out of bounds: must be between 0 and 4}}
+test ArrayObject-9.5 {cmdProc setarrayelts} {
+    list [catch {
+	set a [java::new {int[]} 5]
+	$a set 5 33
+    } msg] $msg
+} {1 {array index "5" is out of bounds: must be between 0 and 4}}
+
+# test bad value types later.
+
+test ArrayObject-10.2 {cmdProc initArray} {
+    list [catch {
+	set a [java::new {int[]} 5 {6 7 8 9 10}]
+	$a getrange
+    } msg] $msg
+} {0 {6 7 8 9 10}}
+test ArrayObject-10.3 {cmdProc initArray} {
+    list [catch {
+	set a [java::new {int[]} 5 {6 7 8 9 10}]
+	$a getrange 1
+    } msg] $msg
+} {0 {7 8 9 10}}
+test ArrayObject-10.4 {cmdProc initArray} {
+    list [catch {
+	set a [java::new {int[]} 5 {6 7 8 9 10}]
+	$a getrange 1 3
+    } msg] $msg
+} {0 {7 8 9}}
+test ArrayObject-10.5 {cmdProc initArray} {
+    list [catch {
+	set a [java::new {int[]} 5 {6 7 8 9 10}]
+	$a getrange 1 5
+    } msg] $msg
+} {0 {7 8 9 10}}
+test ArrayObject-10.6 {cmdProc initArray} {
+    list [catch {
+	set a [java::new {int[][][]} {2 3 4}]
+	$a getrange {1 0 2}
+    } msg] $msg
+} {0 {0 0}}
+test ArrayObject-10.7 {cmdProc initArray} {
+    list [catch {
+	set a [java::new {int[][][]} {2 3 4}]
+	set s [$a getrange]
+	list [java::info class [lindex $s 0]] [llength $s]
+    } msg] $msg
+} {0 {{int[][]} 2}}
+
+test arrayObject-11.1 {initArray, null valueListObj} {
+    list [catch {
+	set handle [java::new {int[]} {} {}]
+	list [java::info cl $handle] [$handle length]
+    } msg] $msg
+} {0 {{int[]} 0}}
+test arrayObject-11.2 {initArray, null valueListObj} {
+    list [catch {
+	set handle [java::new {int[]} 5]
+	set subHandle [$handle get 0]
+	list [java::info cl $handle] [$handle length] [$handle getrange]
+    } msg] $msg
+} {0 {{int[]} 5 {0 0 0 0 0}}}
+test arrayObject-11.3 {initArray, null valueListObj} {
+    list [catch {
+	set handle [java::new {int[][]} {5 6}]
+	set subHandle [$handle get 0]
+	list [java::info cl $handle] [$handle length] \
+	    [$subHandle length] [$subHandle getrange]
+    } msg] $msg
+} {0 {{int[][]} 5 6 {0 0 0 0 0 0}}}
+test arrayObject-11.4 {initArray, null valueListObj} {
+    list [catch {
+	set handle [java::new {int[][][]} {5 6}]
+	set subHandle [$handle get 0]
+	set subSubHandle [$subHandle get 0]
+	list [java::info cl $handle] [$handle length] \
+	    [$subHandle length] [$subSubHandle length]
+    } msg] $msg
+} {0 {{int[][][]} 5 6 0}}
+test arrayObject-11.5 {initArray, empty sizeListObj} {
+    list [catch {
+	set handle [java::new {int[]} {} {6 7 8 9 10}]
+	set subHandle [$handle get 0]
+	list [java::info cl $handle] [$handle length] [$handle getrange]
+    } msg] $msg
+} {0 {{int[]} 5 {6 7 8 9 10}}}
+test arrayObject-11.6 {initArray, empty sizeListObj} {
+    list [catch {
+	set handle [java::new {int[][]} {} {{2 3} {4 5}}]
+	set subHandle [$handle get 1]
+	list [java::info cl $handle] [$handle length] \
+	    [$subHandle length] [$subHandle getrange]
+    } msg] $msg
+} {0 {{int[][]} 2 2 {4 5}}}
+test arrayObject-11.7 {initArray, empty sizeListObj} {
+    list [catch {
+	set handle [java::new {int[][][]} {} {{{2 3} {4 5}} {{6 7} {8 9}}}]
+	set subHandle [$handle get 1]
+	set subSubHandle [$subHandle get 0]
+	list [java::info cl $handle] [$handle length] \
+	    [$subHandle length] [$subSubHandle length] [$subSubHandle getrange]
+    } msg] $msg
+} {0 {{int[][][]} 2 2 2 {6 7}}}
+
+test arrayObject-11.8 {initArray} {
+    list [catch {
+	set handle [java::new {int[][]} {4} {{} {6} {7 8} {9 10 11}}]
+	set a0 [$handle get 0]
+	set a1 [$handle get 1]
+	set a2 [$handle get 2]
+	set a3 [$handle get 3]
+	list [java::info cl $handle] [$handle length] \
+	    [$a0 getrange] [$a1 getrange] [$a2 getrange] [$a3 getrange]
+    } msg] $msg
+} {0 {{int[][]} 4 {} 6 {7 8} {9 10 11}}}
+test arrayObject-11.9 {initArray} {
+    list [catch {
+	set handle [java::new {int[][]} {3 2} {{6} {7 8} {9 10 11}}]
+	set a0 [$handle get 0]
+	set a1 [$handle get 1]
+	set a2 [$handle get 2]
+	list [java::info cl $handle] [$handle length] \
+	    [$a0 getrange] [$a1 getrange] [$a2 getrange]
+    } msg] $msg
+} {0 {{int[][]} 3 {6 0} {7 8} {9 10}}}
+test arrayObject-11.10 {initArray} {
+    list [catch {
+	set handle [java::new {String[][]} {3 2} {{hello} {7 8} {foo bar baz}}]
+	set a00 [$handle get {0 0}]
+	set a01 [$handle -noconvert get {0 1}]
+	if {$a01 == [java::null]} {set a01 "null"}
+	set a1 [$handle get 1]
+	set a2 [$handle get 2]
+	list [java::info cl $handle] [$handle length] \
+	    $a00 $a01 [$a1 getrange] [$a2 getrange]
+    } msg] $msg
+} {0 {{java.lang.String[][]} 3 hello null {7 8} {foo bar}}}
+test arrayObject-11.11 {initArray} {
+    list [catch {
+	set handle [java::new {String[][]} {3 2} {{hello} {7 8} {foo bar baz}}]
+	set a00 [$handle get {0 0}]
+	set a01 [$handle get {0 1}]
+	if {$a01 == [java::null]} {set a01 "null"}
+	set a1 [$handle get 1]
+	set a2 [$handle get 2]
+	list [java::info cl $handle] [$handle length] \
+	    $a00 $a01 [$a1 getrange] [$a2 getrange]
+    } msg] $msg
+} {0 {{java.lang.String[][]} 3 hello {} {7 8} {foo bar}}}
+
+test arrayObject-11.12 {initArray, error conditions} {
+    list [catch {
+	set handle [java::new {int[][]} {} {}]
+    } msg] $msg
+} {1 {cannot initialize a 2 dimensional array with zero size in dimension 0}}
+test arrayObject-11.13 {initArray} {
+    list [catch {
+	set handle [java::new {int[][][]} {} {{{1 2} {3 4}} {}}]
+    } msg] $msg
+} {1 {cannot initialize a 3 dimensional array with zero size in dimension 1}}
+test arrayObject-11.14 {initArray} {
+    list [catch {
+	set handle [java::new {int[][][]} {3} {{{1 2} {3 4}} {{5 6} {7 8}}}]
+    } msg] $msg
+} {1 {cannot initialize a 3 dimensional array with zero size in dimension 1}}
+test arrayObject-11.15 {initArray, error conditions} {
+    list [catch {
+	set handle [java::new {int[][]} {5 -2}]
+    } msg] $msg
+} {1 {negative array size -2}}
+
+
+# black box tests for get, set, getrange, and setrange ArrayObject
+# command options
+
+test ArrayObject-12.4 {isValid flag} {
+    set j [java::new {Integer[][][]} {3 5 6}]
+    set i [java::new {Integer int} 55]
+    $j set {2 3 4} $i
+    $j get {2 3 4}
+} 55
+
+test ArrayObject-12.1 {array object command} {
+    set j [java::new {String[][][]} {3 5 6}]
+    $j set {2 3 4} "hello"
+    $j get {2 3 4}
+} "hello"
+
+test ArrayObject-12.2 {array object command} {
+    set j [java::new {String[][][]} {3 5 6}]
+    set k [$j get {2 3}]
+    $j set {2 1} $k
+    $j set {2 3 4} "hello"
+    $j get {2 1 4}
+} "hello"
+
+test ArrayObject-12.3 {array object command} {
+    set j [java::new {Character[][][]} {3 5 6}]
+    $j set {2 3 4} "c"
+    $j get {2 3 4}
+} "c"
+
+test ArrayObject-12.4 {array object command} {
+    set j [java::new {Character[][][]} {3 5 6}]
+    $j set {2 3 4} 8
+    $j get {2 3 4}
+} 8
+
+test ArrayObject-12.5 {array object command} {
+    list [catch {
+	set j [java::new {Character[][][]} {3 5 6}]
+	$j set {2 3 4} 89
+    } msg] $msg
+} {1 {expected character but got "89"}}
+
+test ArrayObject-12.6 {array object command} {
+    list [catch {
+	set j [java::new {Character[][][]} {3 5 6}]
+	$j set {2 3 4} "ca"
+    } msg] $msg
+} {1 {expected character but got "ca"}}
+
+test ArrayObject-12.7 {array object command} {
+    list [catch {
+	set j [java::new {Character[][][]} {3 5 6}]
+	$j set {2 3 4} ""
+    } msg] $msg
+} {1 {expected character but got ""}}
+
+
+test ArrayObject-13.1 {array class correctness} {
+    catch {unset results}
+    
+    set arr2 [java::new {int[][]} {2 2} {{1 2} {3 4}}]
+    set r1 [$arr2 -noconvert get {0 0}]
+    set r2 [$arr2 -noconvert get {0 1}]
+    set r3 [$arr2 -noconvert get {1 0}]
+    set r4 [$arr2 -noconvert get {1 1}]
+    list  [$r1 toString] [java::info class $r1] \
+          [$r2 toString] [java::info class $r2] \
+          [$r3 toString] [java::info class $r3] \
+          [$r4 toString] [java::info class $r4]
+} {1 java.lang.Integer 2 java.lang.Integer 3 java.lang.Integer 4 java.lang.Integer}
+
+
+test ArrayObject-13.2 {array class correctness} {
+    catch {unset results}
+
+    set obj_arr1 [java::call tests.RetArray getObjectArr1]
+    lappend results [java::info class $obj_arr1]
+
+    set obj_elem [$obj_arr1 -noconvert get 0]
+    lappend results [java::info class $obj_elem]
+
+
+    set str_arr1 [java::call tests.RetArray getStringArr1]
+    lappend results [java::info class $str_arr1]
+
+    set str_elem [$str_arr1 -noconvert get 0]
+    lappend results [java::info class $str_elem]
+
+    lappend results [string compare \
+	[$obj_elem -noconvert toString] $str_elem]
+
+} {{java.lang.Object[]} java.lang.Object {java.lang.String[]} java.lang.String 0}
+
+
+test ArrayObject-13.3 {array class correctness} {
+    catch {unset results}
+
+    set obj_arr2 [java::call tests.RetArray getObjectArr2]
+    set str_arr2 [java::call tests.RetArray getStringArr2]
+
+    set sub_obj_arr [$obj_arr2 get 0]
+    set sub_str_arr [$str_arr2 get 0]
+
+    lappend results [java::info class $sub_obj_arr]
+    lappend results [java::info class $sub_str_arr]
+
+    set obj_elem [$sub_obj_arr -noconvert get 0]
+    set str_elem [$sub_str_arr -noconvert get 0]
+
+    lappend results [java::info class $obj_elem]
+    lappend results [java::info class $str_elem]
+
+    lappend results [string compare \
+	[$obj_elem -noconvert toString] $str_elem]
+
+} {{java.lang.Object[]} {java.lang.String[]} java.lang.Object java.lang.String 0}
+
+# cleanup
+::tcltest::cleanupTests
+return

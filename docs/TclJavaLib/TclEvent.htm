@@ -1,0 +1,73 @@
+<HTML><HEAD><TITLE>TclJava Library Procedures - TclEvent manual page</TITLE></HEAD><BODY>
+<DL>
+<DD><A HREF="TclEvent.htm#M2" NAME="L147">CLASS</A>
+<DL><DD>tcl.lang.TclEvent -- Subclass from this abstract base class to
+create event handlers.</DL>
+<DD><A HREF="TclEvent.htm#M3" NAME="L148">METHODS</A>
+<DL><DD>abstract int <B>processEvent</B>(int <I>flags</I>)</DL>
+<DL><DD>synchronized final void <B>sync</B>()</DL>
+<DD><A HREF="TclEvent.htm#M4" NAME="L149">ARGUMENTS</A>
+<DL>
+</DL>
+<DD><A HREF="TclEvent.htm#M5" NAME="L150">DESCRIPTION</A>
+<DL>
+<DD><A HREF="TclEvent.htm#M6" NAME="L151"><B>processEvent</B></A>
+<DD><A HREF="TclEvent.htm#M7" NAME="L152"><B>sync</B></A>
+</DL>
+<DD><A HREF="TclEvent.htm#M8" NAME="L153">EQUIVALENT C FUNCTIONS</A>
+<DD><A HREF="TclEvent.htm#M9" NAME="L154">SEE ALSO</A>
+<DD><A HREF="TclEvent.htm#M10" NAME="L155">KEYWORDS</A>
+</DL><HR>
+<H3><A NAME="M2">CLASS</A></H3>
+tcl.lang.TclEvent -- Subclass from this abstract base class to
+create event handlers.
+<H3><A NAME="M3">METHODS</A></H3>
+<P>abstract int <B>processEvent</B>(int <I>flags</I>)
+<P>synchronized final void <B>sync</B>()
+<H3><A NAME="M4">ARGUMENTS</A></H3>
+<DL>
+<P><DT>int <B>flags</B> ()<DD>
+Same as <I>flags</I> passed to the <B><A HREF="../TclJavaLib/Notifier.htm">doOneEvent</A></B> method of the
+<B><A HREF="../TclJavaLib/Notifier.htm">Notifier</A></B> class.
+<P></DL>
+<H3><A NAME="M5">DESCRIPTION</A></H3>
+The TclEvent class is used to schedule events to be processed in a
+TclJava Notifier. Usually, an event-driven TclJava application consists of
+one &quot;Notifier Thread&quot; and one or more &quot;Event Detection Threads&quot;. When
+an Event Detection Thread detects an event, it puts an instance of
+TclEvent on the queue of the Notifier. Then, when the Notifier Thread
+is ready to process events (i.e., when the <B><A HREF="../TclJavaLib/Notifier.htm">doOneEvent</A></B> method of
+the <B><A HREF="../TclJavaLib/Notifier.htm">Notifier</A></B> class is invoked), it invokes the
+<B>processEvent</B> method of the TclEvent instances in the order they
+appear in the Notifier's event queue.
+
+<P>
+<DL>
+<P><DT><A NAME="M6"><B>processEvent</B></A><DD>
+When <B>processEvent</B> is called, it should determine whether the
+event can be processed right away (possibly based on the settings of
+the <I>flags</I> parameter). If the event cannot be processed yet, this
+method returns 0, in which case the Notifier will leave the event in
+the event queue and defer its processing to some later
+time. Otherwise, this method should process the event and return 1, in
+which case the Notifier will remove the event from the event queue.
+
+<P><DT><A NAME="M7"><B>sync</B></A><DD>
+Usually, <B>TclEvent</B> instances are processed asynchronously. If
+synchronous processing is desired, an Event Detection Thread can call
+the <B>sync</B> method, which waits until the event is processed by the
+Notifier. The TclEvent must be in the event queue before its
+<B>sync</B> method can be invoked, otherwise a <B><A HREF="../TclJavaLib/runtimeError.htm">TclRuntimeError</A></B>
+will be generated.
+
+<P></DL>
+<H3><A NAME="M8">EQUIVALENT C FUNCTIONS</A></H3>
+<A href="../cFunctions.html">Tcl_EventProc</A>, <A href="../cFunctions.html">Tcl_ServiceAll</A>
+<H3><A NAME="M9">SEE ALSO</A></H3>
+<B><A HREF="../TclJavaLib/Notifier.htm">Notifier</A></B>, <B><A HREF="../TclJavaLib/Interp.htm">Interp</A></B>, <B><A HREF="../TclJavaLib/runtimeError.htm">TclRuntimeError</A></B>, <B><A HREF="../TclJavaLib/IdleHandler.htm">IdleHandler</A></B>, <B><A HREF="../TclJavaLib/TimerHandler.htm">TimerHandler</A></B>
+<H3><A NAME="M10">KEYWORDS</A></H3>
+<A href="../Keywords/E.htm#event">event</A>, <A href="../Keywords/E.htm#event queue">event queue</A>, <A href="../Keywords/T.htm#thread">thread</A>, <A href="../Keywords/E.htm#event sources">event sources</A>, <A href="../Keywords/E.htm#event detection">event detection</A>
+<HR><PRE>
+<A HREF="../license.html">Copyright</A> &#169; 1998 Sun Microsystems, Inc.
+<A HREF="../license.html">Copyright</A> &#169; 1995-1997 Roger E. Critchlow Jr.</PRE>
+</BODY></HTML>

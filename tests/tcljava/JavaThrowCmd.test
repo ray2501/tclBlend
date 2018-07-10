@@ -1,0 +1,73 @@
+# JavaThrowCmd.test --
+#
+#	Tests the implementation of the JavaThrowCmd.java file.
+#
+# Copyright (c) 1997 by Sun Microsystems, Inc.
+#
+# See the file "license.terms" for information on usage and redistribution
+# of this file, and for a DISCLAIMER OF ALL WARRANTIES.
+#
+# RCS: @(#) $Id: JavaThrowCmd.test,v 1.5 2002/12/30 06:28:07 mdejong Exp $
+
+if {[lsearch [namespace children] ::tcltest] == -1} {
+    package require tcltest
+    namespace import -force ::tcltest::*
+}
+
+setupJavaPackage
+
+test JavaThrowCmd-1.1 {JavaThrow.cmdProc} {
+    list [catch {java::throw} msg] $msg
+} {1 {wrong # args: should be "java::throw throwableObj"}}
+
+test JavaThrowCmd-1.2 {JavaThrow.cmdProc} {
+    list [catch {java::throw blah} msg] $msg
+} {1 {unknown java object "blah"}}
+
+test JavaThrowCmd-1.3 {JavaThrow.cmdProc} {
+    list [catch {java::throw [java::new Exception 123 456 789]} msg]               $msg
+} {1 {can't find accessible constructor with 3 argument(s) for class "java.lang.Exception"}}
+
+test JavaThrowCmd-1.4 {JavaThrow.cmdProc} {
+    set k [java::new {java.lang.Throwable} "blah blah blah"]
+    list [catch {java::throw $k} msg] $msg
+} {1 {java.lang.Throwable: blah blah blah}}
+
+test JavaThrowCmd-1.5 {JavaThrow.cmdProc} {
+    list [catch {java::throw [java::new {java.lang.Object}]} msg] $msg
+} {1 {bad object: must be an instance of Throwable}}
+
+test JavaThrowCmd-1.6 {JavaThrow.cmdProc} {
+    list [catch {java::throw [java::new {java.lang.Throwable}]} msg] $msg
+} {1 java.lang.Throwable}
+
+test JavaThrowCmd-1.7 {JavaThrow.cmdProc} {
+    set x [java::new {java.lang.Throwable} "blah blah blah"]
+    list [catch {java::throw $x} msg] $msg
+} {1 {java.lang.Throwable: blah blah blah}}
+
+test JavaThrowCmd-1.8 {JavaThrow.cmdProc} {
+    list [catch {java::throw [java::new {java.lang.Exception}]} msg] $msg
+} {1 java.lang.Exception}
+
+test JavaThrowCmd-1.9 {JavaThrow.cmdProc} {
+    set x [java::new {java.lang.Throwable} blah]
+    catch {java::throw $x}
+    list [lindex $errorCode 0] [[lindex $errorCode 1] toString]
+} {JAVA {java.lang.Throwable: blah}}
+
+test JavaThrowCmd-1.10 {JavaThrow.cmdProc} {
+    set x [java::new {java.lang.Throwable} blah]
+    catch {java::throw $x}
+    [lindex $errorCode 1] equals $x
+} 1
+
+test JavaThrowCmd-1.11 {JavaThrow.cmdProc won't wrap a TclException} {
+    set errorCode NONE
+    list [catch {java::throw [java::new tcl.lang.TclException \
+        [java::getinterp] "Tcl error"]} err] $err $errorCode
+} {1 {Tcl error} NONE}
+
+# cleanup
+::tcltest::cleanupTests
+return

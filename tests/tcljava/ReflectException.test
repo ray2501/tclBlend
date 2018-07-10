@@ -1,0 +1,63 @@
+# ReflectException.test --
+#
+#	Tests the implementation of the ReflectException.java file.
+#
+# Copyright (c) 1997 by Sun Microsystems, Inc.
+#
+# See the file "license.terms" for information on usage and redistribution
+# of this file, and for a DISCLAIMER OF ALL WARRANTIES.
+#
+# RCS: @(#) $Id: ReflectException.test,v 1.2 2000/12/22 09:47:15 mdejong Exp $
+#
+
+if {[lsearch [namespace children] ::tcltest] == -1} {
+    package require tcltest
+    namespace import -force ::tcltest::*
+}
+
+setupJavaPackage
+
+set throwable [java::new Throwable "some error msg"]
+
+test ReflectException-1.1 {constructor, set errorCode} {
+    java::new tcl.lang.ReflectException [java::getinterp] $throwable
+    set errorCode
+} [list JAVA $throwable]
+
+set throwable [java::new Throwable "some error msg"]
+
+test ReflectException-1.2 {constructor, set errorCode} {
+    set invokation [java::new java.lang.reflect.InvocationTargetException              $throwable]
+    java::new tcl.lang.ReflectException [java::getinterp] $invokation
+    set errorCode
+} [list JAVA $throwable]
+
+#
+# If an error happens when we set errorCode inside the constructor of
+# ReflectException, the reference on the $t object should be released
+# properly, so that we won't have object handles hanging around.
+#
+
+proc bad {args} {error xx}
+
+set t [java::new Throwable "some error msg"]
+
+test ReflectException-1.3 {constructor, error during setting errorCode} {
+    set stringrep [format %s $t]
+    set errorCode ""
+    trace variable errorCode w bad
+    java::new tcl.lang.ReflectException [java::getinterp] $t
+    trace vdelete errorCode w bad
+
+    set kk ""
+    lappend kk [list [catch {$stringrep} msg] $msg]
+    unset t
+    lappend kk [list [catch {$stringrep} msg] $msg]
+} "{1 {wrong # args: should be \"$t ?-noconvert? signature ?arg arg ...?\"}} {1 {invalid command name \"$t\"}}"
+
+# cleanup
+catch {trace vdelete errorCode w bad}
+catch {unset errorCode}
+catch {set errorCode ""}
+::tcltest::cleanupTests
+return

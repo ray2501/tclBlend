@@ -1,0 +1,112 @@
+<HTML><HEAD><TITLE>TclJava Library Procedures - Eval manual page</TITLE></HEAD><BODY>
+<DL>
+<DD><A HREF="Eval.htm#M2" NAME="L24">CLASS</A>
+<DL><DD>tcl.lang.Interp -- This manual entry contains Interp methods that execute or
+check Tcl scripts.</DL>
+<DD><A HREF="Eval.htm#M3" NAME="L25">METHODS</A>
+<DL><DD>void <B>eval</B>(String <I>str</I>) throws TclException</DL>
+<DL><DD>void <B>eval</B>(String <I>str</I>, int <I>flags</I>) throws TclException</DL>
+<DL><DD>void <B>eval</B>(TclObject <I>tobj</I>, int <I>flags</I>) throws TclException</DL>
+<DL><DD>void <B>recordAndEval</B>(TclObject <I>tobj</I>, int <I>flags</I>) throws TclException</DL>
+<DL><DD>void <B>evalFile</B>(String <I>fileName</I>) throws TclException</DL>
+<DL><DD>static boolean <B>commandComplete</B>(String <I>cmdName</I>) throws TclException</DL>
+<DD><A HREF="Eval.htm#M4" NAME="L26">OTHER METHODS</A>
+<DD><A HREF="Eval.htm#M5" NAME="L27">ARGUMENTS</A>
+<DL>
+</DL>
+<DD><A HREF="Eval.htm#M6" NAME="L28">DESCRIPTION</A>
+<DL>
+<DD><A HREF="Eval.htm#M7" NAME="L29"><B>eval</B></A>
+<DD><A HREF="Eval.htm#M8" NAME="L31"><B>recordAndEval</B></A>
+<DD><A HREF="Eval.htm#M9" NAME="L30"><B>evalFile</B></A>
+<DD><A HREF="Eval.htm#M10" NAME="L32"><B>commandComplete</B></A>
+</DL>
+<DD><A HREF="Eval.htm#M11" NAME="L33">EQUIVALENT C FUNCTIONS</A>
+<DD><A HREF="Eval.htm#M12" NAME="L34">SEE ALSO</A>
+<DD><A HREF="Eval.htm#M13" NAME="L35">KEYWORDS</A>
+</DL><HR>
+<H3><A NAME="M2">CLASS</A></H3>
+tcl.lang.Interp -- This manual entry contains Interp methods that execute or
+check Tcl scripts.
+<H3><A NAME="M3">METHODS</A></H3>
+<P>void <B>eval</B>(String <I>str</I>) throws TclException
+<P>void <B>eval</B>(String <I>str</I>, int <I>flags</I>) throws TclException
+<P>void <B>eval</B>(TclObject <I>tobj</I>, int <I>flags</I>) throws TclException
+<P>void <B>recordAndEval</B>(TclObject <I>tobj</I>, int <I>flags</I>) throws TclException
+<P>void <B>evalFile</B>(String <I>fileName</I>) throws TclException
+<P>static boolean <B>commandComplete</B>(String <I>cmdName</I>) throws TclException
+<H3><A NAME="M4">OTHER METHODS</A></H3>
+<B><A HREF="../TclJavaLib/setVar.htm">setVar</A></B>, 
+<B><A HREF="../TclJavaLib/traceVar.htm">traceVar</A></B>, 
+<B><A HREF="../TclJavaLib/createCmd.htm">createCommand</A></B>,
+<B><A HREF="../TclJavaLib/setResult.htm">setResult</A></B>, 
+<B><A HREF="../TclJavaLib/backgdErr.htm">backgroundError</A></B>,
+<BR>
+<B><A HREF="../TclJavaLib/getNotifier.htm">getNotifier</A></B>, 
+<B><A HREF="../TclJavaLib/setAssocData.htm">setAssocData</A></B>, 
+<B><A HREF="../TclJavaLib/dispose.htm">dispose</A></B>, 
+<B><A HREF="../TclJavaLib/pkgRequire.htm">pkgRequire</A></B>
+
+<H3><A NAME="M5">ARGUMENTS</A></H3>
+<DL>
+<P><DT>String <B>str</B><DD>
+String value of script to evaluate.
+<P><DT>TclObject <B>tobj</B><DD>
+TclObject value of script to evaluate.
+<P><DT>int <B>flags</B><DD>
+An OR'ed combination of flag  bits. Currently supported flags include
+<B>TCL.EVAL_GLOBAL</B>, <B>TCL.EVAL_DIRECT</B>, and <B>TCL.NO_EVAL</B>.
+<P><DT>String <B>fileName</B><DD>
+File containing script to evaluate.
+<P><DT>String <B>cmdName</B><DD>
+Command string to test for completeness.
+<P></DL>
+<H3><A NAME="M6">DESCRIPTION</A></H3>
+The methods described here are invoked to execute Tcl scripts in
+various forms.
+<P>
+<DL>
+<P><DT><A NAME="M7"><B>eval</B></A><DD>
+The <B>eval</B> method executes the commands in the script stored in
+<I>str</I> or <I>tobj</I> until either an error occurs or the end of the
+script is reached.  If the <I>flag</I> argument is specified, it
+controls the stack level of the evaluation via an OR-ed combination of
+flag bits.  Currently, only the <B>TCL.EVAL_GLOBAL</B> flag is
+supported.  If this flag is set, the script is processed at global
+level.  This means that it is evaluated in the global namespace and
+its variable context consists of global variables only (it ignores any
+Tcl procedures that are active).  Otherwise, the script is evaluated in
+the current stack level.  A TclException is thrown if an error occurs
+in evaluating the <I>str</I> or <I>tobj</I> (e.g. the script contains bad
+Tcl syntax or accesses an undefined variable).
+<P><DT><A NAME="M8"><B>recordAndEval</B></A><DD>
+The <B>recordAndEval</B> method adds the script stored in <I>tobj</I>
+to the current list of recorded events and then executes the command by
+calling <B>eval</B>. Passing <B>TCL.NO_EVAL</B> in the flags argument
+means record the command but don't evaluate.
+
+<P><DT><A NAME="M9"><B>evalFile</B></A><DD>
+The <B>evalFile</B> method reads the file given by <I>fileName</I> and
+evaluates its contents as a Tcl script.  It behaves the same as
+<B>eval</B>.
+<P><DT><A NAME="M10"><B>commandComplete</B></A><DD>
+The <B>commandComplete</B> method takes a Tcl command <I>str</I>
+as argument and determines whether it contains one or more
+complete commands (i.e. there are no unclosed quotes, braces,
+brackets, or variable references).
+If the command string is complete then it returns true; otherwise it
+returns false.
+
+<P></DL>
+<H3><A NAME="M11">EQUIVALENT C FUNCTIONS</A></H3>
+<A href="../cFunctions.html">Tcl_Eval</A>, <A href="../cFunctions.html">Tcl_GlobalEval</A>, <A href="../cFunctions.html">Tcl_EvalObj</A>, <A href="../cFunctions.html">Tcl_EvalFile</A>, <A href="../cFunctions.html">Tcl_RecordAndEvalObj</A>, <A href="../cFunctions.html">Tcl_CommandComplete</A>
+<H3><A NAME="M12">SEE ALSO</A></H3>
+<B><A HREF="../TclJavaLib/Interp.htm">Interp</A></B>, <B><A HREF="../TclJavaLib/setVar.htm">setVar</A></B>, <B><A HREF="../TclJavaLib/setResult.htm">setResult</A></B>, <B><A HREF="../TclJavaLib/backgdErr.htm">addErrorInfo</A></B>, <B><A HREF="../TclJavaLib/dispose.htm">dispose</A></B>, <B><A HREF="../TclJavaLib/TclException.htm">TclException</A></B>, <B><A HREF="../TclJavaLib/runtimeError.htm">TclRuntimeError</A></B>, <B><A HREF="../TclJavaLib/TclEvent.htm">TclEvent</A></B>
+<H3><A NAME="M13">KEYWORDS</A></H3>
+<A href="../Keywords/C.htm#complete command">complete command</A>, <A href="../Keywords/E.htm#execute">execute</A>, <A href="../Keywords/F.htm#file">file</A>, <A href="../Keywords/G.htm#global">global</A>, <A href="../Keywords/I.htm#interpreter">interpreter</A>, <A href="../Keywords/O.htm#object">object</A>, <A href="../Keywords/P.htm#partial
+command">partial
+command</A>, <A href="../Keywords/R.htm#result">result</A>, <A href="../Keywords/S.htm#script">script</A>
+<HR><PRE>
+<A HREF="../license.html">Copyright</A> &#169; 1994-1998 Sun Microsystems, Inc.
+<A HREF="../license.html">Copyright</A> &#169; 1995-1997 Roger E. Critchlow Jr.</PRE>
+</BODY></HTML>

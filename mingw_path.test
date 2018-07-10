@@ -1,0 +1,177 @@
+#!/bin/sh
+
+# This script is a quick regression test for the
+# mingw_path.sh and mingw_paths.sh scripts.
+
+status=0
+
+root_native=`cd / ; pwd -W`
+#echo "root_native is \"$root_native\""
+tmp_native=`cd /tmp ; pwd -W`
+#echo "tmp_native is \"$tmp_native\""
+pwd_native=`pwd -W`
+#echo "pwd_native is \"$pwd_native\""
+c_native=`cd C:/ ; pwd -W`
+#echo "c_native is \"$c_native\""
+
+if [ ! -d /tmp ]
+then
+    mkdir /tmp
+fi
+
+
+testnum=1
+result=`sh mingw_path.sh /`
+expected=${root_native}
+
+if [ "$result" != "${expected}" ]
+then
+     echo "test $testnum: expected \"${expected}\" but got \"$result\""
+     status=$testnum
+fi
+
+
+testnum=2
+result=`sh mingw_path.sh /tmp`
+expected=${tmp_native}
+
+if [ "$result" != "${expected}" ]
+then
+     echo "test $testnum: expected \"${expected}\" but got \"$result\""
+     status=$testnum
+fi
+
+
+testnum=3
+result=`sh mingw_path.sh /tmp/notthere`
+expected=${tmp_native}/notthere
+
+if [ "$result" != "${expected}" ]
+then
+     echo "test $testnum: expected \"${expected}\" but got \"$result\""
+     status=$testnum
+fi
+
+
+testnum=4
+result=`sh mingw_path.sh /mingw/include`
+expected=${root_native}/mingw/include
+
+if [ "$result" != "${expected}" ]
+then
+     echo "test $testnum: expected \"${expected}\" but got \"$result\""
+     status=$testnum
+fi
+
+
+testnum=5
+result=`sh mingw_path.sh /home/joe`
+expected=${root_native}/home/joe
+
+if [ "$result" != "${expected}" ]
+then
+     echo "test $testnum: expected \"${expected}\" but got \"$result\""
+     status=$testnum
+fi
+
+
+testnum=6
+result=`sh mingw_path.sh .`
+expected=${pwd_native}
+
+if [ "$result" != "${expected}" ]
+then
+     echo "test $testnum: expected \"${expected}\" but got \"$result\""
+     status=$testnum
+fi
+
+
+testnum=7
+result=`sh mingw_path.sh foo/bar/baz`
+expected=${pwd_native}/foo/bar/baz
+
+if [ "$result" != "${expected}" ]
+then
+     echo "test $testnum: expected \"${expected}\" but got \"$result\""
+     status=$testnum
+fi
+
+
+testnum=8
+result=`sh mingw_path.sh /c`
+expected=${c_native}
+
+if [ "$result" != "${expected}" ]
+then
+     echo "test $testnum: expected \"${expected}\" but got \"$result\""
+     status=$testnum
+fi
+
+
+testnum=9
+result=`sh mingw_path.sh /notthere1/notthere2/notthere3`
+expected=${root_native}/notthere1/notthere2/notthere3
+
+if [ "$result" != "${expected}" ]
+then
+     echo "test $testnum: expected \"${expected}\" but got \"$result\""
+     status=$testnum
+fi
+
+
+testnum=10
+result=`sh mingw_path.sh ~`
+expected=${root_native}/home/${USERNAME}
+
+if [ "$result" != "${expected}" ]
+then
+     echo "test $testnum: expected \"${expected}\" but got \"$result\""
+     status=$testnum
+fi
+
+
+testnum=11
+result=`sh mingw_path.sh "/c/Program Files/A Company"`
+expected="${c_native}Program Files/A Company"
+
+if [ "$result" != "${expected}" ]
+then
+     echo "test $testnum: expected \"${expected}\" but got \"$result\""
+     status=$testnum
+fi
+
+
+testnum=12
+result=`sh mingw_path.sh "/c/Program Files/A Company/A Product Line"`
+expected="${c_native}Program Files/A Company/A Product Line"
+
+if [ "$result" != "${expected}" ]
+then
+     echo "test $testnum: expected \"${expected}\" but got \"$result\""
+     status=$testnum
+fi
+
+
+testnum=13
+result=`sh mingw_paths.sh "/home/joe:/c/Program Files/A Company/A Product Line"`
+expected="C:/msys/home/joe;c:/Program Files/A Company/A Product Line"
+
+if [ "$result" != "${expected}" ]
+then
+     echo "test $testnum: expected \"${expected}\" but got \"$result\""
+     status=$testnum
+fi
+
+testnum=14
+result=`sh mingw_paths.sh "/mingw/include/::/d:"`
+expected="C:/msys/mingw/include;d:/"
+
+if [ "$result" != "${expected}" ]
+then
+     echo "test $testnum: expected \"${expected}\" but got \"$result\""
+     status=$testnum
+fi
+
+
+exit $status
+

@@ -1,0 +1,122 @@
+<HTML><HEAD><TITLE>TclJava Library Procedures - TclException manual page</TITLE></HEAD><BODY>
+<DL>
+<DD><A HREF="TclException.htm#M2" NAME="L156">EXCEPTION</A>
+<DL><DD>tcl.lang.TclException -- This class is used to signal exception
+conditions in the execution of Tcl scripts.</DL>
+<DD><A HREF="TclException.htm#M3" NAME="L157">CONSTRUCTORS</A>
+<DD><A HREF="TclException.htm#M4" NAME="L158">METHODS</A>
+<DL><DD>int <B>getCompletionCode</B>()</DL>
+<DD><A HREF="TclException.htm#M5" NAME="L159">ARGUMENTS</A>
+<DL>
+</DL>
+<DD><A HREF="TclException.htm#M6" NAME="L160">DESCRIPTION</A>
+<DL>
+<DD><A HREF="TclException.htm#M7" NAME="L161"><B>getCompletionCode</B></A>
+<DL>
+<DD><A HREF="TclException.htm#M8" NAME="L162">TCL.ERROR</A>
+<DD><A HREF="TclException.htm#M9" NAME="L163">TCL.RETURN</A>
+<DD><A HREF="TclException.htm#M10" NAME="L164">TCL.BREAK</A>
+<DD><A HREF="TclException.htm#M11" NAME="L165">TCL.CONTINUE</A>
+</DL>
+<DD><A HREF="TclException.htm#M12" NAME="L166"><B>TclException</B>(int <I>ccode</I>)</A>
+<DD><A HREF="TclException.htm#M13" NAME="L167"><B>TclException</B>(Interp <I>interp</I>, String <I>msg</I>, int <I>ccode</I>)</A>
+<DD><A HREF="TclException.htm#M14" NAME="L168"><B>TclException</B>(Interp <I>interp</I>, String <I>msg</I>)</A>
+</DL>
+<DD><A HREF="TclException.htm#M15" NAME="L169">EQUIVALENT C FUNCTIONALITY</A>
+<DD><A HREF="TclException.htm#M16" NAME="L170">SEE ALSO</A>
+<DD><A HREF="TclException.htm#M17" NAME="L171">KEYWORDS</A>
+</DL><HR>
+<H3><A NAME="M2">EXCEPTION</A></H3>
+tcl.lang.TclException -- This class is used to signal exception
+conditions in the execution of Tcl scripts.
+<H3><A NAME="M3">CONSTRUCTORS</A></H3>
+<P>
+<B>TclException</B>(int <I>ccode</I>)
+<P>
+<B>TclException</B>(Interp <I>interp</I>, String <I>msg</I>, int <I>ccode</I>)
+<P>
+<B>TclException</B>(Interp <I>interp</I>, String <I>msg</I>)
+
+<H3><A NAME="M4">METHODS</A></H3>
+<P>int <B>getCompletionCode</B>()
+<H3><A NAME="M5">ARGUMENTS</A></H3>
+<DL>
+<P><DT>Interp <B>interp</B> ()<DD>
+Internal representation to be stored in newly created TclObject.
+<P><DT>String <B>msg</B> ()<DD>
+Error message to store in the <I>interp</I>'s result object.
+<P><DT>int <B>ccode</B> ()<DD>
+Completion code to store inside the TclException.
+<P></DL>
+<H3><A NAME="M6">DESCRIPTION</A></H3>
+<DL>
+<P><DT><A NAME="M7"><B>getCompletionCode</B></A><DD>
+The <B>getCompletionCode</B> method is used to retrieve the completion
+code of the command that threw the exception.  The following
+are the four possible integer values for the completion code:
+<P>
+<DL>
+<P><DT><A NAME="M8">TCL.ERROR</A><DD>
+The command couldn't be completed successfully;
+the interpreter's result describes what went wrong.
+<P><DT><A NAME="M9">TCL.RETURN</A><DD>
+The command requests that the current procedure
+return; the interpreter's result contains the
+procedure's return value.
+<P><DT><A NAME="M10">TCL.BREAK</A><DD>
+The command requests that the innermost loop
+be exited; the interpreter's result is meaningless.
+<P><DT><A NAME="M11">TCL.CONTINUE</A><DD>
+Go on to the next iteration of the current loop;
+the interpreter's result is meaningless.
+<P></DL>
+<P><DT><A NAME="M12"><B>TclException</B>(int <I>ccode</I>)</A><DD>
+This constructor creates a TclException with the completion code <I>ccode</I>.
+<P><DT><A NAME="M13"><B>TclException</B>(Interp <I>interp</I>, String <I>msg</I>, int <I>ccode</I>)</A><DD>
+This constructor extends the above constructor.  If <I>interp</I> is
+non-null, its result object will be set to contain <I>msg</I>.
+<P><DT><A NAME="M14"><B>TclException</B>(Interp <I>interp</I>, String <I>msg</I>)</A><DD>
+This constructor is the same as the above constructor, except that the
+completion code is set to TCL.ERROR.
+
+<P></DL>
+<H3><A NAME="M15">EQUIVALENT C FUNCTIONALITY</A></H3>
+The Exception handling syntax in the C API can be
+represented by the following canonical C code:
+<PRE>int foo(Tcl_Interp interp, ...)
+	{
+	    if (ok) {
+		Tcl_SetResult(interp, result);
+		return TCL_OK;
+	    } else {
+		Tcl_SetResult(interp, &quot;err message ...&quot;);
+		return TCL_ERROR;
+	    }
+	}</PRE>
+The return value of the foo() procedure is the completion code. TCL_OK
+indicates a normal completion status, and all other values indicate an
+exception. The above code can be written in Java as:
+<PRE>void foo(Interp interp, ...)
+	{
+	    if (ok) {
+		interp.setResult(result);
+	    } else {
+		interp.setResult(&quot;err message ...&quot;);
+		throw new TclException(TCL.ERROR);
+	    }
+	}</PRE>
+In the Java API, foo()'s return type is void.  Rather than returning
+the completion code, the completion code is either stored in a
+TclException or implied to be OK.  If the foo() method completes
+normally, no TclException is thrown, and the completion code is
+implied to be OK.  Otherwise, an exception is thrown with the desired
+completion code (TCL.ERROR in the example above).
+
+<H3><A NAME="M16">SEE ALSO</A></H3>
+<B><A HREF="../TclJavaLib/TclNumArgsException.htm">TclNumArgsException</A></B>, <B><A HREF="../TclJavaLib/runtimeError.htm">TclRuntimeError</A></B>, <B><A HREF="../TclJavaLib/Interp.htm">Interp</A></B>
+<H3><A NAME="M17">KEYWORDS</A></H3>
+<A href="../Keywords/E.htm#error">error</A>, <A href="../Keywords/E.htm#exception">exception</A>, <A href="../Keywords/R.htm#return">return</A>, <A href="../Keywords/R.htm#result">result</A>
+<HR><PRE>
+<A HREF="../license.html">Copyright</A> &#169; 1996-1998 Sun Microsystems, Inc.
+<A HREF="../license.html">Copyright</A> &#169; 1995-1997 Roger E. Critchlow Jr.</PRE>
+</BODY></HTML>

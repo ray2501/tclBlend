@@ -1,0 +1,49 @@
+README
+RCS: @(#) $Id: README,v 1.2 1999/05/08 23:11:58 dejong Exp $
+
+Abstract
+--------
+
+	This directory contains demos that show various ways to
+	program with Jacl and Tcl Blend.
+
+Demos
+-----
+
+1) simplepkg:   Shows how to write a simple Tcl extension package in
+                Java.
+
+2) gluepkg:     Shows how to write Tcl commands that glue together
+                existing Java applications.
+
+3) watchpkg:    Shows how to extend Tcl with a Java class by writing
+                code in either Tcl or in Java.
+
+4) pyramidpkg:  Shows how to embed a Tcl console inside a Java applet.
+ 		Note: This demo is only available for Jacl.  In 
+		addition to your normal CLASSPATH settings, "." needs
+		to be appended to the this environment variable.
+
+5) gridDemo:	Shows how to use the java::* commands to create GUI
+		components and handle user events and how java's
+                GridBagComponent can be wrapped inside a "grid"
+                like command.
+
+6) packDemo:	This demo shows how the java::* commands can be used
+                to create a layout manager for java widgets that acts
+                just like the pack command from tk.
+
+
+Running The Demos
+----------------------------
+
+a)  Depending on your platform, see the README in ../unix or ../win for
+    instructions on how to compile.
+
+b)  To compile the demos under UNIX goto the ../unix directory and type
+    "make demos".
+
+c)  Run the java enabled shell by typing "make shell"
+
+d)  See the README in each of the demos directory for specific information 
+    on how each demo works.

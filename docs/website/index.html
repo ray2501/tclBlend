@@ -1,0 +1,220 @@
+<HTML>
+<HEAD>
+   <TITLE>Tcl/Java Project</TITLE>
+</HEAD>
+<BODY BGCOLOR="#FFFFFF">
+<P><TABLE BORDER=0>
+   <TR>
+      <TD VALIGN=top>
+         <!-- START LEFT TABLE -->
+         <P><TABLE BORDER=0>
+            <TR>
+               <TD>
+                  <P><IMG SRC="logo100.gif" ALT="Tcl logo" WIDTH=68 HEIGHT=100 ALIGN=bottom></P>
+               </TD>
+            </TR>
+            <TR>
+               <TD>
+                  <P><BR>
+                  <TABLE BORDER=0>
+                     <TR>
+                        <TD WIDTH=10>
+                           <P></P>
+                        </TD>
+                        <TD>
+                           <P>
+                           <A HREF="index.html">Home</A><BR>
+                           <A HREF="getstart.html">Getting-Started</A><BR>
+                           <A HREF="download.html">Download</A><BR>
+                           <A HREF="mail.html">Mailing-Lists</A><BR>
+                           <A HREF="manual.html">Manual</A><BR>
+                           <A HREF="faq.html">FAQ</A><BR>
+                           <A HREF="links.html">Links</A><BR>
+                           </P>
+                        </TD>
+                     </TR>
+                  </TABLE>
+                  </P>
+               </TD>
+            </TR>
+         </TABLE>
+         </P>
+         <!-- END LEFT TABLE -->
+      </TD>
+      <TD WIDTH=2 BGCOLOR="#000000">
+         <P>i</P>
+      </TD>
+      <TD WIDTH=6>
+         <P></P>
+      </TD>
+      <TD>
+         <P><BR>
+         <BR>
+         </P>
+         
+         <H2>The Tcl/Java Project</H2>
+         
+         <P><TABLE BORDER=0 CELLPADDING=4 WIDTH="95%">
+            <TR BGCOLOR="#C8C8C8">
+               <TH>
+                  <P>Latest Tcl/Java News</P>
+               </TH>
+            </TR>
+         </TABLE>
+         <BR>
+         <TABLE>
+
+            <TR>
+               <TD VALIGN=top>
+                  <B>September 12, 2007:</B>&nbsp;
+               </TD>
+               <TD>
+                  New Tcl/Java 1.4.1 release!<br>
+                  This release is considered stable and ready
+                  for evaluation in production environments.
+                  Developers deploying in a production environment
+                  should still favor the 1.3.3 release.
+                  <ul>
+                     <li>Fixed bug in Jacl's log10() expr function.</li>
+                     <li>Fixed buggy CR handling in Jacl's subst command.</li>
+                     <li>Fixed bug in classloader related to cached env(TCL_CLASSPATH) paths.</li>
+                  </ul>
+               </TD>
+            </TR>
+
+            <TR>
+               <TD VALIGN=top>
+                  <B>August 21, 2006:</B>&nbsp;
+               </TD>
+               <TD>
+                  New Tcl/Java 1.4.0 release!<br>
+                  <ul>
+                     <li>New TJC compiler for Jacl</li>
+                     <li>Itcl port for Jacl</li>
+                     <li>New <code>java::for</code> command</li>
+                     <li>Class loading improvements</li>
+                  </ul>
+               </TD>
+            </TR>
+
+            <TR>            
+               <TD VALIGN=top>
+                  <B>August 8, 2006:</B>&nbsp;
+               </TD>
+               <TD>
+                  New Tcl/Java 1.3.3 release!<br>
+                  This release is considered stable
+                  and is ready for use in production
+                  environments.
+                  <ul>
+                     <li>Fix exec deadlock in Jacl</li>
+                     <li>Fix default --prefix option</li>
+                     <li>Fix lsort -dictionary sort order</li>
+                     <li>Tcl Blend works with Tcl 8.4.13</li>
+                  </ul>
+               </TD>
+            </TR>
+
+            <TR>            
+               <TD VALIGN=top>
+                  <B>July 28, 2005:</B>&nbsp;
+               </TD>
+               <td>
+                  New Tcl/Java 1.3.2 release!<br>
+                  <ul>
+                     <li>Tcl Blend works with Tcl 8.4.11</li>
+                     <li>New Win32 BAT startup scripts</li>
+                     <li>Fixes a bunch of minor bugs</li>
+                  </ul>
+               </td>
+            </TR>
+
+            <TR>
+               <TD VALIGN=top>
+                  <B>August 7, 2003:</B>&nbsp;
+               </TD>
+               <TD>
+                  Tcl/Java 1.3.1 release!<BR>
+                  <UL>
+                     <LI>Tcl Blend works with Tcl 8.4.4</LI>
+                     <LI>Lots of bug fixes</LI>
+                  </UL>
+               </TD>
+            </TR>
+            <TR>
+               <TD VALIGN=top>
+                  <B>March 17, 2003:</B>&nbsp;
+               </TD>
+               <TD>
+                  Tcl/Java 1.3.0 release!<BR>
+                  <UL>
+                     <LI>Includes lots of bug fixes</LI>
+                     <LI>Includes many new features</LI>
+                     <LI>New project website</LI>
+                  </UL>
+               </TD>
+            </TR>
+         </TABLE>
+         <BR>
+         <TABLE BORDER=0 CELLPADDING=4 WIDTH="95%">
+            <TR BGCOLOR="#C8C8C8">
+               <TH>
+                  <P>What is Tcl/Java?</P>
+               </TH>
+            </TR>
+         </TABLE>
+         <P>
+         The Tcl/Java project's goal is to make integrating the
+         Java platform and the Tcl scripting language as easy
+         as possible. The project actually consists of two
+         distinct packages, called Tcl Blend and Jacl.
+         It is important to understand what each package provides
+         and in what situations one might choose to use Jacl
+         or Tcl Blend.
+         </P>
+
+         <P>
+         <B>Jacl</B> is a self-contained implementation of a Tcl
+         interpreter, written entirely in Java. Jacl also
+         includes features that facilitate communication between
+         a Java interpreter and a Tcl interpreter. Jacl is typically
+         used to incorporate scripting functionality into an existing
+         Java application. Jacl is the ideal solution for users
+         that want to add Tcl scripting to a Java application, but
+         don't want to deal with the complexities of native code
+         that come with Tcl Blend.
+         </P>
+
+         <P>
+         <B>Tcl Blend</B> is a Tcl extension that makes use of
+         <B>JNI</B> to facilitate communication between a Java
+         interpreter and a Tcl interpreter. Tcl Blend is typically
+         used to load a Java interpreter into an existing Tcl
+         process, so that functionality implemented in Java can
+         be accessed via Tcl. One can also load Tcl Blend and
+         Tcl into a Java process, which is a great way to add
+         scripting functionality to an existing Java application.
+         Because Tcl Blend is a normal Tcl extension, one can
+         use it with other popular Tcl extensions like Tk,
+         Expect, and Itcl.
+         </P>
+
+         <P>
+         Tcl Blend and Jacl define both a Tcl API and a Java
+         API that make it easy to call Java code from Tcl or
+         call Tcl code from Java. For example, one could
+         allocate a Java object in a Tcl script and interactively
+         invoke Java methods on the object. It is also easy to use
+         the supplied API to evaluate a Tcl procedure from
+         a Java method or implement Tcl procudures in Java.
+         The flexible API and wealth of implementation options
+         provided by the Tcl/Java project make integrating
+         Tcl and Java easy.
+         </P>
+      </TD>
+   </TR>
+</TABLE>
+
+<HR>
+</BODY>
+</HTML>

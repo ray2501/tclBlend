@@ -1,0 +1,76 @@
+<HTML><HEAD><TITLE>TclJava Library Procedures - Extension manual page</TITLE></HEAD><BODY>
+<DL>
+<DD><A HREF="Extension.htm#M2" NAME="L42">CLASS</A>
+<DL><DD>tcl.lang.Extension -- The base class for building dynamically loadable Tcl
+extensions.</DL>
+<DD><A HREF="Extension.htm#M3" NAME="L43">METHODS</A>
+<DL><DD>void <B>init</B>(Interp <I>interp</I>)</DL>
+<DL><DD>void <B>safeInit</B>(Interp <I>safeInterp</I>)</DL>
+<DL><DD>static void <B>loadOnDemand</B>(Interp <I>interp</I>, String <I>cmdName</I>, String <I>clsName</I>)</DL>
+<DD><A HREF="Extension.htm#M4" NAME="L44">ARGUMENTS</A>
+<DL>
+</DL>
+<DD><A HREF="Extension.htm#M5" NAME="L45">DESCRIPTION</A>
+<DL>
+<DD><A HREF="Extension.htm#M6" NAME="L46"><B>init</B></A>
+<DD><A HREF="Extension.htm#M7" NAME="L47"><B>safeInit</B></A>
+<DD><A HREF="Extension.htm#M8" NAME="L48"><B>loadOnDemand</B></A>
+</DL>
+<DD><A HREF="Extension.htm#M9" NAME="L49">SEE ALSO</A>
+<DD><A HREF="Extension.htm#M10" NAME="L50">KEYWORDS</A>
+</DL><HR>
+<H3><A NAME="M2">CLASS</A></H3>
+tcl.lang.Extension -- The base class for building dynamically loadable Tcl
+extensions.
+<H3><A NAME="M3">METHODS</A></H3>
+<P>void <B>init</B>(Interp <I>interp</I>)
+<P>void <B>safeInit</B>(Interp <I>safeInterp</I>)
+<P>static void <B>loadOnDemand</B>(Interp <I>interp</I>, String <I>cmdName</I>, String <I>clsName</I>)
+<H3><A NAME="M4">ARGUMENTS</A></H3>
+<DL>
+<P><DT>Interp <B>interp</B> ()<DD>
+The interpreter in which the extension is to be loaded.
+<P><DT>Interp <B>safeInterp</B> ()<DD>
+The interpreter in which the extension is to be loaded safely.
+<P><DT>String <B>cmdName</B> ()<DD>
+Name of the Tcl command to be loaded.
+<P><DT>String <B>clsName</B> ()<DD>
+The full pathname of the Java class to load as a Tcl command. The
+class should implement the <B><A HREF="../TclJavaLib/Command.htm">Command</A></B> interface.
+<P></DL>
+<H3><A NAME="M5">DESCRIPTION</A></H3>
+The Extension class is used to create dynamic Tcl extension, which can
+be loaded into a running TclJava enhanced interpreter with the <B><A HREF="../TclJavaCmd/javaload.htm">java::load</A></B>
+Tcl command
+
+<P>
+<DL>
+<P><DT><A NAME="M6"><B>init</B></A><DD>
+A dynamic Tcl extension should override the <B>init</B> method to to
+perform initialization specific to the given extension. Usually, this
+means creating new commands inside the interpreter.
+<P><DT><A NAME="M7"><B>safeInit</B></A><DD>
+The <B>safeInit</B> method is similar to <B>init</B>, but it's used to
+perform initializations when the package is loaded into a safe
+interpreter. It should only enable features that are deemed &quot;safe&quot; to
+be executed by untrusted Tcl scripts.
+<P>
+Note: safe interpreters are not currently implemented in Jacl and this
+function is currently only for future compatibility.
+
+<P><DT><A NAME="M8"><B>loadOnDemand</B></A><DD>
+The <B>loadOnDemand</B> method arranges a <B><A HREF="../TclJavaLib/Command.htm">Command</A></B> implementation
+class, specified by <I>clsName</I>, to be loaded into the JVM the first
+time the command <I>cmdName</I> is executed; this can reduce the time
+it takes to initialize an Extension. The class must implement either
+the <B><A HREF="../TclJavaLib/Command.htm">Command</A></B> interface or the <B><A HREF="../TclJavaLib/CommandWithDispose.htm">CommandWithDispose</A></B> interface.
+
+<P></DL>
+<H3><A NAME="M9">SEE ALSO</A></H3>
+<B><A HREF="../TclJavaLib/Interp.htm">Interp</A></B>, <B><A HREF="../TclJavaLib/Command.htm">Command</A></B>, <B><A HREF="../TclJavaLib/CommandWithDispose.htm">CommandWithDispose</A></B>
+<H3><A NAME="M10">KEYWORDS</A></H3>
+<A href="../Keywords/L.htm#loading">loading</A>, <A href="../Keywords/D.htm#dynamic extension">dynamic extension</A>, <A href="../Keywords/S.htm#safe interpreter">safe interpreter</A>
+<HR><PRE>
+<A HREF="../license.html">Copyright</A> &#169; 1998 Sun Microsystems, Inc.
+<A HREF="../license.html">Copyright</A> &#169; 1995-1997 Roger E. Critchlow Jr.</PRE>
+</BODY></HTML>

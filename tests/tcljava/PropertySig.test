@@ -1,0 +1,75 @@
+# This file tests PropertySig.java.
+#
+# Copyright (c) 1997 by Sun Microsystems, Inc.
+#
+# See the file "license.terms" for information on usage and redistribution
+# of this file, and for a DISCLAIMER OF ALL WARRANTIES.
+#
+# RCS: @(#) $Id: PropertySig.test,v 1.2 2000/12/22 09:47:15 mdejong Exp $
+
+if {[lsearch [namespace children] ::tcltest] == -1} {
+    package require tcltest
+    namespace import -force ::tcltest::*
+}
+
+setupJavaPackage
+
+test PropertySig-1.1 {get, internalRep caching} {
+    set m "foo"
+    set x1 [java::new pkg1.MyClass]
+    set x2 [java::new pkg1.ProtectedClass]
+    java::prop $x1 $m
+    set i1 [[jtest getobject $m] getInternalRep]
+    set i1 [java::cast tcl.lang.PropertySig $i1]
+    set c1 [[java::field $i1 targetCls] getName]
+    java::prop $x2 $m
+    set i2 [[jtest getobject $m] getInternalRep]
+    set i2 [java::cast tcl.lang.PropertySig $i2]
+    set c2 [[java::field $i2 targetCls] getName]
+
+    list $c1 $c2 [expr {$i1 != $i2}]
+} {pkg1.MyClass pkg1.ProtectedClass 1}
+
+test PropertySig-1.2 {get, internalRep caching} {
+    set m "foo"
+    set x1 [java::new pkg1.MyClass]
+    set x2 [java::new pkg1.ProtectedClass]
+    set kk ""
+
+    java::prop $x1 $m 1234
+    lappend kk [java::prop $x1 $m]
+    java::prop $x2 $m 4321
+    lappend kk [java::prop $x2 $m]
+    lappend kk [java::prop $x2 $m]
+    lappend kk [java::prop $x1 $m]
+    lappend kk [java::prop $x1 $m]
+    lappend kk [java::prop $x2 $m]
+
+    set kk
+} {1234 4321 4321 1234 1234 4321}
+
+test PropertySig-1.3 {get} {
+    list [catch {java::prop [java::new Object] foobar} msg] $msg
+} {1 {unknown property "foobar"}}
+
+test PropertySig-1.4 {get} {
+    list [catch {java::prop [java::new pkg1.MyClass] foobar} msg] $msg
+} {1 {unknown property "foobar"}}
+
+test PropertySig-1.5 {get, internalRep caching} {
+    set m "foo"
+    set x1 [java::new pkg1.MyClass]
+    java::prop $x1 $m
+    jtest type $m
+} {tcl.lang.PropertySig}
+
+test PropertySig-1.6 {get, internalRep caching} {
+    set m "foo"
+    set x1 [java::new Object]
+    catch {java::prop $x1 $m}
+    expr {[jtest type $m] == "tcl.lang.PropertySig"}
+} 0
+
+# cleanup
+::tcltest::cleanupTests
+return

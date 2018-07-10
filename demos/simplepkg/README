@@ -1,0 +1,24 @@
+README
+RCS: @(#) $Id: README,v 1.2 1999/05/08 23:27:15 dejong Exp $
+
+
+Abstract
+--------
+
+      This demo shows how to write a simple Tcl extension in Java.  
+      The SimpleExtension contains one Tcl command, "sayhello",
+      which returns the string "Hello World!" when invoked.
+
+Running the Demo
+----------------
+
+     To see the demo in action start out by typing "make demos" in the
+     directory you compiled in. This will create a demos subdirectory
+     in the directory you compiled in. At this point you will want to
+     start up a java enabled shell. The easiest way to do this is to
+     type "make shell" and then cd to the demos/simplepkg directory
+     that was created inside the directory you compiled in. At this
+     point you can load the extension like this "source simple.tcl".
+     You should see a "hello world" message that shows the extension
+     was loaded and is functioning properly.
+

@@ -1,0 +1,275 @@
+# PkgInvoker.test --
+#
+#	Tests the tcl.lang.reflect.PkgInvoker class.
+#
+# Copyright (c) 1997 by Sun Microsystems, Inc.
+#
+# See the file "license.terms" for information on usage and redistribution
+# of this file, and for a DISCLAIMER OF ALL WARRANTIES.
+#
+# RCS: @(#) $Id: PkgInvoker.test,v 1.11 2003/03/11 10:26:41 mdejong Exp $
+
+if {[lsearch [namespace children] ::tcltest] == -1} {
+    package require tcltest
+    namespace import -force ::tcltest::*
+}
+
+setupJavaPackage
+
+set PkgInvoker tcl.lang.reflect.PkgInvoker
+
+test PkgInvoker-1.1 {getPkgInvoker} {
+    set x1 [java::call $PkgInvoker getPkgInvoker [java::field pkg1.MyClass class]]
+    set x2 [java::call $PkgInvoker getPkgInvoker [java::field pkg1.MyClass class]]
+    string compare $x1 $x2
+} 0
+
+test PkgInvoker-1.2 {getPkgInvoker} {
+    set x1 [java::call $PkgInvoker getPkgInvoker [java::field pkg2.MyClass class]]
+    set x2 [java::call $PkgInvoker getPkgInvoker [java::field java.lang.Object class]]
+    string compare $x1 $x2
+} 0
+
+test PkgInvoker-1.3 {getPkgInvoker} {
+    [java::new pkg1.MyClass] someMethod
+} 1234
+
+test PkgInvoker-1.4 {getPkgInvoker} {
+    catch {java::new pkg2.MyClass}
+} {0}
+
+test PkgInvoker-1.5 {getPkgInvoker} {
+    list [catch {[java::new pkg2.MyClass] someMethod} msg] $msg
+} {1 {no accessible method "someMethod" in class pkg2.MyClass}}
+
+test PkgInvoker-1.6 {new inaccessible class} {
+    list [catch {java::new pkg2.ProtectedClass} msg] $msg
+} {1 {Class "pkg2.ProtectedClass" is not accessible}}
+
+test PkgInvoker-1.7 {new array of inaccessible class} {
+    list [catch {java::new {pkg2.ProtectedClass[]} 1} msg] $msg
+} {1 {Class "pkg2.ProtectedClass" is not accessible}}
+
+test PkgInvoker-1.8 {cast to inaccessible class} {
+    list [catch {java::cast tests.invoke.NonPublicTester java0x0} msg] $msg
+} {1 {Class "tests.invoke.NonPublicTester" is not accessible}}
+
+test PkgInvoker-1.9 {field of inaccessible class} {
+    list [catch {java::field tests.invoke.NonPublicTester doesnotexist} msg] $msg
+} {1 {Class "tests.invoke.NonPublicTester" is not accessible}}
+
+test PkgInvoker-1.10 {fields of inaccessible class} {
+    list [catch {java::info fields tests.invoke.NonPublicTester} msg] $msg
+} {1 {Class "tests.invoke.NonPublicTester" is not accessible}}
+
+test PkgInvoker-1.11 {methods of inaccessible class} {
+    list [catch {java::info methods tests.invoke.NonPublicTester} msg] $msg
+} {1 {Class "tests.invoke.NonPublicTester" is not accessible}}
+
+test PkgInvoker-1.12 {constructors of inaccessible class} {
+    list [catch {java::info constructors tests.invoke.NonPublicTester} msg] $msg
+} {1 {Class "tests.invoke.NonPublicTester" is not accessible}}
+
+test PkgInvoker-1.13 {instance of inaccessible class} {
+    list [catch {java::instanceof java0x0 tests.invoke.NonPublicTester} msg] $msg
+} {1 {Class "tests.invoke.NonPublicTester" is not accessible}}
+
+test PkgInvoker-1.14 {call static method of inaccessible class} {
+    list [catch {java::call tests.invoke.NonPublicTester doesnotexist} msg] $msg
+} {1 {Class "tests.invoke.NonPublicTester" is not accessible}}
+
+test PkgInvoker-1.15 {import inaccessible class} {
+    list [catch {java::import tests.invoke.NonPublicTester} msg] $msg
+} {1 {Class "tests.invoke.NonPublicTester" is not accessible}}
+
+test PkgInvoker-1.16 {invoke static method that returns inaccessible class} {
+    list [catch {java::call tests.invoke.PublicTester getNonPublicTester} msg] $msg
+} {1 {Return type "tests.invoke.NonPublicTester" is not accessible}}
+
+test PkgInvoker-1.17 {invoke method that returns inaccessible class} {
+    list [catch {[java::new tests.invoke.PublicTester] getNonPublicTesterI} msg] $msg
+} {1 {Return type "tests.invoke.NonPublicTester" is not accessible}}
+
+test PkgInvoker-1.18 {get field that has inaccessible type} {
+    list [catch {java::field tests.invoke.PublicTester nptf} msg] $msg
+} {1 {Field type "tests.invoke.NonPublicTester" is not accessible}}
+
+test PkgInvoker-1.19 {set field that has inaccessible type} {
+    list [catch {java::field tests.invoke.PublicTester nptf java0x0} msg] $msg
+} {1 {Field type "tests.invoke.NonPublicTester" is not accessible}}
+
+test PkgInvoker-1.20 {create ReflectObject for inaccessible type} {
+    set c [java::call Class forName tests.invoke.NonPublicTester]
+    list [catch {java::call tcl.lang.ReflectObject newInstance\
+            [java::getinterp] $c java0x0} msg] $msg
+} {1 {Class "tests.invoke.NonPublicTester" is not accessible}}
+
+# Note: We don't currently check for accessibility of exceptions
+# used in catch blocks of the java::try command.
+
+foreach CLS {pkg1.MyClass pkg1.ProtectedClass} {
+
+    test PkgInvoker-$CLS-2.1 {invokeConstructor} {
+	[java::new $CLS] getFoo
+    } 4321
+
+    test PkgInvoker-$CLS-2.2 {invokeConstructor} {
+	[java::new "$CLS int" 2233] getFoo
+    } 2233
+
+    test PkgInvoker-$CLS-2.3 {invokeConstructor} {
+	[java::new "$CLS short" 3344] getFoo
+    } 3344
+
+    test PkgInvoker-$CLS-2.4 {invokeMethod} {
+	[java::new $CLS] someMethod
+    } 1234
+    test PkgInvoker-$CLS-2.5 {invokeMethod} {
+	[java::new $CLS] someProtectedMethod
+    } 4321
+
+    test PkgInvoker-$CLS-2.6 {getField} {
+	java::field [java::new $CLS] foo
+    } 4321
+    test PkgInvoker-$CLS-2.7 {getField} {
+	java::field [java::new $CLS] pfoo
+    } 5432
+    test PkgInvoker-$CLS-2.8 {getField} {
+	java::field [java::new $CLS] sstring
+    } "can get"
+    test PkgInvoker-$CLS-2.9 {getField} {
+	java::field [java::new $CLS] psstring
+    } "protected can get"
+    test PkgInvoker-$CLS-2.10 {getField} {
+	java::field $CLS sstring
+    } "can get"
+    test PkgInvoker-$CLS-2.11 {getField} {
+	java::field $CLS psstring
+    } "protected can get"
+
+    test PkgInvoker-$CLS-2.12 {setField} {
+	set x [java::new $CLS]
+	java::field $x foo 2233
+	java::field $x foo
+    } 2233
+    test PkgInvoker-$CLS-2.13 {setField} {
+	set x [java::new $CLS]
+	java::field $x pfoo 3344
+	java::field $x pfoo
+    } 3344
+    test PkgInvoker-$CLS-2.14 {setField} {
+	set x [java::new $CLS]
+	java::field $x sstring "yo yo ma"
+	java::field $x sstring
+    } {yo yo ma}
+    test PkgInvoker-$CLS-2.15 {setField} {
+	set x [java::new $CLS]
+	java::field $x psstring yadiyadida
+	java::field $x psstring
+    } yadiyadida
+    test PkgInvoker-$CLS-2.16 {setField} {
+	java::field $CLS sstring "yo yo ma"
+	java::field $CLS sstring
+    } {yo yo ma}
+    test PkgInvoker-$CLS-2.17 {setField} {
+	java::field $CLS psstring yadiyadida
+	java::field $CLS psstring
+    } yadiyadida
+
+    test PkgInvoker-$CLS-2.18 {get/set property} {
+	set x [java::new $CLS]
+	java::prop $x foo
+    } 4321
+
+    test PkgInvoker-$CLS-2.19 {get/set property} {
+	set x [java::new $CLS]
+	java::prop $x foo 4455
+	java::prop $x foo
+    } 4455
+
+    test PkgInvoker-$CLS-2.20 {query fields} {
+	set x [java::new $CLS]
+        set fields [java::info fields $x]
+        set ind [lsearch $fields foo]
+        expr {$ind != -1}
+    } 1
+
+    test PkgInvoker-$CLS-2.21 {casting} {
+	set x [java::new $CLS]
+	set o [java::cast Object $x]
+	set x [java::cast $CLS $o]
+	$o equals $x
+    } 1
+}
+
+test PkgInvoker-3.1 {usesDefaultInvoker} {
+    java::call tcl.lang.reflect.PkgInvoker usesDefaultInvoker \
+        [java::field java.lang.String class]
+} 1
+
+test PkgInvoker-3.2 {usesDefaultInvoker} {
+    java::call tcl.lang.reflect.PkgInvoker usesDefaultInvoker \
+        [java::field tcl.lang.TclObject class]
+} 0
+
+test PkgInvoker-3.3 {usesDefaultInvoker} {
+    java::call tcl.lang.reflect.PkgInvoker usesDefaultInvoker \
+        [java::field tcl.lang.JavaInvoke class]
+} 0
+
+test PkgInvoker-3.4 {isAccessible Class} {
+    java::call tcl.lang.reflect.PkgInvoker isAccessible \
+        [java::call Class forName pkg2.ProtectedClass]
+} 0
+
+test PkgInvoker-3.5 {isAccessible Class} {
+    java::call tcl.lang.reflect.PkgInvoker isAccessible \
+        [java::call Class forName tcl.lang.JavaInvoke]
+} 1
+
+test PkgInvoker-3.6 {isAccessible Method} {
+    set cls [java::field tcl.lang.JavaInvoke class]
+    set methods [$cls getDeclaredMethods]
+    foreach method [$methods getrange] {
+        if {"isAssignable" == [$method getName]} {
+            set isAssignable $method
+        }
+    }
+    if {![info exists isAssignable]} {
+        error "could not find isAssignable method in class tcl.lang.JavaInvoke"
+    }
+    if {![java::call java.lang.reflect.Modifier isStatic \
+            [$isAssignable getModifiers]]} {
+        error "isAssignable method in class tcl.lang.JavaInvoke is not static"
+    }
+    java::call tcl.lang.reflect.PkgInvoker isAccessible \
+        $isAssignable
+} 1
+
+test PkgInvoker-3.7 {isAccessible Constructor} {
+    java::info constructors pkg1.PrivateAccess
+} {{pkg1.PrivateAccess int}}
+
+test PkgInvoker-3.8 {isAccessible Constructor} {
+    list [catch {java::new {pkg1.PrivateAccess boolean} 0} err] $err
+} {1 {no accessible constructor "pkg1.PrivateAccess boolean"}}
+
+test PkgInvoker-3.9 {isAccessible Method} {
+    set methods [java::info methods pkg1.PrivateAccess]
+    set ind1 [lsearch -exact $methods default_method]
+    set ind2 [lsearch -exact $methods private_method]
+    list [expr {$ind1 != -1}] [expr {$ind2 != -1}]
+} {1 0}
+
+test PkgInvoker-3.10 {isAccessible Field} {
+    java::info fields pkg1.PrivateAccess
+} {default_int}
+
+test PkgInvoker-3.11 {isAccessible Field} {
+    set obj [java::new pkg1.PrivateAccess 0]
+    list [catch {java::field $obj private_int} err] $err
+} {1 {no accessible field "private_int" found in class pkg1.PrivateAccess}}
+
+# cleanup
+::tcltest::cleanupTests
+return

@@ -1,0 +1,512 @@
+# AfterCmd.test --
+#
+#	Tests the implementation of the AfterCmd.java file.
+#
+# Copyright (c) 1997 by Sun Microsystems, Inc.
+#
+# See the file "license.terms" for information on usage and redistribution
+# of this file, and for a DISCLAIMER OF ALL WARRANTIES.
+#
+# SCCS: @(#) AfterCmd.test 1.5 98/01/14 16:38:41
+
+# Note: This test file must be sourced from the parent directory
+#       or else the defs file may not be properly loaded.
+
+if {[lsearch [namespace children] ::tcltest] == -1} {
+    package require tcltest
+    namespace import -force ::tcltest::*
+}
+
+setupJavaPackage
+
+proc cleanup {} {
+    foreach id [after info] {
+	after cancel $id
+    }
+}
+
+test AfterCmd-1.1 {cmdProc} {
+    list [catch {after} msg] $msg
+} {1 {wrong # args: should be "after option ?arg arg ...?"}}
+
+test AfterCmd-1.2 {cmdProc} {
+    list [catch {after baz} msg] $msg
+} {1 {bad argument "baz": must be cancel, idle, info, or a number}}
+
+test AfterCmd-1.3 {cmdProc, "after num" doesn't add to "after info"} {
+    after 10
+    after info
+} {}
+
+test AfterCmd-1.4 {cmdProc, "after <digit>??" expects integer} {
+    list [catch {after 0x} msg] $msg
+} {1 {expected integer but got "0x"}}
+
+test AfterCmd-1.5 {cmdProc, after time {cmd}} {
+    set id [after 10 {puts hello}]
+    set info [after info $id]
+    after cancel $id
+    lappend info [after info]
+    set info
+} {{puts hello} timer {}}
+
+test AfterCmd-1.6 {cmdProc, after time $c, $c should be preserved} {
+    cleanup
+    set list ""
+    set x ""
+    set c "lappend x fo"
+    after 10 $c
+    append c o
+    after 20
+    update
+    list $c $x
+} {{lappend x foo} fo}
+ 
+test AfterCmd-1.7 {cmdProc, after time cmds ...} {
+    set id [after 10 puts hello ]
+    set info [after info $id]
+    after cancel $id
+    lappend info [after info]
+    set info
+} {{puts hello} timer {}}
+
+test AfterCmd-1.8 {cmdProc, after time cmds ...} {
+    set id [after 10 puts -nonewline hello]
+    set info [after info $id]
+    after cancel $id
+    lappend info [after info]
+    set info
+} {{puts -nonewline hello} timer {}}
+
+test AfterCmd-1.9 {cmdProc, after time cmds ...} {
+    set id [after 10 puts {-nonewline hello}]
+    set info [after info $id]
+    after cancel $id
+    lappend info [after info]
+    set info
+} {{puts -nonewline hello} timer {}}
+
+test AfterCmd-1.10 {cmdProc, after time cmds ...} {
+    set list ""
+    lappend list [after 10 puts hello]
+    lappend list [after 20 puts hello]
+    lappend list [after 30 puts hello]
+
+    set k [string compare [lsort $list] [lsort [after info]]]
+
+    foreach id $list {
+	after cancel $id
+    }
+    set k
+} 0
+
+test AfterCmd-1.11 {cmdProc, after time cmds ...} {
+    cleanup
+    set list ""
+    lappend list [after 10 puts hello]
+    lappend list [after 20 puts hello]
+    lappend list [after 30 puts hello]
+
+    set k [string compare [lsort $list] [lsort [after info]]]
+
+    foreach id $list {
+	after cancel $id
+    }
+    set k
+} 0
+
+test AfterCmd-2.1 {cmdProc, after cancel, args} {
+    list [catch {after cancel} msg] $msg
+} {1 {wrong # args: should be "after cancel id|command"}}
+
+test AfterCmd-2.2 {cmdProc, after cancel $id} {
+    cleanup
+    set list ""
+    lappend list [after 10 puts hello1]
+    lappend list [after 20 puts hello2]
+    lappend list [after 30 puts hello3]
+
+    after cancel [lindex $list 1]
+
+    set info ""
+    foreach id [after info] {
+	lappend info [after info $id]
+    }
+    lsort $info
+} {{{puts hello1} timer} {{puts hello3} timer}}
+
+test AfterCmd-2.3 {cmdProc, after cancel $id} {
+    cleanup
+    set list ""
+    lappend list [after 10 puts hello1]
+    lappend list [after 20 puts hello2]
+    lappend list [after 30 puts hello3]
+
+    after cancel [lindex $list 0]
+
+    set info ""
+    foreach id [after info] {
+	lappend info [after info $id]
+    }
+    lsort $info
+} {{{puts hello2} timer} {{puts hello3} timer}}
+
+test AfterCmd-2.4 {cmdProc, after cancel {cmd}} {
+    cleanup
+    set list ""
+    lappend list [after 10 puts hello1]
+    lappend list [after 20 puts hello2]
+    lappend list [after 30 puts hello3]
+
+    after cancel {puts hello2}
+
+    set info ""
+    foreach id [after info] {
+	lappend info [after info $id]
+    }
+    lsort $info
+} {{{puts hello1} timer} {{puts hello3} timer}}
+
+test AfterCmd-2.5 {cmdProc, after cancel cmd ...} {
+    cleanup
+    set list ""
+    lappend list [after 10 puts hello1]
+    lappend list [after 20 puts hello2]
+    lappend list [after 30 puts hello3]
+
+    after cancel puts hello2
+
+    set info ""
+    foreach id [after info] {
+	lappend info [after info $id]
+    }
+    lsort $info
+} {{{puts hello1} timer} {{puts hello3} timer}}
+
+test AfterCmd-2.6 {cmdProc, after cancel no_such_handle} {
+    cleanup
+    set list ""
+    lappend list [after 10 puts hello1]
+    lappend list [after 20 puts hello2]
+    lappend list [after 30 puts hello3]
+
+    after cancel no_such_handle
+
+    set info ""
+    foreach id [after info] {
+	lappend info [after info $id]
+    }
+    lsort $info
+} {{{puts hello1} timer} {{puts hello2} timer} {{puts hello3} timer}}
+
+test AfterCmd-2.7 {cmdProc, after cancel} {
+    cleanup
+    set list ""
+    lappend list [after 10 puts hello0]
+    lappend list [after idle puts hello1]
+    lappend list [after idle puts hello2]
+    lappend list [after idle puts hello3]
+
+    after cancel [lindex $list 2]
+    after cancel [lindex $list 2]
+    after cancel puts hello3
+
+    lappend list [after idle puts hello5]
+    lappend list [after idle puts hello6]
+
+    after cancel puts hello5
+
+    set info ""
+    foreach id [after info] {
+	lappend info [after info $id]
+    }
+    lsort $info
+} {{{puts hello0} timer} {{puts hello1} idle} {{puts hello6} idle}}
+
+test AfterCmd-2.8 {cmdProc, after cancel} {
+    cleanup
+    set list ""
+    lappend list [after 10 puts hello1]
+    lappend list [after idle puts hello2]
+    lappend list [after 30 puts hello3]
+
+    after cancel [lindex $list 1]
+
+    set info ""
+    foreach id [after info] {
+	lappend info [after info $id]
+    }
+    lsort $info
+} {{{puts hello1} timer} {{puts hello3} timer}}
+
+test AfterCmd-2.9 {cmdProc, after cancel} {
+    cleanup
+    set list ""
+    lappend list [after 10 puts hello1]
+    lappend list [after idle puts hello2]
+    lappend list [after 30 puts hello3]
+
+    after cancel puts hello2
+
+    set info ""
+    foreach id [after info] {
+	lappend info [after info $id]
+    }
+    lsort $info
+} {{{puts hello1} timer} {{puts hello3} timer}}
+
+test AfterCmd-2.10 {cmdProc, after cancel} {
+    cleanup
+    set x ""
+    set a1 [after 20  lappend x a]
+    set a2 [after idle lappend x b]
+    set a3 [after 30  lappend x c]
+    set a4 [after idle lappend x d]
+
+    after cancel $a2
+    after cancel $a3
+    after 50
+    update
+    set x
+} {a d}
+
+test AfterCmd-3.1 {cmdProc, after idle, args} {
+    cleanup
+    list [catch {after idle} msg] $msg
+} {1 {wrong # args: should be "after idle script script ..."}}
+
+test AfterCmd-3.2 {cmdProc, after idle {cmd}} {
+    cleanup
+    set id [after idle {puts hello}]
+    set info [after info $id]
+    after cancel $id
+    lappend info [after info]
+    set info
+} {{puts hello} idle {}}
+
+test AfterCmd-3.3 {cmdProc, after idle $c, $c should be preserved} {
+    cleanup
+    set list ""
+    set x ""
+    set c "lappend x fo"
+    after idle $c
+    append c o
+    update
+    list $c $x
+} {{lappend x foo} fo}
+ 
+
+test AfterCmd-3.4 {cmdProc, after idle cmds ...} {
+    cleanup
+    set id [after idle puts hello ]
+    set info [after info $id]
+    after cancel $id
+    lappend info [after info]
+    set info
+} {{puts hello} idle {}}
+
+test AfterCmd-3.5 {cmdProc, after idle cmds ...} {
+    cleanup
+    set id [after idle puts -nonewline hello]
+    set info [after info $id]
+    after cancel $id
+    lappend info [after info]
+    set info
+} {{puts -nonewline hello} idle {}}
+
+test AfterCmd-3.6 {cmdProc, after idle cmds ...} {
+    cleanup
+    set id [after idle puts {-nonewline hello}]
+    set info [after info $id]
+    after cancel $id
+    lappend info [after info]
+    set info
+} {{puts -nonewline hello} idle {}}
+
+test AfterCmd-3.7 {cmdProc, after idle cmds ...} {
+    cleanup
+    set list ""
+    lappend list [after idle puts hello]
+    lappend list [after idle puts hello]
+    lappend list [after idle puts hello]
+
+    set k [string compare [lsort $list] [lsort [after info]]]
+
+    cleanup
+    set k
+} 0
+
+test AfterCmd-3.8 {cmdProc, after idle cmds ...} {
+    cleanup
+    set list ""
+    lappend list [after idle puts hello]
+    lappend list [after idle puts hello]
+    lappend list [after idle puts hello]
+
+    set k [string compare [lsort $list] [lsort [after info]]]
+
+    cleanup
+    set k
+} 0
+
+test AfterCmd-4.1 {cmdProc, after info} {
+    cleanup
+    set list ""
+    lappend list [after idle puts hello]
+    lappend list [after 10 puts hello]
+    lappend list [after idle puts hello]
+
+    set k [string compare [lsort $list] [lsort [after info]]]
+
+    cleanup
+    set k
+} 0
+
+test AfterCmd-4.2 {cmdProc, after info args ...} {
+    cleanup
+    list [catch {after info x y z} msg] $msg
+} {1 {wrong # args: should be "after info ?id?"}}
+
+test AfterCmd-4.3 {cmdProc, after info no_such_event} {
+    cleanup
+    list [catch {after info no_such_event} msg] $msg
+} {1 {event "no_such_event" doesn't exist}}
+
+test AfterCmd-4.4 {cmdProc, after info no_such_event} {
+    cleanup
+
+    after idle puts hello1
+    after 10 puts hello2
+    after 20 puts hello3
+    after idle puts hello4
+
+    set info ""
+    foreach id [after info] {
+	lappend info [after info $id]
+    }
+    cleanup
+
+    lsort $info
+} {{{puts hello1} idle} {{puts hello2} timer} {{puts hello3} timer} {{puts hello4} idle}}
+
+test AfterCmd-5.1 {AfterCmd.getAfterEvent} {
+    cleanup
+    list [catch {after info blah} msg] $msg
+} {1 {event "blah" doesn't exist}}
+
+test AfterCmd-5.2 {AfterCmd.getAfterEvent} {
+    cleanup
+    list [catch {after info after#blah} msg] $msg
+} {1 {event "after#blah" doesn't exist}}
+
+test AfterCmd-5.3 {AfterCmd.getAfterEvent, takes base-10 numbers only} {
+    cleanup
+    set handle [after idle {puts hello}]
+    scan $handle after#%d num
+
+    list [catch {after info after#0x[format %x $num]} msg]
+} {1}
+
+test AfterCmd-5.4 {AfterCmd.getAfterEvent} {
+    cleanup
+    set handle [after idle {puts hello}]
+    scan $handle after#%d num
+
+    after info after#[format %d $num]
+} {{puts hello} idle}
+
+test AfterCmd-5.5 {AfterCmd.getAfterEvent} {
+    cleanup
+    list [catch {after info after#10000000} msg] $msg
+} {1 {event "after#10000000" doesn't exist}}
+
+proc bgerror {msg} {
+    global errorInfo
+    global errorCode
+    global info
+
+    lappend info $msg $errorInfo $errorCode
+}
+
+test AfterCmd-6.1 {AfterCmd.TimerInfo.processTimerEvent} {
+    cleanup
+    set x blah
+    after 10 {lappend x [after info]}
+    after 20
+    update
+    set x
+} {blah {}}
+
+test AfterCmd-6.2 {AfterCmd.TimerInfo.processTimerEvent, release script obj} {
+    cleanup
+    set list ""
+    set x {lappend x 10}
+    after 10 $x
+    jtest refcount $x
+    lappend list [jtest refcount $x]
+    after 20
+    update
+    lappend list [jtest refcount $x]
+} {2 1}
+
+test AfterCmd-6.3 {AfterCmd.TimerInfo.processTimerEvent, bgerror} {
+    cleanup
+    set info ""
+    set errorCode ""
+    set errorInfo ""
+    after 10 {lappend info ww}
+    after 15 {error xx}
+    after 20 {set errorCode 123; set errorInfo blah; error yy}
+    after 40
+    update
+    update idletasks
+    set info
+} {ww xx {xx
+    while executing
+"error xx"
+    ("after" script)} NONE yy {yy
+    while executing
+"error yy"
+    ("after" script)} NONE}
+
+test AfterCmd-7.1 {AfterCmd.IdleInfo.processIdleEvent} {
+    cleanup
+    set x blah
+    after idle {lappend x [after info]}
+    update idletasks
+    set x
+} {blah {}}
+
+test AfterCmd-7.2 {AfterCmd.IdleInfo.processIdleEvent, release script obj} {
+    cleanup
+    set list ""
+    set x {lappend x 10}
+    after idle $x
+    jtest refcount $x
+    lappend list [jtest refcount $x]
+    update idletasks
+    lappend list [jtest refcount $x]
+} {2 1}
+
+test AfterCmd-7.3 {AfterCmd.IdleInfo.processIdleEvent, bgerror} {
+    cleanup
+    set info ""
+    set errorCode ""
+    set errorInfo ""
+    after idle {lappend info ww}
+    after idle {error xx}
+    after idle {set errorCode 123; set errorInfo blah; error yy}
+    update idletasks
+    update
+    set info
+} {ww xx {xx
+    while executing
+"error xx"
+    ("after" script)} NONE yy {yy
+    while executing
+"error yy"
+    ("after" script)} NONE}
+
+catch {
+    cleanup
+}

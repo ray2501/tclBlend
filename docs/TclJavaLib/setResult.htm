@@ -1,0 +1,106 @@
+<HTML><HEAD><TITLE>TclJava Library Procedures - setResult manual page</TITLE></HEAD><BODY>
+<DL>
+<DD><A HREF="setResult.htm#M2" NAME="L344">CLASS</A>
+<DL><DD>tcl.lang.Interp -- This manual entry contains Interp methods that manipulate
+the result object.</DL>
+<DD><A HREF="setResult.htm#M3" NAME="L345">METHODS</A>
+<DL><DD>TclObject <B>getResult</B>()</DL>
+<DL><DD>void <B>setResult</B>(TclObject <I>tobj</I>)</DL>
+<DL><DD>void <B>setResult</B>(String <I>str</I>)</DL>
+<DL><DD>void <B>setResult</B>(int <I>i</I>)</DL>
+<DL><DD>void <B>setResult</B>(double <I>d</I>)</DL>
+<DL><DD>void <B>setResult</B>(boolean <I>b</I>)</DL>
+<DL><DD>void <B>resetResult</B>()</DL>
+<DD><A HREF="setResult.htm#M4" NAME="L346">OTHER METHODS</A>
+<DD><A HREF="setResult.htm#M5" NAME="L347">ARGUMENTS</A>
+<DL>
+</DL>
+<DD><A HREF="setResult.htm#M6" NAME="L348">DESCRIPTION</A>
+<DL>
+<DD><A HREF="setResult.htm#M7" NAME="L349"><B>setResult</B></A>
+<DD><A HREF="setResult.htm#M8" NAME="L350"><B>getResult</B></A>
+<DD><A HREF="setResult.htm#M9" NAME="L351"><B>resetResult</B></A>
+</DL>
+<DD><A HREF="setResult.htm#M10" NAME="L352">EQUIVALENT C FUNCTIONS</A>
+<DD><A HREF="setResult.htm#M11" NAME="L353">SEE ALSO</A>
+<DD><A HREF="setResult.htm#M12" NAME="L354">KEYWORDS</A>
+</DL><HR>
+<H3><A NAME="M2">CLASS</A></H3>
+tcl.lang.Interp -- This manual entry contains Interp methods that manipulate
+the result object.
+<H3><A NAME="M3">METHODS</A></H3>
+<P>TclObject <B>getResult</B>()
+<P>void <B>setResult</B>(TclObject <I>tobj</I>)
+<P>void <B>setResult</B>(String <I>str</I>)
+<P>void <B>setResult</B>(int <I>i</I>)
+<P>void <B>setResult</B>(double <I>d</I>)
+<P>void <B>setResult</B>(boolean <I>b</I>)
+<P>void <B>resetResult</B>()
+<H3><A NAME="M4">OTHER METHODS</A></H3>
+<B><A HREF="../TclJavaLib/setVar.htm">setVar</A></B>, 
+<B><A HREF="../TclJavaLib/traceVar.htm">traceVar</A></B>, 
+<B><A HREF="../TclJavaLib/createCmd.htm">createCommand</A></B>,
+<B><A HREF="../TclJavaLib/Eval.htm">eval</A></B>, 
+<B><A HREF="../TclJavaLib/backgdErr.htm">backgroundError</A></B>,
+<BR>
+<B><A HREF="../TclJavaLib/getNotifier.htm">getNotifier</A></B>, 
+<B><A HREF="../TclJavaLib/setAssocData.htm">setAssocData</A></B>, 
+<B><A HREF="../TclJavaLib/dispose.htm">dispose</A></B>, 
+<B><A HREF="../TclJavaLib/pkgRequire.htm">pkgRequire</A></B>
+
+<H3><A NAME="M5">ARGUMENTS</A></H3>
+<DL>
+<P><DT>TclObject <B>tobj</B> ()<DD>
+TclObject value to become result for <I>Interp</I>.
+<P><DT>String <B>str</B> ()<DD>
+String value to become result for <I>Interp</I>.
+<P><DT>int <B>i</B> ()<DD>
+Primitive int value to become result for <I>Interp</I>.
+<P><DT>double <B>d</B> ()<DD>
+Primitive double value to become result for <I>Interp</I>.
+<P><DT>boolean <B>b</B> ()<DD>
+Primitive boolean value to become result for <I>Interp</I>.
+<P></DL>
+<H3><A NAME="M6">DESCRIPTION</A></H3>
+The procedures described here are utilities for manipulating the
+result value in a Tcl interpreter.  The interpreter result is stored
+as a TclObject but may be set as a TclObject, String, int, double or
+float.   See the manual entry <B><A HREF="../TclJavaLib/backgdErr.htm">backgroundError</A></B> for information on
+processing errors.
+<P>
+<DL>
+<P><DT><A NAME="M7"><B>setResult</B></A><DD>
+The <B>setResult</B> method arranges for the argument to be the result
+for <I>interp</I>, replacing any existing result.
+The result is left pointing to a TclObject that was converted from one
+of the five possible argument types.  The TclObjects's reference count
+is incremented since there is now a new reference to it from <I>Interp</I>.
+The reference count for any old result object
+is decremented and the old result object is freed if no
+references to it remain.
+<P><DT><A NAME="M8"><B>getResult</B></A><DD>
+the <B>getResult</B> method returns the result for <I>Tnterp</I> as a TclObject.
+The object's reference count is not incremented;
+if the caller needs to retain a long-term handle to the object
+they should use <B>preserve</B> method of the TclObject to increment
+its reference count in order to keep it from being garbage collected
+too early or accidently changed.
+<P><DT><A NAME="M9"><B>resetResult</B></A><DD>
+The <B>resetResult</B> method clears the result for <I>Interp</I>
+and leaves the result in its normal empty initialized state.
+The result's reference count is decremented and the result is left
+pointing to an unshared object representing an empty string.
+Calls to <B>resetResult</B> also clear the error state managed by
+<B><A HREF="../TclJavaLib/backgdErr.htm">addErrorInfo</A></B>, and <B><A HREF="../TclJavaLib/backgdErr.htm">setErrorCode</A></B>.
+
+<P></DL>
+<H3><A NAME="M10">EQUIVALENT C FUNCTIONS</A></H3>
+<A href="../cFunctions.html">Tcl_SetObjResult</A>, <A href="../cFunctions.html">Tcl_GetObjResult</A>, <A href="../cFunctions.html">Tcl_SetResult</A>, <A href="../cFunctions.html">Tcl_ResetResult</A>
+<H3><A NAME="M11">SEE ALSO</A></H3>
+<B><A HREF="../TclJavaLib/Interp.htm">Interp</A></B>, <B><A HREF="../TclJavaLib/setVar.htm">setVar</A></B>, <B><A HREF="../TclJavaLib/Eval.htm">Eval</A></B>, <B><A HREF="../TclJavaLib/backgdErr.htm">backgroundError</A></B>
+<H3><A NAME="M12">KEYWORDS</A></H3>
+<A href="../Keywords/A.htm#append">append</A>, <A href="../Keywords/C.htm#command">command</A>, <A href="../Keywords/E.htm#element">element</A>, <A href="../Keywords/I.htm#interpreter">interpreter</A>, <A href="../Keywords/L.htm#list">list</A>, <A href="../Keywords/O.htm#object">object</A>, <A href="../Keywords/R.htm#result">result</A>, <A href="../Keywords/R.htm#return value">return value</A>
+<HR><PRE>
+<A HREF="../license.html">Copyright</A> &#169; 1994-1998 Sun Microsystems, Inc.
+<A HREF="../license.html">Copyright</A> &#169; 1995-1997 Roger E. Critchlow Jr.</PRE>
+</BODY></HTML>

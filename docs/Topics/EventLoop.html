@@ -1,0 +1,287 @@
+<HTML>
+<TITLE>
+Tcl Event Loop
+</TITLE>
+
+<BODY>
+<HR>
+
+<H3>
+The Tcl Event Loop
+</H3>
+
+<HR>
+
+<DL>
+
+<DT>
+<H3>
+About:
+</H3>
+</DT>
+
+<DD>
+
+<P>
+
+Both Tcl Blend and Jacl support evaluation of events
+in the Tcl event loop. It is important that developers
+understand how the Tcl event loop works and how it
+should be used. A number of Tcl features depend on the
+Tcl event loop, for example vwait will not work properly
+if Tcl events are not being processed. The event
+loop also implements thread synchronization in Tcl,
+so it must be used correctly in a multi-threaded
+environment like Java.
+
+</P>
+<P>
+
+The <code>tcl.lang.Notifier</code> class implements event
+loop processing functionality in both Jacl and Tcl Blend.
+There is one Notifier object per-thread. A Thread can contain
+1 to N Tcl interpreters, each interpreter in a specific
+thread will have the same Notifier.
+
+</P>
+
+<P>
+
+In the most simple case, a Thread would contain a single
+Tcl interpreter and a Notifier object.
+
+</P>
+
+<P>
+
+<img src="el1.gif" align="top">
+
+</P>
+
+<p>
+
+<br>
+The Notifier manages the Tcl event queue, so if the
+interpreter were to invoke <code>after</code> commands
+like the following:
+</p>
+
+<pre>
+<code>after 100 {puts hi}</code>
+<code>after 200 {puts bye}</code>
+</pre>
+
+<p>
+
+
+The result would look like:
+
+</p>
+
+<p>
+<img src="el2.gif" align="top">
+</p>
+
+<p>
+Tcl events are processed using the <code>Notifier.doOneEvent()</code>
+API. Typically, event processing is done in a loop and the
+<code>doOneEvent()</code> method is invoked over and over again.
+</p>
+
+<pre>
+<code>
+import tcl.lang.*;
+
+public
+class EventProcessingThread implements Runnable {
+    Interp interp;
+
+    public void run() {
+        interp = new Interp();
+
+        try {
+            while (true) {
+                interp.getNotifier().doOneEvent(TCL.ALL_EVENTS);
+            }
+        } finally {
+            interp.dispose();
+        }
+    }
+}
+</code>
+</pre>
+
+</p>
+
+<p>
+The example above does not queue any events, so when the
+<code>doOneEvent()</code> method is invoked the thread
+will block waiting for an event to process. A developer
+might want to setup an interp like this and then queue
+up events to be processed from another thread. The
+following example shows how a developer might source a
+Tcl file and invoke a Tcl proc defined in that file.
+</p>
+
+<pre>
+<code>
+import tcl.lang.*;
+
+public
+class InterpThreadSetup {
+
+    public static
+    String evalInOtherThread() {
+        EventProcessingThread r = new EventProcessingThread();
+        Thread t = new Thread(r);
+        t.start();
+
+        // Wait for other Thread to get ready
+        while (r.interp == null) {
+            try {Thread.sleep(10);} catch (InterruptedException e) {}
+        }
+        final Interp interp = r.interp;
+        final StringBuffer result = new StringBuffer();
+
+        TclEvent event = new TclEvent() {
+            public int processEvent(int flags) {
+                try {
+                    interp.eval("source somefile.tcl");
+                    interp.eval("cmd");
+                    result.append( interp.getResult().toString() );
+                } catch (TclException ex) {
+                    // Handle Tcl exceptions here
+                }
+                return 1;
+	    }
+        };
+
+        // Add event to Tcl Event Queue in other thread
+        interp.getNotifier().queueEvent(event, TCL.QUEUE_TAIL);
+
+        // Wait for event to be processed by the other thread.
+        event.sync();
+
+        return result.toString();
+    }
+}
+</code>
+</pre>
+
+<p>
+The example above creates a <code>EventProcessingThread</code> object
+and then waits for it to get ready. The <code>EventProcessingThread</code>
+will start and then block inside the <code>doOneEvent()</code> method.
+A new inner class that extends TclEvent is then created and added to
+the Tcl event queue via <code>interp.getNotifier().queueEvent()</code>.
+Finally, the current thread is blocked waiting for the 
+<code>EventProcessingThread</code> to process the event. When the
+<code>processEvent</code> method is invoked by the <code>EventProcessingThread</code>,
+a Tcl file will be sourced and a Tcl proc named <code>cmd</code> will be invoked.
+These two threads would look like the following:
+</p>
+
+<p>
+<img src="el3.gif" align="top">
+</p>
+
+<p>
+While the example above may seem complex, each step is required to
+ensure that events are processed in the correct order and that
+Tcl commands are invoked in a thread safe way. Readers should
+note that it is <b>not legal</b> to invoke <code>interp.eval()</code>
+directly from a thread other than the one processing TclEvents
+via <code>doOneEvent()</code>. To do so will cause a crash or
+random exceptions. In the example above, the
+<code>interp.eval()</code> method is invoked inside the
+the <code>processEvent</code> method and that method is invoked
+by a call to <code>doOneEvent()</code> in <code>EventProcessingThread</code>.
+Using this approach, any number of threads can queue Tcl events
+and they will be processed in the correct order.
+</P>
+
+</DD>
+
+<DT>
+<H3>
+Multiple Interpreters:
+</H3>
+</DT>
+
+<DD>
+
+<p>
+A single thread can contain 1 to N interpreters. A developer could
+create multiple Tcl interpreters in Java code via the <code>Interp()</code>
+constructor. A developer could also use the interp command inside Tcl to create
+a "child" interp. The following example uses the interp create command to
+show how events in two different interpreters are processed by the same Notifier.
+</p>
+
+<code>
+<pre>
+set i2 [interp create i2]
+
+$i2 eval {
+set name "i2"
+after 100 {puts "hi $name"}
+after 200 {puts "bye $name"}
+}
+
+set name "main"
+after 100 {puts "hi $name"}
+after 200 {puts "bye $name"}
+</pre>
+</code>
+
+<p>
+The code above would result in a thread containing two
+Tcl interpreters, it would look like the following:
+</p> 
+
+<p>
+<img src="el4.gif" align="top">
+</p>
+
+<p>
+Both interpreters share the same <code>Notifier</code> object, so
+events in the Tcl Event queue for this thread would be
+processed in the following order:
+</p>
+
+<p>
+<b>Tcl Event Queue</b>
+<code>
+<pre>
+after 100 {puts "hi $name"}  (in i2 interp)
+after 100 {puts "hi $name"}  (in main interp)
+after 200 {puts "bye $name"} (in i2 interp)
+after 200 {puts "bye $name"} (in main interp)
+</pre>
+</code>
+</p>
+
+<p>
+The output of the above code would look like:
+
+<code>
+<pre>
+hi i2
+hi main
+bye i2
+bye main
+</pre>
+</code>
+</p>
+
+</DD>
+
+</DL>
+
+<PRE>
+<A HREF="../license.html">Copyright</A> &#169; 1997-1998 Sun Microsystems, Inc.
+</PRE>
+
+
+</BODY>
+</HTML>

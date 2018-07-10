@@ -1,0 +1,148 @@
+# BeanEventMgr.test --
+#
+#	Tests the implementation of the BeanEventMgr.java file.
+#
+# Copyright (c) 1997 by Sun Microsystems, Inc.
+#
+# See the file "license.terms" for information on usage and redistribution
+# of this file, and for a DISCLAIMER OF ALL WARRANTIES.
+#
+# SCCS: @(#) BeanEventMgr.test 1.2 98/01/14 16:38:43
+
+if {[lsearch [namespace children] ::tcltest] == -1} {
+    package require tcltest
+    namespace import -force ::tcltest::*
+}
+
+setupJavaPackage
+
+test BeanEventMgr-1.1 {getBeanEventMgr} {
+    set x [java::new tcl.lang.TesterBean]
+    java::bind $x
+} {}
+
+test BeanEventMgr-1.2 {{push, peek, pop}EventParamSet} {
+    set x [java::new tcl.lang.TesterBean]
+    set kk ""
+    java::bind $x tcl.lang.Tester1Listener.method1 {lappend kk [java::event]}
+    $x fire1 false
+    $x fire1 true
+    $x fire1 0
+    $x fire1 1
+    set kk
+} {0 1 0 1}
+
+test BeanEventMgr-1.3 {{push, peek, pop}EventParamSet} {
+    set x [java::new tcl.lang.TesterBean]
+    set kk ""
+    java::bind $x tcl.lang.Tester1Listener.method1 {lappend kk [java::event]}
+    java::bind $x tcl.lang.Tester1Listener.method2 {
+	lappend kk [java::event -index 1] [java::event -index 8]
+	$x fire1 false
+	lappend kk [java::event -index 1] [java::event -index 8]
+	$x fire1 true
+	lappend kk [java::event -index 1] [java::event -index 8]
+    }
+    $x fire2 0 1 t 3 4 5 6 7 eight
+    $x fire2 true 12 T 3 4 5 6 7 EIGHT
+    set kk
+} {1 eight 0 1 eight 1 1 eight 12 EIGHT 0 12 EIGHT 1 12 EIGHT}
+
+test BeanEventMgr-1.4 {{push, peek, pop}EventParamSet} {
+    set x [java::new tcl.lang.TesterBean]
+    set kk ""
+    java::bind $x tcl.lang.Tester1Listener.method1 {
+	lappend kk [java::event]
+	java::bind $x tcl.lang.Tester1Listener.method1 {
+	    lappend kk [java::event]
+	}
+	$x fire1 false
+	lappend kk [java::event]
+    }
+    $x fire1 true
+    set kk
+} {1 0 1}
+
+test BeanEventMgr-2.1 {setBinding} {
+    set x [java::new tcl.lang.TesterBean]
+    java::bind $x tcl.lang.Tester1Listener.method1 {puts hello}
+    java::bind $x tcl.lang.Tester1Listener.method1
+} {puts hello}
+
+test BeanEventMgr-2.2 {setBinding} {
+    set x [java::new tcl.lang.TesterBean]
+    java::bind $x tcl.lang.Tester1Listener.method1 {puts hello}
+    java::bind $x
+} {tcl.lang.Tester1Listener.method1}
+
+test BeanEventMgr-2.3 {setBinding, getBinding} {
+    set x [java::new tcl.lang.TesterBean]
+    java::bind $x tcl.lang.Tester1Listener.method1 {puts hello}
+    java::bind $x tcl.lang.Tester1Listener.method1
+} {puts hello}
+
+test BeanEventMgr-2.4 {setBinding, getBinding} {
+    set x [java::new tcl.lang.TesterBean]
+    java::bind $x tcl.lang.Tester1Listener.method1 {puts hello}
+    java::bind $x tcl.lang.Tester1Listener.method1 ""
+    java::bind $x tcl.lang.Tester1Listener.method1 {puts hi}
+    java::bind $x tcl.lang.Tester1Listener.method1
+} {puts hi}
+
+test BeanEventMgr-2.5 {setBinding, getBinding} {
+    set x [java::new tcl.lang.TesterBean]
+    java::bind $x tcl.lang.Tester1Listener.method1 {puts hello}
+    java::bind $x tcl.lang.Tester1Listener.method2 {puts hello}
+    java::bind $x tcl.lang.Tester1Listener.method1 ""
+    java::bind $x tcl.lang.Tester1Listener.method2 ""
+    java::bind $x tcl.lang.Tester1Listener.method1 {puts hello}
+    java::bind $x tcl.lang.Tester1Listener.method2 {puts hello}
+    java::bind $x tcl.lang.Tester1Listener.method1 ""
+    lsort [java::bind $x]
+} {tcl.lang.Tester1Listener.method2}
+
+test BeanEventMgr-2.6 {setBinding, getBinding} {
+    set x [java::new tcl.lang.TesterBean]
+    java::bind $x tcl.lang.Tester1Listener.method1 {puts hello}
+    java::bind $x tcl.lang.Tester1Listener.method2 {puts hi}
+    set list ""
+    foreach event [lsort [java::bind $x]] {
+	lappend list [java::bind $x $event]
+    }
+    set list
+} {{puts hello} {puts hi}}
+
+test BeanEventMgr-2.7 {setBinding, getBinding} {
+    set x [java::new tcl.lang.TesterBean]
+    java::bind $x tcl.lang.Tester1Listener.method1 {puts hello}
+    java::bind $x tcl.lang.Tester1Listener.method2 {puts hi}
+    java::bind $x tcl.lang.Tester1Listener.method1 ""
+    java::bind $x tcl.lang.Tester1Listener.method2 " "
+    java::bind $x
+} {tcl.lang.Tester1Listener.method2}
+
+test BeanEventMgr-2.8 {setBinding, getBinding} {
+    set x [java::new tcl.lang.TesterBean]
+    java::bind $x tcl.lang.Tester1Listener.method1 {puts hello}
+    java::bind $x tcl.lang.Tester1Listener.method2 {puts hi}
+    java::bind $x tcl.lang.Tester1Listener.method1 ""
+    java::bind $x tcl.lang.Tester1Listener.method2 " "
+    set list ""
+    foreach event [lsort [java::bind $x]] {
+	lappend list [java::bind $x $event]
+    }
+    set list
+} {{ }}
+
+test BeanEventMgr-2.9 {getHandledEvents} {
+    set x [java::new tcl.lang.TesterBean]
+    java::bind $x tcl.lang.Tester1Listener.method0 {puts hello}
+    java::bind $x tcl.lang.Tester1Listener.method1 {puts hi}
+    java::bind $x tcl.lang.Tester1Listener.method2 {puts hello}
+    java::bind $x tcl.lang.Tester1Listener.method3 {puts hi}
+    lsort [java::bind $x]
+} {tcl.lang.Tester1Listener.method0 tcl.lang.Tester1Listener.method1 tcl.lang.Tester1Listener.method2 tcl.lang.Tester1Listener.method3}
+
+# cleanup
+::tcltest::cleanupTests
+return

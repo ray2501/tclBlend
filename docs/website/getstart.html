@@ -1,0 +1,360 @@
+<HTML>
+<HEAD>
+   <TITLE>Tcl/Java Project</TITLE>
+</HEAD>
+<BODY BGCOLOR="#FFFFFF">
+<P><TABLE BORDER=0>
+   <TR>
+      <TD VALIGN=top>
+         <!-- START LEFT TABLE -->
+         <P><TABLE BORDER=0>
+            <TR>
+               <TD>
+                  <P><IMG SRC="logo100.gif" ALT="Tcl logo" WIDTH=68 HEIGHT=100 ALIGN=bottom></P>
+               </TD>
+            </TR>
+            <TR>
+               <TD>
+                  <P><BR>
+                  <TABLE BORDER=0>
+                     <TR>
+                        <TD WIDTH=10>
+                           <P></P>
+                        </TD>
+                        <TD>
+                           <P>
+                           <A HREF="index.html">Home</A><BR>
+                           <A HREF="getstart.html">Getting-Started</A><BR>
+                           <A HREF="download.html">Download</A><BR>
+                           <A HREF="mail.html">Mailing-Lists</A><BR>
+                           <A HREF="manual.html">Manual</A><BR>
+                           <A HREF="faq.html">FAQ</A><BR>
+                           <A HREF="links.html">Links</A><BR>
+                           </P>
+                        </TD>
+                     </TR>
+                  </TABLE>
+                  </P>
+               </TD>
+            </TR>
+         </TABLE>
+         </P>
+         <!-- END LEFT TABLE -->
+      </TD>
+      <TD WIDTH=2 BGCOLOR="#000000">
+         <P>i</P>
+      </TD>
+      <TD WIDTH=6>
+         <P></P>
+      </TD>
+      <TD>
+         <P><BR>
+         <BR>
+         </P>
+         
+         <H2>Getting Started with Tcl/Java</H2>
+         
+         <P><TABLE BORDER=0 CELLPADDING=4 WIDTH="95%">
+            <TR BGCOLOR="#C8C8C8">
+               <TH>
+                  <P>Setting up Jacl</P>
+               </TH>
+            </TR>
+         </TABLE>
+         <BR>
+
+         <P>
+         See the README file supplied with Jacl for the most up to date
+         information about installing and running Jacl on your system.
+         Jacl is significantly easier to install and get running when
+         compared to Tcl Blend, since Jacl requires only a JVM.
+         </P>
+
+         <BR>
+         <TABLE BORDER=0 CELLPADDING=4 WIDTH="95%">
+            <TR BGCOLOR="#C8C8C8">
+               <TH>
+                  <P>Setting up Tcl Blend</P>
+               </TH>
+            </TR>
+         </TABLE>
+
+         <P>
+         Setting up and running Tcl Blend can be significantly more
+         difficult than Jacl, since it depends on installed versions
+         of both Tcl and Java. Make sure to read the README file
+         included with Tcl Blend before installing.
+         </P>
+
+         <BR>
+         <TABLE BORDER=0 CELLPADDING=4 WIDTH="95%">
+            <TR BGCOLOR="#C8C8C8">
+               <TH>
+                  <P>The Java Package</P>
+               </TH>
+            </TR>
+         </TABLE>
+
+         <P>
+         Both Jacl and Tcl Blend provide a Tcl package named <code>java</code>.
+         The package is loaded using the <code>package</code> Tcl command, it
+         returns the version of the package that was just loaded. When the
+         java package is loaded, it will create the commands used to interact
+         with Java objects from Tcl (<code>java::new, java::call, java::null,</code> and so on).
+         </P>
+
+<code>
+<pre>
+    % package require java
+    1.3.0
+</pre>
+</code>
+
+         <BR>
+         <TABLE BORDER=0 CELLPADDING=4 WIDTH="95%">
+            <TR BGCOLOR="#C8C8C8">
+               <TH>
+                  <P>Interact with a Java Object in Tcl</P>
+               </TH>
+            </TR>
+         </TABLE>
+
+         <P>
+         In this example, a Java object of type <code>java.lang.String</code>
+         is allocated using the <code>java::new</code> command and the
+         Java object handle <code>java0x1</code> is saved in a variable.
+         The <code>String</code> object's <code>charAt</code> method is then
+         invoked on the object using the saved handle.
+         Note that the <code>char</code> primitive type returned by the
+         <code>charAt</code> method is implicitly converted to a Tcl string value.
+         The <code>unset</code> command is called on the variable that holds the handle
+         to indicate that we are finished with the object so that it can
+         be garage collected.
+         This example assumes that the java package has already been loaded.
+         </P>
+
+<code>
+<pre>
+    % set jstr [java::new String "A Java String"]
+    java0x1
+    % $jstr charAt 2
+    J
+    % unset jstr
+</pre>
+</code>
+
+
+         <BR>
+         <TABLE BORDER=0 CELLPADDING=4 WIDTH="95%">
+            <TR BGCOLOR="#C8C8C8">
+               <TH>
+                  <P>Evaluating a Tcl command from Java</P>
+               </TH>
+            </TR>
+         </TABLE>
+
+         <P>
+         Often, one is interested in executing a Tcl command
+         from Java code. In this example, a Tcl interpreter
+         is created and the Tcl <code>string</code> command
+         is executed from Java. The <code>interp.eval()</code>
+         method parses the input string and executes the
+         string command. An integer result is then extracted
+         from the interpreter result. The only tricky part
+         of this example is properly handling the various
+         types of TclExceptions that might be thrown.
+         </P>
+
+<code>
+<pre>
+import tcl.lang.*;
+
+public class StringLengthTest {
+    public static void main(String[] args) {
+        int thestr_len = -1;
+        String thestr = "noggy";
+        Interp interp = new Interp();
+        try {
+            interp.eval("string length \"" + thestr + "\"");
+            thestr_len = TclInteger.get(interp, interp.getResult());
+        } catch (TclException ex) {
+            int code = ex.getCompletionCode();
+            switch (code) {
+                case TCL.ERROR:
+                    System.err.println(interp.getResult().toString());
+                    break;
+                case TCL.BREAK:
+                    System.err.println(
+                            "invoked \"break\" outside of a loop");
+                    break;
+                case TCL.CONTINUE:
+                    System.err.println(
+                            "invoked \"continue\" outside of a loop");
+                    break;
+                default:
+                    System.err.println(
+                            "command returned bad error code: " + code);
+                    break;
+            }
+        } finally {
+            interp.dispose();
+        }
+
+        System.out.println("string length was " + thestr_len);
+    }
+}
+</pre>
+</code>
+
+         <BR>
+         <TABLE BORDER=0 CELLPADDING=4 WIDTH="95%">
+            <TR BGCOLOR="#C8C8C8">
+               <TH>
+                  <P>Executing a Tcl command from another Java Thread</P>
+               </TH>
+            </TR>
+         </TABLE>
+
+         <P>
+         One area where people often run into problems involves
+         executing a Tcl command in another Java thread. One can't
+         just call <code>interp.eval()</code> as we did in the
+         example above. To understand why, we need to cover how
+         the Tcl threading and event processing approach works.
+         Typically, the main thread would create the Tcl interpreter
+         and then go into a loop that would process Tcl events.
+         </P>
+
+<code>
+<pre>
+import tcl.lang.*;
+
+public class MainLoop {
+    public static void mainLoop() {
+        Interp interp = new Interp();
+        Notifier notifier = interp.getNotifier();
+        while(true) {
+	    // process events until "exit" is called.
+	    notifier.doOneEvent(TCL.ALL_EVENTS);
+        }
+    }
+}
+</pre>
+</code>
+
+         <P>
+         Calling the <code>mainLoop()</code> method would use the calling
+         thread to process Tcl events from that point forward. Now assume
+         that we are running in another thread, and we want to be able
+         to evaluate a Tcl command. It is tempting to just call
+         <code>interp.eval()</code> from this other thread, but that
+         would actually be a serious error. The <code>eval</code> method
+         is <b>not thread-safe</b>, so invoking it from another thread
+         could cause a crash. This strikes Java programmers as strange,
+         they figure one could just add the synchronized keyword
+         to the eval method and the problem would be solved. That is not
+         the case however, as the following example shows.
+         </P>
+
+<code>
+<pre>
+import tcl.lang.*;
+
+public class TwoEvals {
+    public static void evalOne(Interp interp) {
+        try {
+            interp.eval("cmd_one");
+            System.out.println("result one was " + interp.getResult());
+        } catch (TclException ex) {
+            // Handle Tcl exceptions here ...
+        }
+    }
+    public static void evalTwo(Interp interp) {
+        try {
+            interp.eval("cmd_two");
+            System.out.println("result two was " + interp.getResult());
+        } catch (TclException ex) {
+            // Handle Tcl exceptions here ...
+        }
+    }
+}
+</pre>
+</code>
+
+         <P>
+         Assuming that the <code>eval()</code> method was synchronized,
+         we would still have a subtle problem if two different threads
+         called the <code>evalOne</code> and <code>evalTwo</code> methods
+         at the same time. The first thread could grab the monitor while
+         the second thread would have to wait. When the first thread
+         releases the monitor at the end of the <code>eval()</code> method
+         it would create a race condition since the second thread might
+         execute its <code>eval()</code> and change the interpreter result
+         before the first thread can call <code>interp.getResult()</code>.
+         Making the <code>eval()</code> method synchronized could also
+         create deadlocking problems if the Tcl command that was executed
+         called into other Java code which then tried to execute another
+         Tcl command using <code>eval()</code>. The solution to both
+         problems is to use the provided thread-safe event queue. The
+         following example shows how to queue Tcl events in a thread
+         safe way.
+         </P>
+
+<code>
+<pre>
+import tcl.lang.*;
+
+public class TwoEvalEvents {
+    public static void evalOne(final Interp interp) {
+        TclEvent event = new TclEvent() {
+            public int processEvent(int flags) {
+                try {
+                    interp.eval("cmd_one");
+                    System.out.println("result one was " + interp.getResult());
+                } catch (TclException ex) {
+                    // Handle Tcl exceptions here ...
+                }
+                return 1;
+	    }
+        };
+        interp.getNotifier().queueEvent(event, TCL.QUEUE_TAIL);
+        event.sync();
+    }
+    public static void evalTwo(final Interp interp) {
+        TclEvent event = new TclEvent() {
+            public int processEvent(int flags) {
+                try {
+                    interp.eval("cmd_two");
+                    System.out.println("result two was " + interp.getResult());
+                } catch (TclException ex) {
+                    // Handle Tcl exceptions here ...
+                }
+                return 1;
+	    }
+        };
+        interp.getNotifier().queueEvent(event, TCL.QUEUE_TAIL);
+        event.sync();
+    }
+}
+</pre>
+</code>
+
+         <P>
+         The <code>queueEvent()</code> call will add the event to the
+         queue of events that will be processed by the Notifier's
+         <code>doOneEvent()</code> loop that we covered earlier.
+         Since the <code>eval()</code> call will actually be made from
+         the main thread when the event is processed, thread safety
+         is ensured. Note that the optional <code>sync()</code> method
+         simply suspends the calling thread until the event has been
+         processed. If there is no reason to suspend the calling thread,
+         then don't invoke the <code>sync()</code> method.
+         </P>
+
+      </TD>
+   </TR>
+</TABLE>
+
+<HR>
+</BODY>
+</HTML>

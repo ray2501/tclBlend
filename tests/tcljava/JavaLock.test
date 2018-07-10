@@ -1,0 +1,107 @@
+# JavaLock.test --
+#
+#	Tests the java::lock and java::unlock commands defined 
+#	in the javaLock.tcl script.
+#
+# Copyright (c) 1998 by Sun Microsystems, Inc.
+#
+# See the file "license.terms" for information on usage and redistribution
+# of this file, and for a DISCLAIMER OF ALL WARRANTIES.
+#
+# RCS: @(#) $Id: JavaLock.test,v 1.4 2000/12/22 09:47:15 mdejong Exp $
+
+if {[lsearch [namespace children] ::tcltest] == -1} {
+    package require tcltest
+    namespace import -force ::tcltest::*
+}
+
+setupJavaPackage
+
+test java::lock-1.1 {error checking} {
+    list [catch {java::lock} msg] $msg
+} {1 {wrong # args: should be "java::lock javaObj"}}
+
+test java::lock-1.2 {error checking} {
+    list [catch {java::lock a b} msg] $msg
+} {1 {wrong # args: should be "java::lock javaObj"}}
+
+test java::lock-1.4 {error checking} {
+    list [catch {java::lock a} msg] $msg
+} {1 {unknown java object "a"}}
+
+test java::lock-1.5 {object already GC} {
+    set x [java::new java.lang.Object]
+    llength $x
+    catch {java::lock $x} msg
+    string compare [list $msg] [format "{unknown java object \"%s\"}" $x]
+} {0}
+
+test java::lock-1.6 {create a lock} {
+    set x [java::new java.lang.Object]
+    set result [string compare $x [java::lock $x]]
+    java::unlock $x
+    set result
+} {0}
+
+test java::lock-1.7 {create and remove a lock} {
+    set x [java::new java.lang.Object]
+    java::lock $x
+    llength $x
+    java::unlock $x
+    llength $x
+    catch {java::isnull $x} msg
+    string compare [list $msg] [format "{unknown java object \"%s\"}" $x]
+} {0}
+
+test java::lock-1.8 {create and remove multiple locks} {
+    set x [java::new java.lang.Object]
+    java::lock $x
+    java::lock $x
+    java::lock $x
+    java::unlock $x
+    java::unlock $x
+    llength $x
+    set result [java::isnull $x]
+    java::unlock $x
+    set result
+} {0}
+
+test java::lock-1.9 {create and remove multiple locks} {
+    set x [java::new java.lang.Object]
+    java::lock $x
+    java::lock $x
+    java::lock $x
+    java::unlock $x
+    java::unlock $x
+    java::unlock $x
+    llength $x
+    catch {java::isnull $x} msg
+    string compare [list $msg] [format "{unknown java object \"%s\"}" $x]
+} {0}
+
+test java::unlock-1.1 {unlock error messages} {
+    list [catch {java::unlock} msg] $msg
+} {1 {wrong # args: should be "java::unlock javaObj"}}
+
+test java::unlock-1.2 {unlock error checking} {
+    list [catch {java::unlock a b} msg] $msg
+} {1 {wrong # args: should be "java::unlock javaObj"}}
+
+test java::unlock-1.3 {error checking} {
+    list [catch {java::lock a} msg] $msg
+} {1 {unknown java object "a"}}
+
+# This is a test of my tests.  The java::objLockedList
+# should be empty, or I've construced some bad tests.
+
+test java::objLockedList-1.11 {error in test suite} {
+    set java::objLockedList
+} {}
+
+# Now unset the java::objLockedList so the error dosen't 
+# stick around if the test file is sourced again.
+
+# cleanup
+catch {unset java::objLockedList}
+::tcltest::cleanupTests
+return

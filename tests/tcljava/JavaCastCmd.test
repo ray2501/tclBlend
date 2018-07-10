@@ -1,0 +1,136 @@
+# This file tests the routines in JavaCastCmd.java.
+#
+# This file contains a collection of tests for one or more of the Tcl
+# built-in commands.  Sourcing this file into Tcl runs the tests and
+# generates output for errors.  No output means no errors were found.
+#
+# Copyright (c) 1998 Mo DeJong
+#
+# See the file "license.terms" for information on usage and redistribution
+# of this file, and for a DISCLAIMER OF ALL WARRANTIES.
+#
+
+if {[lsearch [namespace children] ::tcltest] == -1} {
+    package require tcltest
+    namespace import -force ::tcltest::*
+}
+
+setupJavaPackage
+
+test javaCastCmd-1.1 {basics} {
+    list [catch {java::cast} msg] $msg
+} {1 {wrong # args: should be "java::cast class javaObj"}}
+
+test javaCastCmd-1.2 {basics} {
+    list [catch {java::cast Class} msg] $msg
+} {1 {wrong # args: should be "java::cast class javaObj"}}
+
+test javaCastCmd-1.3 {basics} {
+    list [catch {java::cast Class obj extra} msg] $msg
+} {1 {wrong # args: should be "java::cast class javaObj"}}
+
+test javaCastCmd-1.4 {basics} {
+    list [catch {java::cast Class obj} msg] $msg
+} {1 {unknown java object "obj"}}
+
+test javaCastCmd-1.5 {basics} {
+    set o [java::new java.lang.Object]
+    catch {java::cast java.lang.Object $o}
+} {0}
+
+test javaCastCmd-1.6 {basics} {
+    set h1 [java::new java.util.Hashtable]
+    list [catch {java::cast java.util.Hashtable $h1} obj] \
+        [java::info class $obj]
+} {0 java.util.Hashtable}
+
+test javaCastCmd-1.7 {basics} {
+    set h1 [java::new java.util.Hashtable]
+    catch {java::cast java.lang.BADCLASS $h1}
+} {1}
+
+test javaCastCmd-1.8 {basics} {
+    java::isnull [java::cast java.lang.String [java::null]]
+} {1}
+
+
+test javaCastCmd-2.0 {object casting} {
+    catch {unset results}
+    set s1 [java::new {java.lang.String java.lang.String} "hello"]
+    lappend results [java::info class $s1]
+    set o1 [java::cast java.lang.Object $s1]
+    lappend results [java::info class $o1]
+    set s2 [java::cast java.lang.String $o1]
+    lappend results [java::info class $s2]
+    lappend results [string compare $s1 $s2]
+} {java.lang.String java.lang.Object java.lang.String 0}
+
+test javaCastCmd-2.1 {object casting} {
+    set o1 [java::new java.lang.Object]    
+    list [catch {java::cast java.lang.String $o1} err] $err
+} {1 {could not cast from java.lang.Object to java.lang.String}}
+
+test javaCastCmd-2.2 {object casting} {
+    set h1 [java::new java.util.Hashtable]    
+    list [catch {java::cast java.lang.String $h1} err] $err
+} {1 {could not cast from java.util.Hashtable to java.lang.String}}
+
+test javaCastCmd-2.3 {object casting} {
+    set s1 [java::new {java.lang.String java.lang.String} "hello"]  
+    list [catch {java::cast java.util.Hashtable $s1} err] $err
+} {1 {could not cast from java.lang.String to java.util.Hashtable}}
+
+test javaCastCmd-2.4 {object casting} {
+    set h1 [java::new java.util.Hashtable]
+    set o1 [java::cast java.lang.Object $h1]
+    java::info class $o1
+} {java.lang.Object}
+
+
+test javaCastCmd-3.0 {array casting} {
+    set a1 [java::new {java.lang.String[]} {5} {1 2 3 4 5}]
+    list [catch {java::cast {java.lang.Object[]} $a1} a2] \
+	 [java::info class $a2]
+} {0 {java.lang.Object[]}}
+
+test javaCastCmd-3.1 {array casting} {
+    set a1 [java::new {java.lang.String[]} {5} {1 2 3 4 5}]
+    list [catch {java::cast java.lang.Object $a1} o] \
+	 [java::info class $o]
+} {0 java.lang.Object}
+
+test javaCastCmd-3.2 {array casting} {
+    set a1 [java::new {java.lang.String[]} {5} {1 2 3 4 5}]
+    set a2 [java::cast {java.lang.Object[]} $a1]
+    list [catch {java::cast {java.lang.String[]} $a2} a3] \
+	 [java::info class $a3] [string compare $a1 $a3]
+} {0 {java.lang.String[]} 0}
+
+test javaCastCmd-3.3 {array casting} {
+    set a1 [java::new {java.lang.String[]} {5} {1 2 3 4 5}]
+    list [catch {java::cast {java.lang.String} $a1} err] $err
+} {1 {could not cast from java.lang.String[] to java.lang.String}}
+
+test javaCastCmd-3.4 {array casting} {
+    set a1 [java::new {java.lang.String[]} {5} {1 2 3 4 5}]
+    list [catch {java::cast {java.lang.String[][]} $a1} err] $err
+} {1 {could not cast from java.lang.String[] to java.lang.String[][]}}
+
+test javaCastCmd-3.5 {array casting} {
+    set a1 [java::new {java.lang.String[]} {5} {1 2 3 4 5}]
+    list [catch {java::cast {java.lang.Object[][]} $a1} err] $err
+} {1 {could not cast from java.lang.String[] to java.lang.Object[][]}}
+
+test javaCastCmd-3.6 {array casting} {
+    set a1 [java::new {java.lang.String[]} {5} {1 2 3 4 5}]
+    list [catch {java::cast {java.lang.Class[]} $a1} err] $err
+} {1 {could not cast from java.lang.String[] to java.lang.Class[]}}
+
+test javaCastCmd-3.7 {array casting} {
+    set a1 [java::new {java.lang.String[]} {5} {1 2 3 4 5}]
+    list [catch {java::cast java.lang.Void $a1} err] $err
+} {1 {could not cast from java.lang.String[] to java.lang.Void}}
+
+# cleanup
+::tcltest::cleanupTests
+return

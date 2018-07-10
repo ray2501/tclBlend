@@ -1,0 +1,690 @@
+# This file tests the routines in JavaInfoCmd.java.
+#
+# This file contains a collection of tests for one or more of the Tcl
+# built-in commands.  Sourcing this file into Tcl runs the tests and
+# generates output for errors.  No output means no errors were found.
+#
+# Copyright (c) 1994 Sun Microsystems, Inc.
+#
+# See the file "license.terms" for information on usage and redistribution
+# of this file, and for a DISCLAIMER OF ALL WARRANTIES.
+#
+# RCS: @(#) $Id: JavaInfoCmd.test,v 1.7 2003/01/10 01:35:58 mdejong Exp $
+
+if {[lsearch [namespace children] ::tcltest] == -1} {
+    package require tcltest
+    namespace import -force ::tcltest::*
+}
+
+setupJavaPackage
+
+# The exact properties returned for java.awt.Button differ from one JVM
+# version to another. This proc checks for the properties known to exist
+# as of JDK 1.1 and returns 1 if they are all found.
+
+proc Button_properties_check { props {checktype 0} } {
+    set known_props {actionCommand background enabled font foreground label name visible}
+    set known_tprops [list \
+        {java.lang.String actionCommand} \
+        {java.awt.Color background} \
+        {boolean enabled} \
+        {java.awt.Font font} \
+        {java.awt.Color foreground} \
+        {java.lang.String label} \
+        {java.lang.String name} \
+        {boolean visible}]
+
+    if {$checktype} {
+        foreach ktp $known_tprops {
+            set ind [lsearch -exact $props $ktp]
+            if {$ind == -1} {return -1}
+        }
+    } else {
+        foreach kp $known_props {
+            set ind [lsearch -exact $props $kp]
+            if {$ind == -1} {return -1}
+        }
+    }
+    return 1
+}
+
+test javaInfoCmd-1.1 {basics} {
+    list [catch {java::info} msg] $msg
+} {1 {wrong # args: should be "java::info option ?arg arg ...?"}}
+
+test javaInfoCmd-1.2 {basics} {
+    list [catch {java::info junk} msg] $msg
+} {1 {bad option "junk": must be class, baseclass, dimensions, events, fields, methods, constructors, properties, or superclass}}
+
+
+test javaInfoCmd-2.1 {class} {
+    list [catch {java::info class junk1 junk2} msg] $msg
+} {1 {wrong # args: should be "java::info class javaObj"}}
+
+test javaInfoCmd-2.2 {class} {
+    list [catch {java::info class} msg] $msg
+} {1 {wrong # args: should be "java::info class javaObj"}}
+
+test javaInfoCmd-2.3 {class} {
+    list [catch {java::info class junk} msg] $msg
+} {1 {unknown java object "junk"}}
+
+test javaInfoCmd-2.4 {class} {
+    list [catch {java::info class tests.javainfo.InfoTestClass} msg] $msg
+} {1 {unknown java object "tests.javainfo.InfoTestClass"}}
+
+test javaInfoCmd-2.5 {class} {
+    list [catch {
+	set handle [java::new tests.javainfo.InfoTestClass]
+	java::info class $handle
+    } msg] $msg
+} {0 tests.javainfo.InfoTestClass}
+
+test javaInfoCmd-2.6 {class} {
+    list [catch {
+	set handle [java::new tests.javainfo.InfoTestClass]
+	java::info cl $handle
+    } msg] $msg
+} {0 tests.javainfo.InfoTestClass}
+
+test javaInfoCmd-2.7 {class} {
+    list [catch {
+	set handle [java::new tests.javainfo.InfoTestClass]
+	java::info c $handle
+    } msg] $msg
+} {1 {ambiguous option "c": must be class, baseclass, dimensions, events, fields, methods, constructors, properties, or superclass}}
+
+test javaInfoCmd-2.8 {class} {
+    java::info class [java::new {int[][][]} {5 5 5}]
+} {int[][][]}
+
+test javaInfoCmd-2.9 {class} {
+    java::info class [java::new {java.lang.String[]} {1}]
+} {java.lang.String[]}
+
+
+test javaInfoCmd-3.1 {baseclass} {
+    list [catch {java::info baseclass junk1 junk2} msg] $msg
+} {1 {wrong # args: should be "java::info baseclass objOrClass"}}
+
+test javaInfoCmd-3.2 {baseclass} {
+    list [catch {java::info baseclass} msg] $msg
+} {1 {wrong # args: should be "java::info baseclass objOrClass"}}
+
+test javaInfoCmd-3.3 {baseclass} {
+    list [catch {java::info baseclass junk} msg] $msg
+} {1 {unknown java class or object "junk"}}
+
+test javaInfoCmd-3.4 {baseclass} {
+    list [catch {java::info baseclass tests.javainfo.InfoTestClass} msg] $msg
+} {0 tests.javainfo.InfoTestClass}
+
+test javaInfoCmd-3.5 {baseclass} {
+    list [catch {
+	set handle [java::new tests.javainfo.InfoTestClass]
+	java::info baseclass $handle
+    } msg] $msg
+} {0 tests.javainfo.InfoTestClass}
+
+test javaInfoCmd-3.6 {baseclass} {
+    list [catch {
+	set handle [java::new tests.javainfo.InfoTestClass]
+	java::info b $handle
+    } msg] $msg
+} {0 tests.javainfo.InfoTestClass}
+
+test javaInfoCmd-3.7 {baseclass} {
+    list [catch {
+	set handle [java::new {int[]} 5]
+	java::info baseclass $handle
+    } msg] $msg
+} {0 int}
+
+test javaInfoCmd-3.8 {baseclass} {
+    list [catch {
+	set handle [java::new {int[][][]} {5 6}]
+	java::info baseclass $handle
+    } msg] $msg
+} {0 int}
+
+test javaInfoCmd-3.9 {baseclass} {
+    list [catch {
+	set handle [java::new {Integer[]} 5]
+	java::info baseclass $handle
+    } msg] $msg
+} {0 java.lang.Integer}
+
+test javaInfoCmd-3.10 {baseclass} {
+    list [catch {
+	set handle [java::new {Integer[][][]} {5 6}]
+	java::info baseclass $handle
+    } msg] $msg
+} {0 java.lang.Integer}
+
+test javaInfoCmd-3.11 {baseclass} {
+    list [catch {
+	set handle [java::new {tests.javainfo.InfoTestClass[]} 5]
+	java::info baseclass $handle
+    } msg] $msg
+} {0 tests.javainfo.InfoTestClass}
+
+test javaInfoCmd-3.12 {baseclass} {
+    list [catch {
+	set handle [java::new {tests.javainfo.InfoTestClass[][][]} {5 6}]
+	java::info baseclass $handle
+    } msg] $msg
+} {0 tests.javainfo.InfoTestClass}
+
+test javaInfoCmd-3.13 {baseclass} {
+   java::info baseclass {java.lang.Integer[][][]} 
+} {java.lang.Integer}
+
+test javaInfoCmd-3.14 {baseclass} {
+   java::info baseclass {int[][][]} 
+} {int}
+
+test javaInfoCmd-4.1 {dimensions} {
+    list [catch {java::info dimensions junk1 junk2} msg] $msg
+} {1 {wrong # args: should be "java::info dimensions objOrClass"}}
+
+test javaInfoCmd-4.2 {dimensions} {
+    list [catch {java::info dimensions} msg] $msg
+} {1 {wrong # args: should be "java::info dimensions objOrClass"}}
+
+test javaInfoCmd-4.3 {dimensions} {
+    list [catch {java::info dimensions junk} msg] $msg
+} {1 {unknown java class or object "junk"}}
+
+test javaInfoCmd-4.4 {dimensions} {
+    list [catch {java::info dimensions tests.javainfo.InfoTestClass} msg] $msg
+} {0 0}
+
+test javaInfoCmd-4.5 {dimensions} {
+    list [catch {
+	set handle [java::new tests.javainfo.InfoTestClass]
+	java::info dimensions $handle
+    } msg] $msg
+} {0 0}
+
+test javaInfoCmd-4.6 {dimensions} {
+    list [catch {
+	set handle [java::new tests.javainfo.InfoTestClass]
+	java::info d $handle
+    } msg] $msg
+} {0 0}
+
+test javaInfoCmd-4.7 {dimensions} {
+    list [catch {
+	set handle [java::new {int[]} 5]
+	java::info dimensions $handle
+    } msg] $msg
+} {0 1}
+
+test javaInfoCmd-4.8 {dimensions} {
+    list [catch {
+	set handle [java::new {int[][]} {4 4}]
+	java::info dimensions $handle
+    } msg] $msg
+} {0 2}
+
+test javaInfoCmd-4.9 {dimensions} {
+    list [catch {
+	set handle [java::new {Integer[]} 5]
+	java::info dimensions $handle
+    } msg] $msg
+} {0 1}
+
+test javaInfoCmd-4.10 {dimensions} {
+    list [catch {
+	set handle [java::new {Integer[][][]} {2 2 2}]
+	java::info dimensions $handle
+    } msg] $msg
+} {0 3}
+
+test javaInfoCmd-4.11 {dimensions} {
+    list [catch {
+	set handle [java::new {tests.javainfo.InfoTestClass[]} 5]
+	java::info dimensions $handle
+    } msg] $msg
+} {0 1}
+
+test javaInfoCmd-4.12 {dimensions} {
+    list [catch {
+	set handle [java::new {tests.javainfo.InfoTestClass[][][][]} {2 2 2 2}]
+	java::info dimensions $handle
+    } msg] $msg
+} {0 4}
+
+
+test javaInfoCmd-5.1 {events} {
+    list [catch {java::info events} msg] $msg
+} {1 {wrong # args: should be "java::info events javaObj"}}
+
+test javaInfoCmd-5.2 {events} {
+    list [catch {java::info events junk junk} msg] $msg
+} {1 {wrong # args: should be "java::info events javaObj"}}
+
+test javaInfoCmd-5.3 {events} {
+    list [catch {java::info events junk} msg] $msg
+} {1 {unknown java class or object "junk"}}
+
+test javaInfoCmd-5.4 {events} {
+    lsort [java::info events tcl.lang.NoEventBean]
+} {}
+
+test javaInfoCmd-5.5 {events} {
+    set x [java::new tcl.lang.NoEventBean]
+    lsort [java::info events $x]
+} {}
+
+test javaInfoCmd-5.6 {events} {
+    set x [java::new tcl.lang.TesterBean]
+    lsort [java::info events $x]
+} {tcl.lang.Tester1Listener tcl.lang.Tester2Listener}
+
+test javaInfoCmd-5.7 {events} {
+    set x [java::new tcl.lang.TesterBean]
+    lsort [java::info events $x]
+} {tcl.lang.Tester1Listener tcl.lang.Tester2Listener}
+
+
+test javaInfoCmd-6.1 {fields} {
+    list [catch {java::info fields} msg] $msg
+} {1 {wrong # args: should be "java::info fields ?-type? ?-static? objOrClass"}}
+
+test javaInfoCmd-6.2 {fields} {
+    list [catch {java::info fields junk1 junk2 junk3 junk4} msg] $msg
+} {1 {wrong # args: should be "java::info fields ?-type? ?-static? objOrClass"}}
+
+test javaInfoCmd-6.3 {fields} {
+    list [catch {java::info fields junk1 junk2} msg] $msg
+} {1 {bad option "junk1": must be -type or -static}}
+
+test javaInfoCmd-6.4 {fields} {
+    list [catch {java::info fields junk} msg] $msg
+} {1 {unknown java class or object "junk"}}
+
+test javaInfoCmd-6.5 {fields} {
+    list [catch {
+	lsort [java::info fields tests.javainfo.InfoTestClass]
+    } msg] $msg
+} {0 {a b y}}
+
+test javaInfoCmd-6.6 {fields} {
+    list [catch {
+	set handle [java::new tests.javainfo.InfoTestClass]
+	lsort [java::info fields $handle]
+    } msg] $msg
+} {0 {a b y}}
+
+test javaInfoCmd-6.7 {fields} {
+    list [catch {
+	lsort [java::info fields tests.javainfo.SuperTestClass]
+    } msg] $msg
+} {0 {IArray a {a tests.javainfo.InfoTestClass} b bArray cArray fArray iArray j sArray tArray y {y tests.javainfo.InfoTestClass}}}
+
+test javaInfoCmd-6.8 {fields -static} {
+    list [catch {java::info fields -static} msg] $msg
+} {1 {unknown java class or object "-static"}}
+
+test javaInfoCmd-6.9 {fields -static} {
+    list [catch {java::info fields -static junk} msg] $msg
+} {1 {unknown java class or object "junk"}}
+
+test javaInfoCmd-6.10 {fields -static} {
+    list [catch {
+	lsort [java::info fields -stat tests.javainfo.InfoTestClass]
+    } msg] $msg
+} {0 {c d}}
+
+test javaInfoCmd-6.11 {fields -static} {
+    list [catch {
+	lsort [java::info fields -static tests.javainfo.InfoTestClass]
+    } msg] $msg
+} {0 {c d}}
+
+test javaInfoCmd-6.12 {fields -static} {
+    list [catch {
+	set handle [java::new tests.javainfo.InfoTestClass]
+	lsort [java::info fields -static $handle]
+    } msg] $msg
+} {0 {c d}}
+
+test javaInfoCmd-6.13 {fields -static} {
+    list [catch {
+	lsort [java::info fields -static tests.javainfo.SuperTestClass]
+    } msg] $msg
+} {0 {c {c tests.javainfo.InfoTestClass} d i}}
+
+test javaInfoCmd-6.14 {fields -type} {
+    list [catch {java::info fields -type} msg] $msg
+} {1 {unknown java class or object "-type"}}
+
+test javaInfoCmd-6.15 {fields -type} {
+    list [catch {java::info fields -type junk} msg] $msg
+} {1 {unknown java class or object "junk"}}
+
+test javaInfoCmd-6.16 {fields -type} {
+    list [catch {
+	lsort [java::info fields -t tests.javainfo.InfoTestClass]
+    } msg] $msg
+} {0 {{int a} {int b} {int y}}}
+
+test javaInfoCmd-6.17 {fields -type} {
+    list [catch {
+	lsort [java::info fields -type tests.javainfo.InfoTestClass]
+    } msg] $msg
+} {0 {{int a} {int b} {int y}}}
+
+test javaInfoCmd-6.18 {fields -type} {
+    list [catch {
+	set handle [java::new tests.javainfo.InfoTestClass]
+	lsort [java::info fields -type $handle]
+    } msg] $msg
+} {0 {{int a} {int b} {int y}}}
+
+test javaInfoCmd-6.19 {fields -type} {
+    list [catch {
+	lsort [java::info fields -type tests.javainfo.SuperTestClass]
+    } msg] $msg
+} {0 {{int a} {int b} {int j} {int y} {int {a tests.javainfo.InfoTestClass}} {int {y tests.javainfo.InfoTestClass}} {{byte[]} bArray} {{char[]} cArray} {{float[]} fArray} {{int[]} iArray} {{java.lang.Integer[]} IArray} {{java.lang.String[]} sArray} {{tests.javainfo.InfoTestClass[]} tArray}}}
+
+test javaInfoCmd-6.20 {fields -type -static} {
+    list [catch {
+	lsort [java::info fields -static -type tests.javainfo.InfoTestClass]
+    } msg] $msg
+} {0 {{int c} {int d}}}
+
+test javaInfoCmd-6.21 {fields -type -static} {
+    list [catch {
+	set handle [java::new tests.javainfo.InfoTestClass]
+	lsort [java::info fields -type -static $handle]
+    } msg] $msg
+} {0 {{int c} {int d}}}
+
+test javaInfoCmd-6.22 {fields -type -static} {
+    list [catch {
+	lsort [java::info fields -type -static tests.javainfo.SuperTestClass]
+    } msg] $msg
+} {0 {{int c} {int d} {int i} {int {c tests.javainfo.InfoTestClass}}}}
+
+test javaInfoCmd-7.1 {methods} {
+    list [catch {java::info methods} msg] $msg
+} {1 {wrong # args: should be "java::info methods ?-type? ?-static? objOrClass"}}
+
+test javaInfoCmd-7.2 {methods} {
+    list [catch {java::info methods junk1 junk2 junk3 junk4} msg] $msg
+} {1 {wrong # args: should be "java::info methods ?-type? ?-static? objOrClass"}}
+
+test javaInfoCmd-7.3 {methods} {
+    list [catch {java::info methods junk1 junk2 junk3} msg] $msg
+} {1 {bad option "junk1": must be -type or -static}}
+
+test javaInfoCmd-7.4 {methods} {
+    list [catch {java::info methods junk} msg] $msg
+} {1 {unknown java class or object "junk"}}
+
+test javaInfoCmd-7.5 {methods} {
+    list [catch {
+	lsort [java::info methods tests.javainfo.InfoTestClass]
+    } msg] $msg
+} {0 {{add int int int} add1 {equals java.lang.Object} getClass hashCode notify notifyAll sum toString wait {wait long} {wait long int}}}
+test javaInfoCmd-7.6 {methods} {
+    list [catch {
+	set handle [java::new tests.javainfo.InfoTestClass]
+	lsort [java::info methods $handle]
+    } msg] $msg
+} {0 {{add int int int} add1 {equals java.lang.Object} getClass hashCode notify notifyAll sum toString wait {wait long} {wait long int}}}
+
+test javaInfoCmd-7.7 {methods} {
+    list [catch {
+	lsort [java::info methods tests.javainfo.SuperTestClass]
+    } msg] $msg
+} {0 {{add int int int} add1 {addArray {tests.javainfo.InfoTestClass[]} {java.lang.String[]} {java.lang.Integer[]}} {addArrayArray {java.lang.String[][]} {int[][][]}} {equals java.lang.Object} getClass hashCode notify notifyAll sum toString wait {wait long} {wait long int}}}
+
+
+test javaInfoCmd-7.8 {methods -static} {
+    list [catch {java::info methods -static junk1 junk2} msg] $msg
+} {1 {bad option "junk1": must be -type or -static}}
+
+test javaInfoCmd-7.9 {methods -static} {
+    list [catch {java::info methods -static} msg] $msg
+} {1 {unknown java class or object "-static"}}
+
+test javaInfoCmd-7.10 {methods -static} {
+    list [catch {java::info methods -static junk} msg] $msg
+} {1 {unknown java class or object "junk"}}
+
+test javaInfoCmd-7.11 {methods -static} {
+    list [catch {
+	lsort [java::info methods -stat tests.javainfo.InfoTestClass]
+    } msg] $msg
+} {0 {clue {herring int} {herring int double} {herring int double char}}}
+
+test javaInfoCmd-7.12 {methods -static} {
+    list [catch {
+	lsort [java::info methods -static tests.javainfo.InfoTestClass]
+    } msg] $msg
+} {0 {clue {herring int} {herring int double} {herring int double char}}}
+
+test javaInfoCmd-7.13 {methods -static} {
+    list [catch {
+	set handle [java::new tests.javainfo.InfoTestClass]
+	lsort [java::info methods -static $handle]
+    } msg] $msg
+} {0 {clue {herring int} {herring int double} {herring int double char}}}
+
+test javaInfoCmd-7.14 {methods -static} {
+    list [catch {
+	lsort [java::info methods -static tests.javainfo.SuperTestClass]
+    } msg] $msg
+} {0 {clue {herring int} {herring int double char}}}
+
+test javaInfoCmd-7.15 {methods -type} {
+    list [catch {java::info methods -type junk1 junk2} msg] $msg
+} {1 {bad option "junk1": must be -type or -static}}
+
+test javaInfoCmd-7.16 {methods -type} {
+    list [catch {java::info methods -type} msg] $msg
+} {1 {unknown java class or object "-type"}}
+
+test javaInfoCmd-7.17 {methods -type} {
+    list [catch {java::info methods -type junk} msg] $msg
+} {1 {unknown java class or object "junk"}}
+
+test javaInfoCmd-7.18 {methods -type} {
+    list [catch {
+	lsort [java::info methods -t tests.javainfo.InfoTestClass]
+    } msg] $msg
+} {0 {{boolean {equals java.lang.Object} {}} {int hashCode {}} {int sum {}} {java.lang.Class getClass {}} {java.lang.String toString {}} {void add1 {}} {void notify {}} {void notifyAll {}} {void wait java.lang.InterruptedException} {void {add int int int} {}} {void {wait long int} java.lang.InterruptedException} {void {wait long} java.lang.InterruptedException}}}
+
+test javaInfoCmd-7.19 {methods -type} {
+    list [catch {
+	lsort [java::info methods -type tests.javainfo.InfoTestClass]
+    } msg] $msg
+} {0 {{boolean {equals java.lang.Object} {}} {int hashCode {}} {int sum {}} {java.lang.Class getClass {}} {java.lang.String toString {}} {void add1 {}} {void notify {}} {void notifyAll {}} {void wait java.lang.InterruptedException} {void {add int int int} {}} {void {wait long int} java.lang.InterruptedException} {void {wait long} java.lang.InterruptedException}}}
+
+test javaInfoCmd-7.20 {methods -type} {
+    list [catch {
+	set handle [java::new tests.javainfo.InfoTestClass]
+	lsort [java::info methods -type $handle]
+    } msg] $msg
+} {0 {{boolean {equals java.lang.Object} {}} {int hashCode {}} {int sum {}} {java.lang.Class getClass {}} {java.lang.String toString {}} {void add1 {}} {void notify {}} {void notifyAll {}} {void wait java.lang.InterruptedException} {void {add int int int} {}} {void {wait long int} java.lang.InterruptedException} {void {wait long} java.lang.InterruptedException}}}
+
+test javaInfoCmd-7.21 {methods -type} {
+    list [catch {
+	lsort [java::info methods -type tests.javainfo.SuperTestClass]
+    } msg] $msg
+} {0 {{boolean {equals java.lang.Object} {}} {int hashCode {}} {int sum {}} {java.lang.Class getClass {}} {java.lang.String toString {}} {void add1 {}} {void notify {}} {void notifyAll {}} {void wait java.lang.InterruptedException} {void {add int int int} {}} {void {wait long int} java.lang.InterruptedException} {void {wait long} java.lang.InterruptedException} {{int[]} {addArray {tests.javainfo.InfoTestClass[]} {java.lang.String[]} {java.lang.Integer[]}} {}} {{java.lang.String[][]} {addArrayArray {java.lang.String[][]} {int[][][]}} {}}}}
+
+test javaInfoCmd-7.22 {methods -type -static} {
+    list [catch {java::info methods -type -static junk} msg] $msg
+} {1 {unknown java class or object "junk"}}
+
+test javaInfoCmd-7.23 {methods -type -static} {
+    list [catch {java::info methods -type -static} msg] $msg
+} {1 {unknown java class or object "-static"}}
+
+test javaInfoCmd-7.24 {methods -type -static} {
+    list [catch {java::info methods -type -static junk} msg] $msg
+} {1 {unknown java class or object "junk"}}
+
+test javaInfoCmd-7.25 {methods -type -static} {
+    list [catch {
+	lsort [java::info methods -type -static tests.javainfo.InfoTestClass]
+    } msg] $msg
+} {0 {{java.lang.String clue {}} {java.lang.String {herring int double char} {}} {java.lang.String {herring int double} {}} {java.lang.String {herring int} {}}}}
+
+test javaInfoCmd-7.26 {methods -type -static} {
+    list [catch {
+	lsort [java::info methods -type -static tests.javainfo.SuperTestClass]
+    } msg] $msg
+} {0 {{java.lang.String clue {}} {java.lang.String {herring int double char} {}} {java.lang.String {herring int} {}}}}
+
+test javaInfoCmd-8.1 {properties} {
+    list [catch {java::info properties junk1 junk2 junk3} msg] $msg
+} {1 {wrong # args: should be "java::info properties ?-type? objOrClass"}}
+
+test javaInfoCmd-8.2 {properties} {
+    list [catch {java::info properties} msg] $msg
+} {1 {wrong # args: should be "java::info properties ?-type? objOrClass"}}
+
+test javaInfoCmd-8.3 {properties} {
+    list [catch {java::info properties junk} msg] $msg
+} {1 {unknown java class or object "junk"}}
+
+test javaInfoCmd-8.4 {properties} {
+    list [catch {
+	Button_properties_check [java::info properties java.awt.Button]
+    } msg] $msg
+} {0 1}
+
+test javaInfoCmd-8.5 {properties} {
+    list [catch {
+	set handle [java::new java.awt.Button]
+	Button_properties_check [java::info properties $handle]
+    } msg] $msg
+} {0 1}
+
+test javaInfoCmd-8.6 {properties} {
+    list [catch {
+	lsort [java::info properties tests.javainfo.InfoTestClass]
+    } msg] $msg
+} {0 class}
+
+test javaInfoCmd-8.7 {properties} {
+    list [catch {
+	lsort [java::info properties java.lang.Object]
+    } msg] $msg
+} {0 class}
+
+test javaInfoCmd-8.8 {properties -type} {
+    list [catch {java::info properties -type} msg] $msg
+} {1 {unknown java class or object "-type"}}
+
+test javaInfoCmd-8.9 {properties -type} {
+    list [catch {
+	Button_properties_check [java::info properties -t java.awt.Button] 1
+    } msg] $msg
+} {0 1}
+
+test javaInfoCmd-8.10 {properties -type} {
+    list [catch {
+	Button_properties_check [java::info properties -type java.awt.Button] 1
+    } msg] $msg
+} {0 1}
+
+test javaInfoCmd-8.11 {properties -type} {
+    list [catch {
+	set handle [java::new java.awt.Button]
+	Button_properties_check [java::info properties -type $handle] 1
+    } msg] $msg
+} {0 1}
+
+test javaInfoCmd-8.12 {properties -type} {
+    list [catch {
+	lsort [java::info properties -type tests.javainfo.InfoTestClass]
+    } msg] $msg
+} {0 {{java.lang.Class class}}}
+
+test javaInfoCmd-8.13 {properties -type} {
+    list [catch {
+	lsort [java::info properties -type java.lang.Object]
+    } msg] $msg
+} {0 {{java.lang.Class class}}}
+
+test javaInfoCmd-8.14 {properties -type} {
+    list [catch {
+	lsort [java::info properties -t java.lang.Object]
+    } msg] $msg
+} {0 {{java.lang.Class class}}}
+
+test javaInfoCmd-9.1 {superclass} {
+    list [catch {java::info superclass junk1 junk2} msg] $msg
+} {1 {wrong # args: should be "java::info superclass objOrClass"}}
+
+test javaInfoCmd-9.2 {superclass} {
+    list [catch {java::info superclass} msg] $msg
+} {1 {wrong # args: should be "java::info superclass objOrClass"}}
+
+test javaInfoCmd-9.3 {superclass} {
+    list [catch {java::info superclass junk} msg] $msg
+} {1 {unknown java class or object "junk"}}
+
+test javaInfoCmd-9.4 {superclass} {
+    list [catch {java::info superclass java.awt.Button} msg] $msg
+} {0 java.awt.Component}
+
+test javaInfoCmd-9.5 {superclass} {
+    list [catch {
+	set handle [java::new java.awt.Button]
+	java::info superclass $handle
+    } msg] $msg
+} {0 java.awt.Component}
+
+test javaInfoCmd-9.6 {superclass} {
+    list [catch {java::info superclass tests.javainfo.InfoTestClass} msg] $msg
+} {0 java.lang.Object}
+
+test javaInfoCmd-9.7 {superclass} {
+    list [catch {java::info superclass java.lang.Object} msg] $msg
+} {0 {}}
+
+test javaInfoCmd-9.8 {superclass} {
+    list [catch {java::info superclass {java.lang.Object[]}} msg] $msg
+} {0 java.lang.Object}
+
+test javaInfoCmd-9.9 {superclass} {
+    list [catch {java::info superclass {java.lang.String[]}} msg] $msg
+} {0 java.lang.Object}
+
+test javaInfoCmd-10.0 {null safety} {
+    catch {unset results}
+    lappend results [java::info baseclass    [java::null]]
+    lappend results [java::info class        [java::null]]
+    lappend results [java::info dimensions   [java::null]]
+    lappend results [java::info events       [java::null]]
+    lappend results [java::info fields       [java::null]]
+    lappend results [java::info methods      [java::null]]
+    lappend results [java::info constructors [java::null]]
+    lappend results [java::info properties   [java::null]]
+    lappend results [java::info superclass   [java::null]]
+} {{} {} 0 {} {} {} {} {} {}}
+
+test javaInfoCmd-10.1 {:: qualifier uses global info command} {
+    set name mo
+
+    proc java::test_exists { var } {
+      global [set var]
+      ::info exists [set var]
+    }
+
+    set result [java::test_exists name]
+    unset name
+    rename java::test_exists {}
+    set result
+} {1}
+
+# cleanup
+::tcltest::cleanupTests
+return

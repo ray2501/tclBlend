@@ -1,0 +1,492 @@
+# The file tests the GlobCmd.java file.
+#
+# This file contains a collection of tests for one or more of the Tcl
+# built-in commands.  Sourcing this file into Tcl runs the tests and
+# generates output for errors.  No output means no errors were found.
+#
+# Copyright (c) 1996-1998 by Sun Microsystems, Inc.
+#
+# See the file "license.terms" for information on usage and redistribution
+# of this file, and for a DISCLAIMER OF ALL WARRANTIES.
+#
+# SCCS: @(#) GlobCmd.test 1.4 98/01/27 17:19:15
+
+return
+
+if {[lsearch [namespace children] ::tcltest] == -1} {
+    package require tcltest
+    namespace import -force ::tcltest::*
+}
+
+setupJavaPackage
+
+if {[info commands testsetplatform] == {}} {
+    puts "This application hasn't been compiled with the \"testsetplatform\""
+    puts "command, so I can't test the filename conversion procedures."
+    return 
+} 
+
+global env
+set platform [testgetplatform]
+
+catch {unset oldConfig}
+foreach index {macOnly pcOnly unixOnly unixOrPc macOrPc macOrUnix} {
+    set oldConfig($index) $testConfig($index)
+}
+switch $platform {
+    "mac" {set testConfig(macOnly) 1}
+    "windows" {set testConfig(pcOnly) 1}
+    "unix" {set testConfig(unixOnly) 1}
+}
+set testConfig(unixOrPc) [expr $testConfig(unixOnly) || $testConfig(pcOnly)]
+set testConfig(macOrPc) [expr $testConfig(macOnly) || $testConfig(pcOnly)]
+set testConfig(macOrUnix) [expr $testConfig(macOnly) || $testConfig(unixOnly)]
+
+test globCmd-1.1 {cmdProc} {
+    list [catch {glob} msg] $msg
+} {1 {wrong # args: should be "glob ?switches? name ?name ...?"}}
+
+test globCmd-1.2 {cmdProc} {
+    list [catch {glob -gorp} msg] $msg
+} {1 {bad switch "-gorp": must be -nocomplain, or --}}
+
+test globCmd-1.3 {cmdProc} {
+    list [catch {glob -nocomplai} msg] $msg
+} {1 {bad switch "-nocomplai": must be -nocomplain, or --}}
+
+test globCmd-1.4 {cmdProc} {
+    list [catch {glob -nocomplain} msg] $msg
+} {1 {wrong # args: should be "glob ?switches? name ?name ...?"}}
+
+test globCmd-1.5 {cmdProc} {
+    list [catch {glob -nocomplain -- -nocomplain} msg] $msg
+} {0 {}}
+
+test globCmd-1.6 {cmdProc} {
+    list [catch {glob -- -nocomplain} msg] $msg
+} {1 {no files matched glob patterns "-nocomplain"}}
+
+test globCmd-1.7 {cmdProc tildeSubst} {
+    list [catch {glob -nocomplain ~xyqrszzz} msg] $msg
+} {0 {}}
+
+test globCmd-1.8 {cmdProc} {
+    list [catch {glob ~xyqrszzz} msg] $msg
+} {1 {user "xyqrszzz" doesn't exist}}
+
+# unix tests
+
+test globCmd-1.9 {cmdProc} {
+    testsetplatform unix
+    list [catch {glob -nocomplain ~\\xyqrszzz/bar} msg] $msg
+} {0 {}}
+
+test globCmd-1.10 {cmdProc} {
+    testsetplatform unix
+    list [catch {glob ~\\xyqrszzz/bar} msg] $msg
+} {1 {globbing characters not supported in user names}}
+
+test globCmd-1.11 {cmdProc} {
+    testsetplatform unix
+    list [catch {glob ~xyqrszzz\\/\\bar} msg] $msg
+} {1 {user "xyqrszzz" doesn't exist}}
+
+test globCmd-1.12 {cmdProc tildeSubst} {
+    testsetplatform unix
+    set home $env(HOME)
+    unset env(HOME)
+    set x [list [catch {glob -nocomplain ~/*} msg] $msg]
+    set env(HOME) $home
+    set x
+} {0 {}}
+
+test globCmd-1.13 {cmdProc tildeSubst} {
+    testsetplatform unix
+    set home $env(HOME)
+    unset env(HOME)
+    set x [list [catch {glob ~/*} msg] $msg]
+    set env(HOME) $home
+    set x
+} {1 {couldn't find HOME environment variable to expand path}}
+
+testsetplatform $platform
+
+test globCmd-1.14 {cmdProc} {
+    list [catch {file join [lindex [glob ~] 0]} msg] $msg
+} [list 0 [file join $env(HOME)]]
+
+# The following tests will work on Windows platforms only if MKS
+# toolkit is installed.
+
+catch {
+    set oldhome $env(HOME)
+    set env(HOME) [pwd]
+    file delete -force globTestJacl
+    file mkdir globTestJacl/a1/b1
+    file mkdir globTestJacl/a1/b2
+    file mkdir globTestJacl/a2/b3
+    file mkdir globTestJacl/a3
+    close [open globTestJacl/x1.c w]
+    close [open globTestJacl/y1.c w]
+    close [open globTestJacl/z1.c w]
+    close [open globTestJacl/x,z1.c w]
+    close [open "globTestJacl/weird name.c" w]
+    close [open globTestJacl/.1 w]
+    close [open globTestJacl/a1/b1/x2.c w]
+    close [open globTestJacl/a1/b2/y2.c w]
+}
+
+test globCmd-1.15 {cmdProc} {unixExecs} {
+    list [catch {glob ~/globTestJacl} msg] $msg
+} [list 0 [list [file join $env(HOME) globTestJacl]]]
+
+test globCmd-1.16 {cmdProc} {unixExecs} {
+    list [catch {glob ~\\/globTestJacl} msg] $msg
+} [list 0 [list [file join $env(HOME) globTestJacl]]]
+
+test globCmd-1.17 {cmdProc} {unixExecs} {
+    list [catch {glob globTestJacl} msg] $msg
+} {0 globTestJacl}
+
+test globCmd-2.1 {simple globbing} {unixOrPc} {
+    list [catch {glob {}} msg] $msg
+} {0 .}
+
+test globCmd-2.2 {simple globbing} {macOnly} {
+    list [catch {glob {}} msg] $msg
+} {0 :}
+
+test globCmd-2.3 {simple globbing} {
+    list [catch {glob -nocomplain \{a1,a2\}} msg] $msg
+} {0 {}}
+
+if {$platform == "mac"} {
+  set globPreResult :globTestJacl:
+} else {
+  set globPreResult globTestJacl/
+}
+
+set x1 x1.c
+set y1 y1.c
+test globCmd-2.4 {simple globbing} {unixOrPC} {
+    lsort [glob globTestJacl/x1.c globTestJacl/y1.c globTestJacl/foo]
+} "$globPreResult$x1 $globPreResult$y1"
+
+test globCmd-2.4 {simple globbing} {
+    lsort [glob globTestJacl/x1.c globTestJacl/y1.c globTestJacl/foo]
+} "$globPreResult$x1 $globPreResult$y1"
+
+test globCmd-2.5 {simple globbing} {unixExecs} {
+    list [catch {glob globTestJacl\\/x1.c} msg] $msg
+} "0 $globPreResult$x1"
+
+test globCmd-2.6 {simple globbing} {unixExecs} {
+    list [catch {glob globTestJacl\\/\\x1.c} msg] $msg
+} "0 $globPreResult$x1"
+
+test globCmd-3.1 {globbing with brace substitution} {unixExecs} {
+    list [catch {glob globTestJacl/\{\}} msg] $msg
+} "0 $globPreResult"
+
+test globCmd-3.2 {globbing with brace substitution} {
+    list [catch {glob globTestJacl/\{} msg] $msg
+} {1 {unmatched open-brace in file name}}
+
+test globCmd-3.3 {globbing with brace substitution} {
+    list [catch {glob globTestJacl/\{\\\}} msg] $msg
+} {1 {unmatched open-brace in file name}}
+
+test globCmd-3.4 {globbing with brace substitution} {
+    list [catch {glob globTestJacl/\{\\} msg] $msg
+} {1 {unmatched open-brace in file name}}
+
+test globCmd-3.5 {globbing with brace substitution} {
+    list [catch {glob globTestJacl/\}} msg] $msg
+} {1 {unmatched close-brace in file name}}
+
+test globCmd-3.6 {globbing with brace substitution} {unixExecs} {
+    list [catch {glob globTestJacl/\{\}x1.c} msg] $msg
+} "0 $globPreResult$x1"
+
+test globCmd-3.7 {globbing with brace substitution} {unixExecs} {
+    list [catch {glob globTestJacl/\{x\}1.c} msg] $msg
+} "0 $globPreResult$x1"
+
+test globCmd-3.8 {globbing with brace substitution} {unixExecs} {
+    list [catch {glob globTestJacl/\{x\{\}\}1.c} msg] $msg
+} "0 $globPreResult$x1"
+
+test globCmd-3.9 {globbing with brace substitution} {unixExecs} {
+    list [lsort [catch {glob globTestJacl/\{x,y\}1.c} msg]] $msg
+} [list 0 [list $globPreResult$x1 $globPreResult$y1]]
+
+test globCmd-3.10 {globbing with brace substitution} {unixExecs} {
+    list [lsort [catch {glob globTestJacl/\{x,,y\}1.c} msg]] $msg
+} [list 0 [list $globPreResult$x1 $globPreResult$y1]]
+
+test globCmd-3.11 {globbing with brace substitution} {unixOrPc unixExecs} {
+    list [lsort [catch {glob globTestJacl/\{x,x\\,z,z\}1.c} msg]] $msg
+} {0 {globTestJacl/x1.c globTestJacl/x,z1.c globTestJacl/z1.c}}
+
+test globCmd-3.12 {globbing with brace substitution} {macOnly} {
+    list [lsort [catch {glob globTestJacl/\{x,x\\,z,z\}1.c} msg]] $msg
+} {0 {:globTestJacl:x1.c :globTestJacl:x,z1.c :globTestJacl:z1.c}}
+
+test globCmd-3.13 {globbing with brace substitution} {unixExecs} {
+    lsort [glob globTestJacl/{a,b,x,y}1.c]
+} [list $globPreResult$x1 $globPreResult$y1]
+
+test globCmd-3.14 {globbing with brace substitution} {unixOrPc unixExecs} {
+    lsort [glob {globTestJacl/{x1,y2,weird name}.c}]
+} {{globTestJacl/weird name.c} globTestJacl/x1.c}
+
+test globCmd-3.15 {globbing with brace substitution} {macOnly} {
+    lsort [glob {globTestJacl/{x1,y2,weird name}.c}]
+} {{:globTestJacl:weird name.c} :globTestJacl:x1.c}
+
+test globCmd-3.16 {globbing with brace substitution} {unixOrPc unixExecs} {
+    lsort [glob globTestJacl/{x1.c,a1/*}]
+} {globTestJacl/a1/b1 globTestJacl/a1/b2 globTestJacl/x1.c}
+
+test globCmd-3.17 {globbing with brace substitution} {macOnly} {
+    lsort [glob globTestJacl/{x1.c,a1/*}]
+} {:globTestJacl:a1:b1 :globTestJacl:a1:b2 :globTestJacl:x1.c}
+
+test globCmd-3.18 {globbing with brace substitution} {unixOrPc unixExecs} {
+    lsort [glob globTestJacl/{x1.c,{a},a1/*}]
+} {globTestJacl/a1/b1 globTestJacl/a1/b2 globTestJacl/x1.c}
+
+test globCmd-3.19 {globbing with brace substitution} {macOnly} {
+    lsort [glob globTestJacl/{x1.c,{a},a1/*}]
+} {:globTestJacl:a1:b1 :globTestJacl:a1:b2 :globTestJacl:x1.c}
+
+test globCmd-3.20 {globbing with brace substitution} {unixOrPc unixExecs} {
+    lsort [glob globTestJacl/{a,x}1/*/{x,y}*]
+} {globTestJacl/a1/b1/x2.c globTestJacl/a1/b2/y2.c}
+
+test globCmd-3.21 {globbing with brace substitution} {macOnly} {
+    lsort [glob globTestJacl/{a,x}1/*/{x,y}*]
+} {:globTestJacl:a1:b1:x2.c :globTestJacl:a1:b2:y2.c}
+
+test globCmd-3.22 {globbing with brace substitution} {unixExecs} {
+    list [catch {glob globTestJacl/\{a,x\}1/*/\{} msg] $msg
+} {1 {unmatched open-brace in file name}}
+
+test globCmd-4.1 {asterisks, question marks, and brackets} {unixExecs unixOrPc} {
+    lsort [glob g*/*.c]
+} {{globTestJacl/weird name.c} globTestJacl/x,z1.c globTestJacl/x1.c globTestJacl/y1.c globTestJacl/z1.c}
+
+test globCmd-4.2 {asterisks, question marks, and brackets} {macOnly} {
+    lsort [glob g*/*.c]
+} {{:globTestJacl:weird name.c} :globTestJacl:x,z1.c :globTestJacl:x1.c :globTestJacl:y1.c :globTestJacl:z1.c}
+
+test globCmd-4.3 {asterisks, question marks, and brackets} {unixExecs unixOrPc} {
+    lsort [glob globTestJacl/?1.c]
+} {globTestJacl/x1.c globTestJacl/y1.c globTestJacl/z1.c}
+
+test globCmd-4.4 {asterisks, question marks, and brackets} {macOnly} {
+    lsort [glob globTestJacl/?1.c]
+} {:globTestJacl:x1.c :globTestJacl:y1.c :globTestJacl:z1.c}
+
+test globCmd-4.5 {asterisks, question marks, and brackets} {unixExecs unixOrPc} {
+    lsort [glob */*/*/*.c]
+} {globTestJacl/a1/b1/x2.c globTestJacl/a1/b2/y2.c}
+
+test globCmd-4.6 {asterisks, question marks, and brackets} {macOnly} {
+    lsort [glob */*/*/*.c]
+} {:globTestJacl:a1:b1:x2.c :globTestJacl:a1:b2:y2.c}
+
+test globCmd-4.7 {asterisks, question marks, and brackets} {unixExecs unixOrPc} {
+    lsort [glob globTestJacl/*]
+} {globTestJacl/a1 globTestJacl/a2 globTestJacl/a3 {globTestJacl/weird name.c} globTestJacl/x,z1.c globTestJacl/x1.c globTestJacl/y1.c globTestJacl/z1.c}
+
+test globCmd-4.8 {asterisks, question marks, and brackets} {macOnly} {
+    lsort [glob globTestJacl/*]
+} {:globTestJacl:.1 :globTestJacl:a1 :globTestJacl:a2 :globTestJacl:a3 {:globTestJacl:weird name.c} :globTestJacl:x,z1.c :globTestJacl:x1.c :globTestJacl:y1.c :globTestJacl:z1.c}
+
+test globCmd-4.9 {asterisks, question marks, and brackets} {unixExecs unixOrPc} {
+    lsort [glob globTestJacl/.*]
+} {globTestJacl/. globTestJacl/.. globTestJacl/.1}
+
+test globCmd-4.10 {asterisks, question marks, and brackets} {macOnly} {
+    lsort [glob globTestJacl/.*]
+} {:globTestJacl:.1}
+
+test globCmd-4.11 {asterisks, question marks, and brackets} {unixExecs unixOrPc} {
+    lsort [glob globTestJacl/*/*]
+} {globTestJacl/a1/b1 globTestJacl/a1/b2 globTestJacl/a2/b3}
+
+test globCmd-4.12 {asterisks, question marks, and brackets} {macOnly} {
+    lsort [glob globTestJacl/*/*]
+} {:globTestJacl:a1:b1 :globTestJacl:a1:b2 :globTestJacl:a2:b3}
+
+test globCmd-4.13 {asterisks, question marks, and brackets} {unixExecs unixOrPc} {
+    lsort [glob {globTestJacl/[xyab]1.*}]
+} {globTestJacl/x1.c globTestJacl/y1.c}
+
+test globCmd-4.14 {asterisks, question marks, and brackets} {macOnly} {
+    lsort [glob {globTestJacl/[xyab]1.*}]
+} {:globTestJacl:x1.c :globTestJacl:y1.c}
+
+test globCmd-4.15 {asterisks, question marks, and brackets} {unixExecs unixOrPc} {
+    lsort [glob globTestJacl/*/]
+} {globTestJacl/a1/ globTestJacl/a2/ globTestJacl/a3/}
+
+test globCmd-4.16 {asterisks, question marks, and brackets} {macOnly} {
+    lsort [glob globTestJacl/*/]
+} {:globTestJacl:a1: :globTestJacl:a2: :globTestJacl:a3:}
+
+test globCmd-4.17 {asterisks, question marks, and brackets} {unixExecs} {
+    global env
+    set temp $env(HOME)
+    set env(HOME) [file join $env(HOME) globTestJacl]
+    set result [list [catch {glob ~/z*} msg] $msg]
+    set env(HOME) $temp
+    set result
+} [list 0 [list [file join $env(HOME) globTestJacl z1.c]]]
+
+test globCmd-4.18 {asterisks, question marks, and brackets} {unixExecs unixOrPc} {
+    list [catch {lsort [glob globTestJacl/*.c goo/*]} msg] $msg
+} {0 {{globTestJacl/weird name.c} globTestJacl/x,z1.c globTestJacl/x1.c globTestJacl/y1.c globTestJacl/z1.c}}
+
+test globCmd-4.19 {asterisks, question marks, and brackets} {macOnly} {
+    list [catch {lsort [glob globTestJacl/*.c goo/*]} msg] $msg
+} {0 {{:globTestJacl:weird name.c} :globTestJacl:x,z1.c :globTestJacl:x1.c :globTestJacl:y1.c :globTestJacl:z1.c}}
+
+test globCmd-4.20 {asterisks, question marks, and brackets} {
+    list [catch {glob -nocomplain goo/*} msg] $msg
+} {0 {}}
+
+test globCmd-4.21 {asterisks, question marks, and brackets} {
+    list [catch {glob globTestJacl/*/gorp} msg] $msg
+} {1 {no files matched glob pattern "globTestJacl/*/gorp"}}
+
+test globCmd-4.22 {asterisks, question marks, and brackets} {
+    list [catch {glob goo/* x*z foo?q} msg] $msg
+} {1 {no files matched glob patterns "goo/* x*z foo?q"}}
+
+test globCmd-4.23 {slash globbing} {unixOrPc} {
+    glob /
+} /
+
+test globCmd-4.24 {slash globbing} {pcOnly} {
+    list [catch {glob {\\}} msg] $msg
+} {0 /}
+
+# The following tests are only valid for Unix systems.
+
+if {$platform == "unix"} {
+    # On some systems, like AFS, "000" protection doesn't prevent
+    # access by owner, so the following test is not portable.
+
+    exec chmod 000 globTestJacl
+    test globCmd-5.1 {unix specific globbing} {nonPortable} {
+	string tolower [list [catch {glob globTestJacl/*} msg]  $msg $errorCode]
+    } {1 {couldn't read directory "globTestJacl": permission denied} {posix eacces {permission denied}}}
+    exec chmod 755 globTestJacl
+	
+	test globCmd-5.2 {unix specific globbing} {nonPortable} {
+	    glob ~ouster/.csh*
+	} "/home/ouster/.cshrc"
+    close [open globTestJacl/odd\\\[\]*?\{\}name w]
+    test globCmd-5.3 {unix specific globbing} {
+	global env
+	set temp $env(HOME)
+	set env(HOME) $env(HOME)/globTestJacl/odd\\\[\]*?\{\}name
+	set result [list [catch {glob ~} msg] $msg]
+	set env(HOME) $temp
+	set result
+    } [list 0 [list [glob ~]/globTestJacl/odd\\\[\]*?\{\}name]]
+    exec rm -f globTestJacl/odd\\\[\]*?\{\}name
+}
+
+# The following tests are only valid for Windows systems.
+
+if {$platform == "windows"} {
+    set temp [pwd]
+    cd c:/
+    catch {
+	removeDirectory globTestJacl
+	makeDirectory globTestJacl
+	close [open globTestJacl/x1.BAT w]
+	close [open globTestJacl/y1.Bat w]
+	close [open globTestJacl/z1.bat w]
+    }
+    
+    test globCmd-6.1 {windows specific globbing} {unixExecs} {
+	lsort [glob globTestJacl/*.bat]
+    } {globTestJacl/x1.BAT globTestJacl/y1.Bat globTestJacl/z1.bat}
+
+    test globCmd-6.2 {windows specific globbing} {
+	glob c:
+    } c:
+
+    test globCmd-6.3 {windows specific globbing} {unixExecs} {
+	glob c:\\\\
+	} c:/
+
+    test globCmd-6.4 {windows specific globbing} {
+	glob c:/
+    } c:/
+
+    test globCmd-6.5 {windows specific globbing} {unixExecs} {
+	glob c:*TestJacl
+    } c:globTestJacl
+
+    test globCmd-6.6 {windows specific globbing} {unixExecs} {
+	glob c:\\\\*TestJacl
+    } c:/globTestJacl
+
+    test globCmd-6.7 {windows specific globbing} {unixExecs} {
+	glob c:/*TestJacl
+    } c:/globTestJacl
+
+    test globCmd-6.8 {windows specific globbing} {unixExecs} {
+	lsort [glob c:globTestJacl/*.bat]
+    } {c:globTestJacl/x1.BAT c:globTestJacl/y1.Bat c:globTestJacl/z1.bat}
+
+    test globCmd-6.9 {windows specific globbing} {unixExecs} {
+	lsort [glob c:/globTestJacl/*.bat]
+    } {c:/globTestJacl/x1.BAT c:/globTestJacl/y1.Bat c:/globTestJacl/z1.bat}
+
+    test globCmd-6.10 {windows specific globbing} {unixExecs} {
+	lsort [glob c:globTestJacl\\\\*.bat]
+    } {c:globTestJacl/x1.BAT c:globTestJacl/y1.Bat c:globTestJacl/z1.bat}
+
+    test globCmd-6.11 {windows specific globbing} {unixExecs} {
+	lsort [glob c:\\\\globTestJacl\\\\*.bat]
+    } {c:/globTestJacl/x1.BAT c:/globTestJacl/y1.Bat c:/globTestJacl/z1.bat}
+
+    #removeDirectory globTestJacl
+
+    if $testConfig(nonPortable) {
+	cd //gaspode/d
+	removeDirectory globTestJacl
+	makeDirectory globTestJacl
+
+	close [open globTestJacl/x1.BAT w]
+	close [open globTestJacl/y1.Bat w]
+	close [open globTestJacl/z1.bat w]
+
+	test globCmd-6.12 {windows specific globbing} {
+	    glob //gaspode/d/*TestJacl
+	} //gaspode/d/globTestJacl
+	test globCmd-6.13 {windows specific globbing} {
+	    glob {\\\\gaspode\\d\\*TestJacl}
+	} //gaspode/d/globTestJacl
+
+	removeDirectory globTestJacl
+    }	    
+
+    cd $temp
+}
+
+removeDirectory globTestJacl
+set env(HOME) $oldhome
+
+testsetplatform $platform
+foreach index {macOnly pcOnly unixOnly unixOrPc macOrPc macOrUnix} {
+    set testConfig($index) $oldConfig($index)
+}
+catch {unset oldhome platform temp result oldConfig}
+concat ""

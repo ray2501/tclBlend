@@ -1,0 +1,193 @@
+# Commands covered:  none--covers static methods of Util class.
+#
+# This file contains a collection of tests for one or more of the Tcl
+# built-in commands.  Sourcing this file into Tcl runs the tests and
+# generates output for errors.  No output means no errors were found.
+#
+# Copyright (c) 1991-1993 The Regents of the University of California.
+# Copyright (c) 1998 Sun Microsystems, Inc.
+#
+# See the file "license.terms" for information on usage and redistribution
+# of this file, and for a DISCLAIMER OF ALL WARRANTIES.
+#
+# SCCS: @(#) util.test 1.1 98/01/26 16:22:31
+
+if {[lsearch [namespace children] ::tcltest] == -1} {
+    package require tcltest
+    namespace import -force ::tcltest::*
+}
+
+test util-1.1 {stringMatch} {
+    string match ab*c abc
+} 1
+
+test util-1.2 {stringMatch} {
+    string match ab**c abc
+} 1
+
+test util-1.3 {stringMatch} {
+    string match ab* abcdef
+} 1
+
+test util-1.4 {stringMatch} {
+    string match *c abc
+} 1
+
+test util-1.5 {stringMatch} {
+    string match *3*6*9 0123456789
+} 1
+
+test util-1.6 {stringMatch} {
+    string match *3*6*9 01234567890
+} 0
+
+test util-1.8 {stringMatch} {
+    string match a?c abc
+} 1
+
+test util-1.10 {stringMatch} {
+    string match a??c abc
+} 0
+
+test util-1.11 {stringMatch} {
+    string match ?1??4???8? 0123456789
+} 1
+
+test util-1.12 {stringMatch} {
+    string match {[abc]bc} abc
+} 1
+
+test util-1.14 {stringMatch} {
+    # if ((*pattern == ']') || (*pattern == '\0'))
+    # badly formed pattern
+
+    string match {[]} {[]}
+} 0
+
+test util-1.15 {stringMatch} {
+    # if ((*pattern == ']') || (*pattern == '\0'))
+    # badly formed pattern
+
+    string match {[} {[}
+} 0
+
+test util-1.16 {stringMatch} {
+    string match {a[abc]c} abc
+} 1
+
+test util-1.20 {stringMatch} {
+    string match {a[xyz]c} abc
+} 0
+
+test util-1.21 {stringMatch} {
+    string match {12[2-7]45} 12345
+} 1
+
+test util-1.25 {stringMatch} {
+    string match {12[ab2-4cd]45} 12345
+} 1
+
+test util-1.26 {stringMatch} {
+    string match {12[ab2-4cd]45} 12b45
+} 1
+
+test util-1.27 {stringMatch} {
+    string match {12[ab2-4cd]45} 12d45
+} 1
+
+test util-1.28 {stringMatch} {
+    string match {12[ab2-4cd]45} 12145
+} 0
+
+test util-1.29 {stringMatch} {
+    string match {12[ab2-4cd]45} 12545
+} 0
+
+test util-1.30 {stringMatch: forwards range} {
+    string match {[k-w]} "z"
+} 0
+
+test util-1.31 {stringMatch: forwards range} {
+    string match {[k-w]} "w"
+} 1
+
+test util-1.32 {stringMatch: forwards range} {
+    string match {[k-w]} "r"
+} 1
+
+test util-1.33 {stringMatch: forwards range} {
+    string match {[k-w]} "k"
+} 1
+
+test util-1.34 {stringMatch: forwards range} {
+    string match {[k-w]} "a"
+} 0
+
+test util-1.35 {stringMatch: reverse range} {
+    string match {[w-k]} "z"
+} 0
+
+test util-1.36 {stringMatch: reverse range} {
+    string match {[w-k]} "w"
+} 1
+
+test util-1.37 {stringMatch: reverse range} {
+    string match {[w-k]} "r"
+} 1
+
+test util-1.38 {stringMatch: reverse range} {
+    string match {[w-k]} "k"
+} 1
+
+test util-1.39 {stringMatch: reverse range} {
+    string match {[w-k]} "a"
+} 0
+
+test util-1.40 {stringMatch: skip correct number of ']'} {knownbug} {
+    string match {[A-]x} Ax
+} 1
+
+# the wrong way is 0
+
+test util-1.41 {stringMatch: skip correct number of ']'} {knownbug} {
+    string match {[A-]]x} Ax
+} 0
+
+# the wrong way is 1
+
+test util-1.44 {stringMatch: skip correct number of ']'} {
+    string match {[A-]h]x} hx
+} 1
+
+test util-1.45 {stringMatch} {
+    # if (*pattern == '\0')
+    # badly formed pattern
+
+    string match {[a} a
+} 1
+
+# the wrong way is 0
+
+test util-1.46 {stringMatch} {
+    string match {a\*b} a*b
+} 1
+
+test util-1.47 {stringMatch} {
+    string match {a\*b} ab
+} 0
+
+test util-1.48 {stringMatch} {
+    string match {a\*\?\[\]\\\x} "a*?\[\]\\x"
+} 1
+
+test util-1.49 {stringMatch} {
+    string match ** ""
+} 1
+
+test util-1.50 {stringMatch} {
+    string match *. ""
+} 0
+
+test util-1.51 {stringMatch} {
+    string match "" ""
+} 1

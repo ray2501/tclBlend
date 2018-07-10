@@ -1,0 +1,53 @@
+# javaNullCmd.test --
+#
+#	Tests the java::null command.
+#
+# Copyright (c) 1997 by Sun Microsystems, Inc.
+#
+# See the file "license.terms" for information on usage and redistribution
+# of this file, and for a DISCLAIMER OF ALL WARRANTIES.
+#
+# RCS: @(#) $Id: JavaNullCmd.test,v 1.2 2000/12/22 09:47:15 mdejong Exp $
+
+if {[lsearch [namespace children] ::tcltest] == -1} {
+    package require tcltest
+    namespace import -force ::tcltest::*
+}
+
+setupJavaPackage
+
+test javaNullCmd-1.1 {conversion} {
+    java::call tests.ConvertTest staticTestParam ""
+} 1
+
+test javaNullCmd-1.2 {conversion} {
+    java::call tests.ConvertTest staticTestParam null
+} 3
+
+test javaNullCmd-1.3 {java::null command} {
+    java::call tests.ConvertTest staticTestParam [java::null]
+} 2
+
+test javaNullCmd-1.4 {java::null command} {
+    eval "java::call tests.ConvertTest staticTestParam [java::null]"
+} 2
+
+test javaNullCmd-1.5 {java::null command} {
+    list [catch {rename [java::null] ""} msg] $msg
+} {1 {can't delete "java0x0": command doesn't exist}}
+
+test javaNullCmd-1.6 {java::null command} {
+    catch {
+	rename [java::null] ""
+    } msg
+
+    list $msg [java::instanceof [java::null] java.lang.Object]
+} {{can't delete "java0x0": command doesn't exist} 0}
+
+test javaNullCmd-1.7 {java::null command} {
+    string compare [java::null] "java0x0"
+} {0}
+
+# cleanup
+::tcltest::cleanupTests
+return

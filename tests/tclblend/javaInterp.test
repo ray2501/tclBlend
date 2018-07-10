@@ -1,0 +1,828 @@
+# This file tests the functions in javaInterp.c.
+#
+# This file contains a collection of tests for one or more of the Tcl
+# built-in commands.  Sourcing this file into Tcl runs the tests and
+# generates output for errors.  No output means no errors were found.
+#
+# Copyright (c) 1997 by Sun Microsystems, Inc.
+#
+# See the file "license.terms" for information on usage and redistribution
+# of this file, and for a DISCLAIMER OF ALL WARRANTIES.
+#
+# RCS: @(#) $Id: javaInterp.test,v 1.12 2006/07/26 20:55:28 mdejong Exp $
+
+if {[lsearch [namespace children] ::tcltest] == -1} {
+    package require tcltest
+    namespace import -force ::tcltest::*
+}
+
+setupJavaPackage
+
+catch {rename testobject}
+[java::getinterp] createCommand testobject [java::new tests.TestObjectCmd]
+
+test javaInterp-1.1 {ThrowNullPointerException} {
+    set i [java::new tcl.lang.Interp]
+    $i dispose
+    list [catch {$i addErrorInfo foobar} msg] $msg
+} {1 {java.lang.NullPointerException: Invalid interpreter.}}
+
+test javaInterp-2.1 {Java_tcl_lang_Interp_create} {
+    set i [java::new tcl.lang.Interp]
+    $i {eval String} {info commands set}
+    set result [[$i getResult] toString]
+    $i dispose
+    set result
+} {set}
+
+test javaInterp-3.1 {Java_tcl_lang_Interp_init} {
+    set i [java::new tcl.lang.Interp]
+    $i {eval String} {info commands java::new}
+    set result [[$i getResult] toString]
+    $i dispose
+    set result
+} {::java::new}
+
+test javaInterp-4.1 {Java_tcl_lang_Interp_doDispose} {
+    set i [java::new tcl.lang.Interp]
+    $i dispose
+    list [catch {$i dispose} msg] $msg
+} {0 {}}
+
+test javaInterp-5.1 {Java_tcl_lang_Interp_eval} {
+    set i [java::new tcl.lang.Interp]
+    $i dispose
+    list [catch {$i {eval java.lang.String} {set x 1}} msg] $msg
+} {1 {java.lang.NullPointerException: Invalid interpreter.}}
+test javaInterp-5.2 {Java_tcl_lang_Interp_eval} {
+    set i [java::new tcl.lang.Interp]
+    set result [list [catch {$i {eval java.lang.String} [java::null]} msg] $msg]
+    $i dispose
+    set result
+} {1 {java.lang.NullPointerException: No string to evaluate.}}
+test javaInterp-5.3 {Java_tcl_lang_Interp_eval} {
+    set i [java::getinterp]
+    set x global
+    proc doit {} {
+	global i
+	set x local
+	set ::y {}
+	$i {eval String int} {lappend ::y $x} 0
+	$i {eval String int} {lappend ::y $x} \
+		 [java::field tcl.lang.TCL GLOBAL_ONLY]
+	return $::y
+    }
+    doit
+} {local global}
+test javaInterp-5.4 {Java_tcl_lang_Interp_eval} {
+    set i [java::new tcl.lang.Interp]
+    $i {eval java.lang.String} {expr 4 * 5}
+    set result [[$i getResult] toString]
+    $i dispose
+    set result
+} {20}
+test javaInterp-5.5 {Java_tcl_lang_Interp_eval} {
+    set i [java::new tcl.lang.Interp]
+    set result [list [catch {$i {eval java.lang.String} {set x}} msg] $msg]
+    $i dispose
+    set result
+} {1 {can't read "x": no such variable}}
+
+test javaInterp-6.1 {Java_tcl_lang_Interp_getResult} {
+    set i [java::new tcl.lang.Interp]
+    $i dispose
+     list [catch {$i getResult} msg] $msg
+} {1 {java.lang.NullPointerException: Invalid interpreter.}}
+test javaInterp-6.2 {Java_tcl_lang_Interp_getResult} {
+    set i [java::new tcl.lang.Interp]
+    $i {eval String} {expr 4*5}
+    set result [[$i getResult] toString]
+    $i dispose
+    set result
+} {20}
+
+test javaInterp-7.1 {Java_tcl_lang_Interp_setResult} {
+    set i [java::new tcl.lang.Interp]
+    $i dispose
+    list [catch {$i {setResult int} 0} msg] $msg
+} {1 {java.lang.NullPointerException: Invalid interpreter.}}
+test javaInterp-7.2 {Java_tcl_lang_Interp_setResult} {
+    set i [java::new tcl.lang.Interp]
+    set result [list [catch {$i {setResult tcl.lang.TclObject} [java::null]} msg] $msg]
+    $i dispose
+    set result
+} {1 {java.lang.NullPointerException: Invalid result object.}}
+test javaInterp-7.3 {Java_tcl_lang_Interp_setResult} {
+    set i [java::new tcl.lang.Interp]
+    $i {setResult int} 42
+    set result [[$i getResult] toString]
+    $i dispose
+    set result
+} {42}
+test javaInterp-7.4 {Java_tcl_lang_Interp_setResult} {
+    set results [list]
+    set i [java::getinterp]
+    $i createCommand testsetinterpresult \
+        [java::new tests.SetInterpResultCmd]
+
+    lappend results [testsetinterpresult true]
+    lappend results [testsetinterpresult false]
+    lappend results [testsetinterpresult min_int]
+    lappend results [testsetinterpresult max_int]
+    lappend results [testsetinterpresult int \
+        [java::field java.lang.Integer MIN_VALUE]]
+    lappend results [testsetinterpresult int \
+        [java::field java.lang.Integer MAX_VALUE]]
+
+    rename testsetinterpresult {}
+
+    set results
+} {1 0 -2147483648 2147483647 -2147483648 2147483647}
+test javaInterp-7.5 {Java_tcl_lang_Interp_setResult} {
+    set results [list]
+    set i [java::getinterp]
+    $i createCommand testsetinterpresult \
+        [java::new tests.SetInterpResultCmd]
+
+    # Native versions of Interp.setResult() are optimized
+    # to avoid allocating a TclObject for boolean and int results.
+
+    lappend results [btest isjobject [testsetinterpresult true]]
+    lappend results [btest isjobject [testsetinterpresult max_int]]
+
+    rename testsetinterpresult {}
+
+    set results
+} {0 0}
+
+test javaInterp-8.1 {Java_tcl_lang_Interp_resetResult} {
+    set i [java::new tcl.lang.Interp]
+    $i dispose
+    list [catch {$i {resetResult}} msg] $msg
+} {1 {java.lang.NullPointerException: Invalid interpreter.}}
+test javaInterp-8.2 {Java_tcl_lang_Interp_resetResult} {
+    set i [java::new tcl.lang.Interp]
+    $i {setResult int} 42
+    set result [[$i getResult] toString]
+    $i resetResult
+    lappend result [[$i getResult] toString]
+    $i dispose
+    set result
+} {42 {}}
+
+test javaInterp-9.1 {Java_tcl_lang_Interp_setVar} {
+    set i [java::new tcl.lang.Interp]
+    $i dispose
+    list [catch {$i {setVar String tcl.lang.TclObject int} \
+		     [java::null] [java::null] 0} msg] $msg
+} {1 {java.lang.NullPointerException: Invalid interpreter.}}
+test javaInterp-9.2 {Java_tcl_lang_Interp_setVar} {
+    catch {unset foo}
+    set i [java::getinterp]
+    set value [java::call tcl.lang.TclString {newInstance String} baz]
+    list [catch {$i {setVar String tcl.lang.TclObject int} \
+		     [java::null] $value 0} msg] $msg
+} {1 {java.lang.NullPointerException: setVar}}
+test javaInterp-9.3 {Java_tcl_lang_Interp_setVar} {
+    catch {unset foo}
+    set i [java::getinterp]
+    set value [java::call tcl.lang.TclString {newInstance String} baz]
+    list [catch {$i {setVar String tcl.lang.TclObject int} \
+		     foo [java::null] 0} msg] $msg
+} {1 {java.lang.NullPointerException: setVar}}
+test javaInterp-9.4 {Java_tcl_lang_Interp_setVar} {
+    catch {unset foo}
+    set i [java::getinterp]
+    set value [java::call tcl.lang.TclString {newInstance String} baz]
+    list [[$i {setVar java.lang.String tcl.lang.TclObject int} \
+	       foo(bar) $value 0] toString] [set foo(bar)]
+} {baz baz}
+test javaInterp-9.5 {Java_tcl_lang_Interp_setVar} {
+    catch {unset foo}
+    set i [java::getinterp]
+    set value [java::call tcl.lang.TclString {newInstance String} baz]
+    list [[$i {setVar java.lang.String tcl.lang.TclObject int} \
+	       foo $value 0] toString] [set foo]
+} {baz baz}
+test javaInterp-9.6 {Java_tcl_lang_Interp_setVar} {
+    catch {unset foo}
+    set i [java::getinterp]
+    set value [java::call tcl.lang.TclString {newInstance String} baz]
+    list [[$i {setVar java.lang.String java.lang.String tcl.lang.TclObject int} \
+	       foo bar $value 0] toString] [set foo(bar)]
+} {baz baz}
+test javaInterp-9.7 {Java_tcl_lang_Interp_setVar: error result} {
+    set i [java::new tcl.lang.Interp]
+    set flags [java::field tcl.lang.TCL LEAVE_ERR_MSG]
+    $i {eval java.lang.String} {set foo 1}
+    set value [java::call tcl.lang.TclString {newInstance String} baz]
+    set result [list [catch {
+	$i {setVar java.lang.String tcl.lang.TclObject int} foo(bar) \
+	    $value $flags
+    } msg] $msg]
+    $i dispose
+    set result
+} {1 {can't set "foo(bar)": variable isn't array}}
+test javaInterp-9.8 {Java_tcl_lang_Interp_setVar: different result} {
+    trace var x w foo
+    proc foo {var1 var2 op} {
+	uplevel 1 set $var1 42
+    }
+    set i [java::getinterp]
+    set value [java::call tcl.lang.TclString {newInstance String} baz]
+    set r [$i {setVar java.lang.String tcl.lang.TclObject int} x $value 0]
+    $r preserve
+    unset x
+    set str [$r toString]
+    $r release
+    set str
+} 42
+test javaInterp-9.9 {Java_tcl_lang_Interp_setVar: memory leak} {
+    set interp [java::getinterp]
+    set obj [java::new Object]
+    set append [java::field tcl.lang.TCL APPEND_VALUE]
+    set copy ""
+    append copy "hi "
+    # The following set command does not incr the ref
+    # count of the Tcl_Obj created in Java_tcl_lang_Interp_setVar.
+    # This used to leak memory.
+    $interp {setVar String tcl.lang.TclObject int} \
+        "copy" [jtest getobject $obj] $append
+    unset copy
+    unset append
+    unset obj
+    unset interp
+    set nothing ok
+} {ok}
+
+test javaInterp-10.1 {Java_tcl_lang_Interp_getVar} {
+    set i [java::new tcl.lang.Interp]
+    $i dispose
+    list [catch {$i {getVar String int} [java::null] 0} msg] $msg
+} {1 {java.lang.NullPointerException: Invalid interpreter.}}
+test javaInterp-10.2 {Java_tcl_lang_Interp_getVar} {
+    catch {unset foo}
+    set i [java::getinterp]
+    list [catch {$i {getVar String int} [java::null] 0} msg] $msg
+} {1 {java.lang.NullPointerException: getVar}}
+test javaInterp-10.3 {Java_tcl_lang_Interp_getVar} {
+    catch {unset foo}
+    set foo baz
+    set i [java::getinterp]
+    [$i {getVar java.lang.String int} foo 0] toString
+} {baz}
+test javaInterp-10.4 {Java_tcl_lang_Interp_getVar} {
+    catch {unset foo}
+    set foo(bar) baz
+    set i [java::getinterp]
+    [$i {getVar java.lang.String int} foo(bar) 0] toString
+} {baz}
+test javaInterp-10.5 {Java_tcl_lang_Interp_getVar} {
+    catch {unset foo}
+    set foo(bar) baz
+    set i [java::getinterp]
+    [$i {getVar java.lang.String java.lang.String int} foo bar 0] toString
+} {baz}
+test javaInterp-10.6 {Java_tcl_lang_Interp_getVar} {
+    set i [java::new tcl.lang.Interp]
+    set flags [java::field tcl.lang.TCL LEAVE_ERR_MSG]
+    set result [list [catch {
+	$i {getVar java.lang.String java.lang.String int} foo bar $flags
+    } msg] $msg]
+    $i dispose
+    set result
+} {1 {can't read "foo(bar)": no such variable}}
+test javaInterp-10.7 {Java_tcl_lang_Interp_getVar} {
+    set i [java::getinterp]
+    set x [java::new String 42]
+    set tobj [$i getVar x [java::null] 0]
+    $tobj preserve
+    unset x
+    set xobj [$tobj toString]
+    set result [$xobj toString]
+    $tobj release
+    unset tobj
+    llength $xobj
+    lappend result [catch {$xobj toString}]
+} {42 1}
+
+test javaInterp-11.1 {Java_tcl_lang_Interp_unsetVar} {
+    set i [java::new tcl.lang.Interp]
+    $i dispose
+    list [catch {$i {unsetVar String int} [java::null] 0} msg] $msg
+} {1 {java.lang.NullPointerException: Invalid interpreter.}}
+test javaInterp-11.2 {Java_tcl_lang_Interp_unsetVar} {
+    catch {unset foo}
+    set i [java::getinterp]
+    list [catch {$i {unsetVar String int} [java::null] 0} msg] $msg
+} {1 {java.lang.NullPointerException: unsetVar}}
+test javaInterp-11.3 {Java_tcl_lang_Interp_unsetVar} {
+    catch {unset foo}
+    set foo baz
+    set i [java::getinterp]
+    $i {unsetVar java.lang.String int} foo 0
+    info var foo
+} {}
+test javaInterp-11.4 {Java_tcl_lang_Interp_unsetVar} {
+    catch {unset foo}
+    set foo(bar) baz
+    set i [java::getinterp]
+    $i {unsetVar java.lang.String int} foo(bar) 0
+    list [array exists foo] [array names foo]
+} {1 {}}
+test javaInterp-11.5 {Java_tcl_lang_Interp_unsetVar} {
+    catch {unset foo}
+    set foo(bar) baz
+    set i [java::getinterp]
+    $i {unsetVar java.lang.String java.lang.String int} foo bar 0
+    list [array exists foo] [array names foo]
+} {1 {}}
+test javaInterp-11.6 {Java_tcl_lang_Interp_unsetVar} {
+    set i [java::new tcl.lang.Interp]
+    set flags [java::field tcl.lang.TCL LEAVE_ERR_MSG]
+    set result [list [catch {
+	$i {unsetVar java.lang.String java.lang.String int} foo bar $flags
+    } msg] $msg]
+    $i dispose
+    set result
+} {1 {can't unset "foo(bar)": no such variable}}
+
+
+test javaInterp-12.1 {Java_tcl_lang_Interp_traceVar} {
+    set i [java::new tcl.lang.Interp]
+    $i dispose
+    list [catch {$i traceVar foo [java::null] 0} msg] $msg
+} {1 {java.lang.NullPointerException: Invalid interpreter.}}
+test javaInterp-12.2 {Java_tcl_lang_Interp_traceVar} {
+    set i [java::getinterp]
+    list [catch {$i traceVar [java::null] [java::null] 0} msg] $msg
+} {1 {java.lang.NullPointerException: traceVar}}
+test javaInterp-12.3 {Java_tcl_lang_Interp_traceVar} {
+    set i [java::getinterp]
+    list [catch {$i traceVar foo [java::null] 0} msg] $msg
+} {1 {java.lang.NullPointerException: traceVar}}
+test javaInterp-12.4 {Java_tcl_lang_Interp_traceVar} {
+    set i [java::new tcl.lang.Interp]
+    $i {eval String} {set foo 42}
+    set t [java::new tests.VarTraceTest {}]
+    set result [catch {$i traceVar foo(bar) $t 0}]
+    lappend result [[$i getResult] toString]
+    $i dispose
+    set result
+} {1 {can't trace "foo(bar)": variable isn't array}}
+test javaInterp-12.5 {Java_tcl_lang_Interp_untraceVar} {
+    set i [java::new tcl.lang.Interp]
+    $i dispose
+    list [catch {$i untraceVar foo [java::null] 0} msg] $msg
+} {1 {java.lang.NullPointerException: Invalid interpreter.}}
+test javaInterp-12.6 {Java_tcl_lang_Interp_untraceVar} {
+    set i [java::getinterp]
+    list [catch {$i untraceVar [java::null] [java::null] 0} msg] $msg
+} {1 {java.lang.NullPointerException: untraceVar}}
+test javaInterp-12.7 {Java_tcl_lang_Interp_traceVar} {
+    set i [java::getinterp]
+    list [catch {$i untraceVar foo [java::null] 0} msg] $msg
+} {1 {java.lang.NullPointerException: untraceVar}}
+test javaInterp-12.8 {Java_tcl_lang_Interp_traceVar & _untraceVar} {
+    catch {unset foo}
+    set t [java::new tests.VarTraceTest {set foo read}]
+    set i [java::getinterp]
+    set foo 42
+    $i traceVar foo $t [java::field tcl.lang.TCL TRACE_READS]
+    set result [set foo]
+    $i untraceVar foo $t [java::field tcl.lang.TCL TRACE_READS]
+    set foo 42
+    lappend result [set foo]
+} {read 42}
+test javaInterp-12.9 {Java_tcl_lang_Interp_traceVar & _untraceVar} {
+    catch {unset foo}
+    set t [java::new tests.VarTraceTest {set foo write}]
+    set i [java::getinterp]
+    $i traceVar foo $t [java::field tcl.lang.TCL TRACE_WRITES]
+    set result [set foo 42]
+    $i untraceVar foo $t [java::field tcl.lang.TCL TRACE_WRITES]
+    lappend result [set foo 42]
+} {write 42}
+test javaInterp-12.10 {Java_tcl_lang_Interp_traceVar & _untraceVar} {
+    catch {unset foo}
+    set t [java::new tests.VarTraceTest {set foo unset}]
+    set i [java::getinterp]
+    set foo 42
+    $i traceVar foo $t [java::field tcl.lang.TCL TRACE_UNSETS]
+    unset foo
+    set result [set foo]
+    $i untraceVar foo $t [java::field tcl.lang.TCL TRACE_UNSETS]
+    unset foo
+    lappend result [catch {unset foo} msg] $msg
+} {unset 1 {can't unset "foo": no such variable}}
+
+test javaInterp-13.1 {JavaTraceProc} {
+    catch {unset foo}
+    set result {}
+    set t [java::new tests.VarTraceTest {error {traceProc failed}}]
+    set i [java::new tcl.lang.Interp]
+    $i traceVar foo $t [java::field tcl.lang.TCL TRACE_WRITES]
+    set result [list [catch {$i {eval String} {set foo 42}}] \
+		    [[$i getResult] toString]]
+    $i untraceVar foo $t [java::field tcl.lang.TCL TRACE_WRITES]
+    $i {eval String} {set foo 42}
+    lappend result [[$i getResult] toString]
+    $i dispose
+    set result
+} {1 {can't set "foo": traceProc failed} 42}
+
+test javaInterp-14.1 {Java_tcl_lang_Interp_createCommand} {
+    set i [java::new tcl.lang.Interp]
+    $i dispose
+    list [catch {$i createCommand fooCmd [java::null]} msg] $msg
+} {1 {java.lang.NullPointerException: Invalid interpreter.}}
+test javaInterp-14.2 {Java_tcl_lang_Interp_createCommand} {
+    set i [java::new tcl.lang.Interp]
+    set result [list [catch {$i createCommand [java::null] [java::null]} msg] $msg]
+    $i dispose
+    set result
+} {1 {java.lang.NullPointerException: createCommand}}
+test javaInterp-14.3 {Java_tcl_lang_Interp_createCommand} {
+    set i [java::new tcl.lang.Interp]
+    set result [list [catch {$i createCommand fooCmd [java::null]} msg] $msg]
+    $i dispose
+    set result
+} {1 {java.lang.NullPointerException: createCommand}}
+test javaInterp-14.4 {Java_tcl_lang_Interp_createCommand} {
+    catch {rename fooCmd {}}
+    set cmd [java::new tests.JavaTest]
+    java::field $cmd iboolean true
+    set i [java::getinterp]
+    $i createCommand fooCmd $cmd
+    set result [list [fooCmd] [rename fooCmd {}]]
+} {{fooCmd: success} {}}
+test javaInterp-14.5 {Java_tcl_lang_Interp_createCommand} {
+    catch {rename fooCmd {}}
+    set cmd [java::new tests.JavaTest]
+    java::field $cmd iboolean false
+    set i [java::getinterp]
+    $i createCommand fooCmd $cmd
+    set result [list [catch {fooCmd} msg] $msg [rename fooCmd {}]]
+} {1 {fooCmd: failure} {}}
+test javaInterp-14.6 {Java_tcl_lang_Interp_createCommand} {
+    catch {rename fooCmd {}}
+    set cmd [java::new tests.JavaTest]
+    java::field $cmd iboolean true
+    set i [java::getinterp]
+    $i createCommand fooCmd $cmd
+    set result [list [fooCmd arg1 arg2] [rename fooCmd {}]]
+} {{fooCmd, arg1, arg2: success} {}}
+test javaInterp-14.7 {Java_tcl_lang_Interp_createCommand} {
+    catch {rename fooCmd {}}
+    set cmd [java::new tests.JavaTest]
+    java::field $cmd iboolean false
+    set i [java::getinterp]
+    $i createCommand fooCmd $cmd
+    set result [list [catch {fooCmd arg1 arg2} msg] $msg [rename fooCmd {}]]
+} {1 {fooCmd, arg1, arg2: failure} {}}
+
+test javaInterp-15.1 {JavaCmdDeleteProc} {
+    catch {rename fooCmd {}}
+    set cmd [java::new tests.JavaTest]
+    java::field $cmd iboolean true
+    java::field $cmd istr ready
+    set i [java::getinterp]
+    $i createCommand fooCmd $cmd
+    set result [fooCmd arg1 arg2]
+    rename fooCmd {}
+    lappend result [java::field $cmd istr]
+} {fooCmd, arg1, arg2: success disposed}
+
+test javaInterp-16.1 {JavaCmdProc} {
+    catch {unset foo}
+    set o [java::call tcl.lang.TclInteger newInstance 42]
+    set i [java::getinterp]
+    catch {$i {setVar java.lang.String tcl.lang.TclObject int} \
+	       foo $o 0}
+    testobject type $foo
+} tcl.lang.TclInteger
+
+test javaInterp-17.1 {Java_tcl_lang_Interp_deleteCommand} {
+    set i [java::new tcl.lang.Interp]
+    $i {eval java.lang.String} {info command switch}
+    set result [[$i getResult] toString]
+    lappend result [$i deleteCommand switch]
+    $i {eval java.lang.String} {info command switch}
+    lappend result [[$i getResult] toString]
+    lappend result [$i deleteCommand switch]
+    $i dispose
+    set result
+} {switch 0 {} -1}
+
+test javaInterp-18.1 {Java_tcl_lang_Interp_commandComplete} {
+    java::call tcl.lang.Interp commandComplete {set x 42}
+} 1
+test javaInterp-18.2 {Java_tcl_lang_Interp_commandComplete} {
+    java::call tcl.lang.Interp commandComplete "set x \{"
+} 0
+
+test javaInterp-19.1 {Java_tcl_lang_Interp_setErrorCode} {
+    set i [java::new tcl.lang.Interp]
+    $i dispose
+    list [catch {$i {setErrorCode tcl.lang.TclObject} [java::null]} msg] $msg
+} {1 {java.lang.NullPointerException: Invalid interpreter.}}
+test javaInterp-19.2 {Java_tcl_lang_Interp_setErrorCode} {
+    set i [java::getinterp]
+    list [catch {$i {setErrorCode tcl.lang.TclObject} [java::null]} msg] $msg
+} {1 {java.lang.NullPointerException: setErrorCode}}
+test javaInterp-19.3 {Java_tcl_lang_Interp_setErrorCode} {
+    set i [java::getinterp]
+    $i {setErrorCode tcl.lang.TclObject} \
+	[java::call tcl.lang.TclString {newInstance String} "foobar"]
+    set errorCode
+} foobar
+
+test javaInterp-20.1 {Java_tcl_lang_Interp_addErrorInfo} {
+    set i [java::new tcl.lang.Interp]
+    $i dispose
+    list [catch {$i addErrorInfo [java::null]} msg] $msg
+} {1 {java.lang.NullPointerException: Invalid interpreter.}}
+test javaInterp-20.2 {Java_tcl_lang_Interp_addErrorInfo} {
+    set i [java::getinterp]
+    list [catch {$i addErrorInfo [java::null]} msg] $msg
+} {1 {java.lang.NullPointerException: addErrorInfo}}
+test javaInterp-20.3 {Java_tcl_lang_Interp_addErrorInfo} {
+    set i [java::new tcl.lang.Interp]
+    $i addErrorInfo foobar
+    $i addErrorInfo baz
+    set result [[$i {getVar java.lang.String int} errorInfo 0] toString]
+    $i dispose
+    set result
+} foobarbaz
+
+test javaInterp-21.1 {Java_tcl_lang_Interp_pkgProvide} {
+    set i [java::new tcl.lang.Interp]
+    set result [list [catch {$i pkgProvide [java::null] 1.0} msg] $msg]
+    $i dispose
+    set result
+} {1 {java.lang.NullPointerException: pkgProvide}}
+test javaInterp-21.2 {Java_tcl_lang_Interp_pkgProvide} {
+    set i [java::new tcl.lang.Interp]
+    set result [list [catch {$i pkgProvide java [java::null]} msg] $msg]
+    $i dispose
+    set result
+} {1 {java.lang.NullPointerException: pkgProvide}}
+test javaInterp-21.3 {Java_tcl_lang_Interp_pkgProvide} {
+    set i [java::new tcl.lang.Interp]
+    $i pkgProvide blah 1.0
+    set result [list [catch {$i pkgProvide blah 1.1} msg] $msg]
+    $i dispose
+    set result
+} {1 {conflicting versions provided for package "blah": 1.0, then 1.1}}
+test javaInterp-21.4 {Java_tcl_lang_Interp_pkgProvide} {
+    set i [java::new tcl.lang.Interp]
+    $i pkgProvide blah 1.0
+    $i dispose
+} {}
+
+test javaInterp-22.1 {Java_tcl_lang_Interp_pkgRequire} {
+    set i [java::new tcl.lang.Interp]
+    set result [list [catch {$i pkgRequire blah 1.2 hi} msg] $msg]
+    $i dispose
+    set result
+} {1 {expected boolean value but got "hi"}}
+test javaInterp-22.2 {Java_tcl_lang_Interp_pkgRequire} {
+    set i [java::new tcl.lang.Interp]
+    set result [list [catch {$i pkgRequire [java::null] 1.2 1} msg] $msg]
+    $i dispose
+    set result
+} {1 {java.lang.NullPointerException: pkgRequire}}
+test javaInterp-22.3 {Java_tcl_lang_Interp_pkgRequire} {
+    set i [java::new tcl.lang.Interp]
+    set result [list [catch {$i pkgRequire blah [java::null] 1} msg] $msg]
+    $i dispose
+    set result
+} {1 {java.lang.NullPointerException: pkgRequire}}
+test javaInterp-22.4 {Java_tcl_lang_Interp_pkgRequire} {
+    set i [java::new tcl.lang.Interp]
+    $i pkgProvide blah 1.3  
+    set result [list [catch {$i pkgRequire blah 1.4 0} msg] $msg]
+    $i dispose
+    set result
+} {1 {version conflict for package "blah": have 1.3, need 1.4}}
+test javaInterp-22.5 {Java_tcl_lang_Interp_pkgRequire} {
+    set i [java::new tcl.lang.Interp]
+    $i pkgProvide blah 1.3  
+    set result [list [catch {$i pkgRequire blah 1.2 1} msg] $msg]
+    $i dispose
+    set result
+} {1 {version conflict for package "blah": have 1.3, need 1.2}}
+test javaInterp-22.6 {Java_tcl_lang_Interp_pkgRequire} {
+    set i [java::new tcl.lang.Interp]
+    $i pkgProvide blah 1.3  
+    set result [list [catch {$i pkgRequire blah 1.4 1} msg] $msg]
+    $i dispose
+    set result
+} {1 {version conflict for package "blah": have 1.3, need 1.4}}
+test javaInterp-22.7 {Java_tcl_lang_Interp_pkgRequire} {
+    set i [java::new tcl.lang.Interp]
+    $i pkgProvide blah 1.3  
+    set result [$i pkgRequire blah 1.2 0]
+    $i dispose
+    set result
+} {1.3}
+test javaInterp-22.8 {Java_tcl_lang_Interp_pkgRequire} {
+    set i [java::new tcl.lang.Interp]
+    $i pkgProvide blah 1.3  
+    set result [$i pkgRequire blah 1.3 1]
+    $i dispose
+    set result
+} {1.3}
+test javaInterp-22.9 {Java_tcl_lang_Interp_pkgRequire} {
+    set i [java::new tcl.lang.Interp]
+    $i pkgProvide blah 1.3  
+    set result [$i pkgRequire blah 1.3 0]
+    $i dispose
+    set result
+} {1.3}
+
+test javaInterp-23.1 {If dispose is not called for an interp, the
+        dispose method will print an message to stderr} {
+    set script {
+set i [java::new tcl.lang.Interp]
+#$i dispose
+unset i
+java::call System runFinalizersOnExit 1
+java::call System exit 0
+}
+    catch \
+    {exec $env(JAVA) -classpath $env(CLASSPATH) tests.JavaEval $script} \
+    err
+    # The interp we did not dispose of and the interp
+    # we exited from via Java print an error here!
+    set err
+} {finalized interp has not been disposed
+finalized interp has not been disposed}
+
+test javaInterp-24.1 {callCommand completion code} {
+    btest compcode {testcompcode 1234 {}}
+} 1234
+
+test javaInterp-24.2 {callCommand completion code} {
+    jtest compcode {testcompcode 1234 {}}
+} 1234
+
+# JavaGetInterp is already tested by the rest of this file
+
+test javaInterp-25.1 {Interp.callCommand} {
+    # When Interp.callCommand is invoked for this call to
+    # java::throw, it does not propagate the Java exception.
+
+    list \
+        [catch {java::throw [java::new Exception myerr1]}] \
+        [btest isjniexceptionpending]
+} {1 0}
+
+test javaInterp-25.2 {Interp.callCommand} {
+    # The Interp.callCommand invoked by {$i eval ...}
+    # does not propagate the Java exception.
+
+    set i [java::getinterp]
+    set script {java::throw [java::new Exception myerr1]}
+
+    list \
+        [catch {$i eval $script}] \
+        [btest isjniexceptionpending]
+} {1 0}
+
+test javaInterp-25.3 {Interp.callCommand} {
+    # When Interp.callCommand is invoked via
+    # {$i eval ...} it would stop propagation
+    # of the exception. Unfortunatly, that is too
+    # late as the exception is propagated by
+    # the jtest invocation. Tcl's catch command
+    # in the script being evaluated does not
+    # know how to clear the JNI exception pending
+    # flag. The exception is propagated because
+    # the interp class thinks that Interp.eval()
+    # was invoked from Java code.
+
+    set i [java::getinterp]
+    set script {
+    set RESULT [list \
+        [catch {jtest tclexception}] \
+        [btest isjniexceptionpending] \
+    ]
+}
+
+    set RESULT {}
+    list [catch {$i eval $script}] $RESULT
+} {0 {1 0}}
+
+test javaInterp-25.4 {Interp.callCommand} {
+    # This test raises a NullPointerException
+    # in the implementation of the cmdProc()
+    # method. Unlike a NullPointerException
+    # thrown by the java::throw command, this
+    # code does not wrap the NullPointerException
+    # as a ReflectException, as a result it
+    # is should not be caught by the catch
+    # command. Trouble is, Tcl's catch command
+    # does not behave exactly like Jacl's catch
+    # command, it will try to catch a RuntimeException.
+    # Deal with this confusing case by throwing
+    # a class derived from RuntimeException at the
+    # end of a Java eval block. In the case where
+    # only a catch command is run, this exception
+    # would be caught. Jacl would unwind the stack
+    # until the java::try command caught the npe.
+
+    set i [java::getinterp]
+    set script {
+    set RESULT [list \
+        [catch {jtest npe}] \
+        [btest isjniexceptionpending] \
+    ]
+}
+
+    set RESULT {}
+    set caught 0
+    java::try {
+        $i eval $script
+    } catch {NullPointerException npe} {
+        set caught 1
+    }
+    list $caught $RESULT
+} {1 {1 0}}
+
+test javaInterp-25.5 {Interp.callCommand} {
+    # This test raises a NullPointerException
+    # using the java::throw command. This will
+    # wrap the NullPointerException as a
+    # ReflectException so that it can be
+    # caught with the catch command.
+
+    set i [java::getinterp]
+    set script {
+    set RESULT [list \
+        [catch {java::throw [java::new NullPointerException myerr1]}] \
+        [btest isjniexceptionpending] \
+    ]
+}
+
+    set RESULT {}
+    set caught 0
+    java::try {
+        $i eval $script
+    } catch {NullPointerException npe} {
+        set caught 1
+    }
+    list $caught $RESULT
+} {0 {1 0}}
+
+test javaInterp-25.6 {Interp.callCommand} {
+    # Invoking Interp.callCommand from Tcl code invoked
+    # by Java code causes the exception to be propataged,
+    # but that should not happen since the first command
+    # in the evaluation caught a Tcl error.
+
+    set i [java::getinterp]
+    set script {
+    set RESULT [list \
+        [catch {java::throw [java::new Exception myerr1]}] \
+        [btest isjniexceptionpending] \
+    ]
+}
+
+    set RESULT {}
+    set caught 0
+    java::try {
+        $i eval $script
+    } catch {Exception e} {
+        set caught 1
+    }
+    list $caught $RESULT
+} {0 {1 0}}
+
+test javaInterp-25.7 {Interp.callCommand} {
+    # If Tcl's catch command is used to catch a Java exception, then
+    # the JNI exception pending flag is not cleared. The result is
+    # that next call to a Java method (java::getinterp) will generate
+    # a panic since a JNI exception is pending. Once the problem is
+    # fixed in the Interp class and the JNI layer, this code will
+    # no longer generate a panic().
+
+    set i [java::getinterp]
+    set script {
+catch {java::throw [java::new Exception myerr1]}
+java::getinterp
+}
+
+    list \
+        [catch {$i {eval java.lang.String} $script} msg] \
+        $msg
+} {0 {}}
+
+
+# cleanup
+
+catch {unset foo}
+catch {unset i}
+catch {unset result}
+::tcltest::cleanupTests
+return

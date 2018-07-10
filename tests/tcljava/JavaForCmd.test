@@ -1,0 +1,435 @@
+# Test the implementation of the java::for command
+#
+# Copyright (c) 2006 by Moses DeJong.
+#
+# See the file "license.terms" for information on usage and redistribution
+# of this file, and for a DISCLAIMER OF ALL WARRANTIES.
+#
+# RCS: @(#) $Id: JavaForCmd.test,v 1.1 2006/04/13 20:07:04 mdejong Exp $
+
+if {[lsearch [namespace children] ::tcltest] == -1} {
+    package require tcltest
+    namespace import -force ::tcltest::*
+}
+
+setupJavaPackage
+
+java::import -package java.util Vector Hashtable Map HashMap
+
+# Test series 1.
+# Make sure the common errors are detected
+
+test javaforcmd-1.1 {JavaForCmd: common errors} {
+    list [catch {
+    java::for
+    } err] $err
+} {1 {wrong # args: should be "java::for type_var collection script"}}
+
+test javaforcmd-1.2 {JavaForCmd: common errors} {
+    list [catch {
+    java::for {}
+    } err] $err
+} {1 {wrong # args: should be "java::for type_var collection script"}}
+
+test javaforcmd-1.3 {JavaForCmd: common errors} {
+    list [catch {
+    java::for {} {}
+    } err] $err
+} {1 {wrong # args: should be "java::for type_var collection script"}}
+
+test javaforcmd-1.4 {JavaForCmd: common errors} {
+    list [catch {
+    java::for {} {} {} {}
+    } err] $err
+} {1 {wrong # args: should be "java::for type_var collection script"}}
+
+test javaforcmd-1.5 {JavaForCmd: 0 arguments in type_var list} {
+    list [catch {
+    java::for {} {} {}
+    } err] $err
+} {1 {invalid type_var ""}}
+
+test javaforcmd-1.6 {JavaForCmd: 1 arguments in type_var list} {
+    list [catch {
+    java::for {TYPE} {} {}
+    } err] $err
+} {1 {invalid type_var "TYPE"}}
+
+test javaforcmd-1.7 {JavaForCmd: 3 arguments in type_var list} {
+    list [catch {
+    java::for {TYPE VARNAME EXTRA} {} {}
+    } err] $err
+} {1 {invalid type_var "TYPE VARNAME EXTRA"}}
+
+test javaforcmd-1.8 {JavaForCmd: 2 arguments in type_var list} {
+    list [catch {
+    java::for {TYPE a(one)} {} {}
+    } err] $err
+} {1 {invalid type_var "TYPE a(one)", varname must be simple scalar}}
+
+test javaforcmd-1.9 {JavaForCmd: 2 arguments in type_var list} {
+    list [catch {
+    java::for {TYPE ::myglobal} {} {}
+    } err] $err
+} {1 {invalid type_var "TYPE ::myglobal", varname must be simple scalar}}
+
+test javaforcmd-1.10 {JavaForCmd: 2 arguments in type_var list} {
+    list [catch {
+    java::for {{} varname} {} {}
+    } err] $err
+} {1 {invalid type_var "{} varname"}}
+
+test javaforcmd-1.11 {JavaForCmd: 2 arguments in type_var list} {
+    list [catch {
+    java::for {TYPE {}} {} {}
+    } err] $err
+} {1 {invalid type_var "TYPE {}"}}
+
+
+# Test series 2.
+
+test javaforcmd-2.1 {JavaForCmd: iterate over Vector} {
+    set v [java::new Vector]
+    $v addElement [java::new String "One"]
+    $v addElement [java::new String "Two"]
+
+    set results [list]
+    java::for {String e} $v {
+        lappend results $e
+    }
+    set results
+} {One Two}
+
+test javaforcmd-2.2 {JavaForCmd: iterate over Vector of Integer as int primitive} {
+    set v [java::new Vector]
+    $v addElement [java::new Integer 0]
+    $v addElement [java::new Integer 1]
+    $v addElement [java::new Integer 2]
+
+    set results [list]
+    java::for {int e} $v {
+        lappend results $e
+    }
+    set results
+} {0 1 2}
+
+test javaforcmd-2.3 {JavaForCmd: iterate over Vector of Integer as Integer object} {
+    set v [java::new Vector]
+    $v addElement [java::new Integer 0]
+    $v addElement [java::new Integer 1]
+    $v addElement [java::new Integer 2]
+
+    set results [list]
+    java::for {Integer e} $v {
+        lappend results [$e toString]
+    }
+    set results
+} {0 1 2}
+
+test javaforcmd-2.4 {JavaForCmd: void not allowed} {
+    set v [java::new Vector]
+    list \
+        [catch {java::for {void v} $v {}} err] $err \
+        [catch {java::for {Void v} $v {}} err] $err \
+        [catch {java::for {java.lang.Void v} $v {}} err] $err
+} [list \
+    1 {void type is invalid} \
+    1 {void type is invalid} \
+    1 {void type is invalid} \
+    ]
+
+test javaforcmd-2.5 {JavaForCmd: can't iterate over non-Collection object} {
+    set obj [java::new Integer 0]
+    list [catch {java::for {Object o} $obj {}} err] $err
+} {1 {passed collection argument of type java.lang.Integer which does not implement Collection interface}}
+
+test javaforcmd-2.6 {JavaForCmd: iterate over Hashtable key/value pairs} {
+    set t [java::new java.util.Hashtable]
+    $t put "One" "onestr"
+    $t put "Two" "twostr"
+
+    set results [list]
+    java::for {java.util.Map.Entry e} [$t entrySet] {
+        set key [[$e getKey] toString]
+        set value [[$e getValue] toString]
+        lappend results [list $key $value]
+    }
+    set results
+} {{One onestr} {Two twostr}}
+
+test javaforcmd-2.7 {JavaForCmd: iterate over Hashtable key/value pairs} {
+    set t [java::new Hashtable]
+    $t put "One" "onestr"
+    $t put "Two" "twostr"
+
+    set results [list]
+    java::for {Map.Entry e} [$t entrySet] {
+        set key [[$e getKey] toString]
+        set value [[$e getValue] toString]
+        lappend results [list $key $value]
+    }
+    set results
+} {{One onestr} {Two twostr}}
+
+test javaforcmd-2.8 {JavaForCmd: iterate over Hashtable keys} {
+    set t [java::new Hashtable]
+    $t put "s1" "one"
+    $t put "s2" "two"
+
+    set results [list]
+    java::for {String key} [$t keySet] {
+        set value [[$t get $key] toString]
+        lappend results [list $key $value]
+    }
+    lsort -dictionary $results
+} {{s1 one} {s2 two}}
+
+test javaforcmd-2.9 {JavaForCmd: iterate over Integer HashMap keys} {
+    set t [java::new HashMap]
+    $t put [java::new Integer 1] "one"
+    $t put [java::new Integer 2] "two"
+
+    set results [list]
+    java::for {Integer key} [$t keySet] {
+        set value [[$t get $key] toString]
+        lappend results [list [$key toString] $value]
+    }
+    lsort -dictionary $results
+} {{1 one} {2 two}}
+
+
+test javaforcmd-3.1 {JavaForCmd: iterate over array of String} {
+    set a [java::new {String[]} {3} {str1 str2 str3}]
+
+    set results [list]
+    java::for {String e} $a {
+        lappend results $e
+    }
+    set results
+} {str1 str2 str3}
+
+test javaforcmd-3.2 {JavaForCmd: iterate over array of int} {
+    set a [java::new {int[]} {3} {1 2 3}]
+
+    set results [list]
+    java::for {int e} $a {
+        lappend results $e
+    }
+    set results
+} {1 2 3}
+
+test javaforcmd-3.3 {JavaForCmd: iterate over array of boolean} {
+    set a [java::new {boolean[]} {2} {false true}]
+
+    set results [list]
+    java::for {boolean e} $a {
+        lappend results $e
+    }
+    set results
+} {0 1}
+
+test javaforcmd-3.4 {JavaForCmd: iterate over array of long} {
+    set a [java::new {long[]} {2} {2147483647 2147483648}]
+
+    set results [list]
+    java::for {long e} $a {
+        lappend results $e
+    }
+    set results
+} {2147483647 2147483648}
+
+test javaforcmd-3.5 {JavaForCmd: iterate over array of float} {
+    set a [java::new {float[]} {2} {0.0 1.0}]
+
+    set results [list]
+    java::for {float e} $a {
+        lappend results $e
+    }
+    set results
+} {0.0 1.0}
+
+test javaforcmd-3.6 {JavaForCmd: iterate over array of double} {
+    set a [java::new {double[]} {2} {0.0 2.0e3}]
+
+    set results [list]
+    java::for {double e} $a {
+        lappend results $e
+    }
+    set results
+} {0.0 2000.0}
+
+test javaforcmd-3.7 {JavaForCmd: iterate over array of byte} {
+    set a [java::new {byte[]} {3} {-1 0 1}]
+
+    set results [list]
+    java::for {byte e} $a {
+        lappend results $e
+    }
+    set results
+} {-1 0 1}
+
+test javaforcmd-3.8 {JavaForCmd: iterate over array of short} {
+    set a [java::new {short[]} {3} {-1 0 1}]
+
+    set results [list]
+    java::for {short e} $a {
+        lappend results $e
+    }
+    set results
+} {-1 0 1}
+
+test javaforcmd-3.9 {JavaForCmd: iterate over array of char} {
+    set a [java::new {char[]} {3} {a b c}]
+
+    set results [list]
+    java::for {char e} $a {
+        lappend results $e
+    }
+    set results
+} {a b c}
+
+test javaforcmd-3.10 {JavaForCmd: iterate over array of Object} {
+    set s1 [java::new String string1]
+    set s2 [java::new String string2]
+    set a [java::new {Object[]} {2} [list $s1 $s2]]
+
+    set results [list]
+    java::for {Object e} $a {
+        lappend results [$e toString]
+    }
+    set results
+} {string1 string2}
+
+test javaforcmd-3.11 {JavaForCmd: iterate over array of Date} {
+    set d1 [java::new java.util.Date]
+    set d2 [java::new java.util.Date]
+    set a [java::new {Object[]} {2} [list $d1 $d2]]
+
+    set results [list]
+    java::for {Object e} $a {
+        set d [java::cast java.util.Date $e]
+        lappend results [java::info class $d]
+    }
+    set results
+} {java.util.Date java.util.Date}
+
+test javaforcmd-3.12 {JavaForCmd: iterate over array of Integer as Integer} {
+    set a [java::new {Integer[]} {3} {1 2 3}]
+
+    set results [list]
+    java::for {Integer e} $a {
+        lappend results [$e toString]
+    }
+    set results
+} {1 2 3}
+
+test javaforcmd-3.13 {JavaForCmd: bad array argument} {
+    # Not an array of primitive type
+    set a [java::new {Object[]} 1]
+    # Not an array of Object type
+    set a2 [java::new {int[]} 1 {1}]
+
+    list \
+        [catch {java::for {String s} $a {}} err] $err \
+        [catch {java::for {int i} $a {}} err] $err \
+        [catch {java::for {boolean b} $a {}} err] $err \
+        [catch {java::for {long l} $a {}} err] $err \
+        [catch {java::for {float f} $a {}} err] $err \
+        [catch {java::for {double d} $a {}} err] $err \
+        [catch {java::for {byte b} $a {}} err] $err \
+        [catch {java::for {short s} $a {}} err] $err \
+        [catch {java::for {char c} $a {}} err] $err \
+        [catch {java::for {Object o} $a2 {}} err] $err
+} [list \
+    1 {expected collection object to be array of String} \
+    1 {expected collection object to be array of int} \
+    1 {expected collection object to be array of boolean} \
+    1 {expected collection object to be array of long} \
+    1 {expected collection object to be array of float} \
+    1 {expected collection object to be array of double} \
+    1 {expected collection object to be array of byte} \
+    1 {expected collection object to be array of short} \
+    1 {expected collection object to be array of char} \
+    1 {expected collection object to be array of Object} \
+    ]
+
+
+test javaforcmd-4.1 {JavaForCmd: iterate over multidimensional array of int} {
+    set a [java::new {int[][]} {3 3} {{1 2 3} {4 5 6} {7 8 9}}]
+
+    set results [list]
+    java::for {int[] asub} $a {
+        lappend results SUB
+        java::for {int e} $asub {
+            lappend results $e
+        }
+    }
+
+    set results
+} {SUB 1 2 3 SUB 4 5 6 SUB 7 8 9}
+
+test javaforcmd-4.2 {JavaForCmd: iterate over contents of two vectors} {
+    set v1 [java::new Vector]
+    set v2 [java::new Vector]
+
+    $v1 addElement [java::new String "Black"]
+    $v1 addElement [java::new String "White"]
+
+    $v2 addElement [java::new String "0"]
+    $v2 addElement [java::new String "1"]
+    $v2 addElement [java::new String "2"]
+
+    set results [list]
+    java::for {String s1} $v1 {
+        java::for {String s2} $v2 {
+            lappend results [list $s1 $s2]
+        }
+    }
+
+    set results
+} {{Black 0} {Black 1} {Black 2} {White 0} {White 1} {White 2}}
+
+
+test javaforcmd-5.0 {JavaForCmd: use of break and continue} {
+    set a [java::new {int[]} {3} {1 2 3 4}]
+
+    set results [list]
+    java::for {int e} $a {
+        if {($e % 2) == 0} {
+            continue
+        }
+        lappend results $e
+    }
+    set results
+} {1 3}
+
+test javaforcmd-5.1 {JavaForCmd: use of break and continue} {
+    set a [java::new {int[]} {3} {1 2 3 4}]
+
+    set results [list]
+    java::for {int e} $a {
+        if {$e == 3} {
+            break
+        }
+        lappend results $e
+    }
+    set results
+} {1 2}
+
+test javaforcmd-5.2 {JavaForCmd: result} {
+    set a [java::new {int[]} {3} {1 2 3 4}]
+
+    set result [java::for {int e} $a {
+        set e
+    }]
+    set result
+} {}
+
+
+# Pass in typename that does not exist
+
+# cleanup
+java::import -forget -package java.util
+::tcltest::cleanupTests
+return
+

@@ -1,0 +1,73 @@
+<HTML><HEAD><TITLE>TclJava Library Procedures - TclInteger manual page</TITLE></HEAD><BODY>
+<DL>
+<DD><A HREF="TclInteger.htm#M2" NAME="L182">CLASS</A>
+<DL><DD>tcl.lang.TclInteger -- This class is used to create, read, and modify integer
+objects from Java code.</DL>
+<DD><A HREF="TclInteger.htm#M3" NAME="L183">IMPLEMENTS</A>
+<DL><DD>tcl.lang.InternalRep
+</DL>
+<DD><A HREF="TclInteger.htm#M4" NAME="L184">METHODS</A>
+<DL><DD>static TclObject <B>newInstance</B>(int <I>intValue</I>)</DL>
+<DL><DD>static int <B>get</B>(Interp <I>interp</I>, TclObject <I>tobj</I>) throws TclException</DL>
+<DL><DD>static void <B>set</B>(TclObject <I>tobj</I>, int <I>intValue</I>)</DL>
+<DD><A HREF="TclInteger.htm#M5" NAME="L185">ARGUMENTS</A>
+<DL>
+</DL>
+<DD><A HREF="TclInteger.htm#M6" NAME="L186">DESCRIPTION</A>
+<DL>
+<DD><A HREF="TclInteger.htm#M7" NAME="L187"><B>newInstance</B></A>
+<DD><A HREF="TclInteger.htm#M8" NAME="L188"><B>get</B></A>
+<DD><A HREF="TclInteger.htm#M10" NAME="L190"><B>set</B></A>
+</DL>
+<DD><A HREF="TclInteger.htm#M11" NAME="L191">EQUIVALENT C FUNCTIONS</A>
+<DD><A HREF="TclInteger.htm#M12" NAME="L192">SEE ALSO</A>
+<DD><A HREF="TclInteger.htm#M13" NAME="L193">KEYWORDS</A>
+</DL><HR>
+<H3><A NAME="M2">CLASS</A></H3>
+tcl.lang.TclInteger -- This class is used to create, read, and modify integer
+objects from Java code.
+<H3><A NAME="M3">IMPLEMENTS</A></H3>
+tcl.lang.InternalRep
+
+<H3><A NAME="M4">METHODS</A></H3>
+<P>static TclObject <B>newInstance</B>(int <I>intValue</I>)
+<P>static int <B>get</B>(Interp <I>interp</I>, TclObject <I>tobj</I>) throws TclException
+<P>static void <B>set</B>(TclObject <I>tobj</I>, int <I>intValue</I>)
+<H3><A NAME="M5">ARGUMENTS</A></H3>
+<DL>
+<P><DT>int <B>intValue</B><DD>
+New value for internal integer representation.
+<P><DT>Interp <B>interp</B><DD>
+If an error occurs while converting an object to be an integer object,
+an error message is left in the interpreter's result object
+unless <I>interp</I> is null.
+<P><DT>TclObject <B>tobj</B><DD>
+TclObject to manipulate.  If the internal representation of
+<I>tobj</I> is not TclInteger, the method converts it to TclInteger.
+<P></DL>
+<H3><A NAME="M6">DESCRIPTION</A></H3>
+<DL>
+<P><DT><A NAME="M7"><B>newInstance</B></A><DD>
+The <B>newInstance</B> method creates and returns a new TclObject whose internal
+representation is the integer <I>intValue</I>.
+<P><DT><A NAME="M8"><B>get</B></A><DD>
+The <B>get</B> method returns an integer value from the <I>tobj</I>.  If an error
+occurs while converting <I>tobj</I> to be an integer object, an error
+message is left in the <I>interp</I>'s result object unless
+<I>interp</I> is null.
+<P><DT><A NAME="M10"><B>set</B></A><DD>
+The <B>set</B> method sets <I>tobj</I> to have the integer value of <I>intValue</I>.
+When this method returns, the internal representation of <I>tobj</I>
+is TclInteger.
+
+<P></DL>
+<H3><A NAME="M11">EQUIVALENT C FUNCTIONS</A></H3>
+<A href="../cFunctions.html">Tcl_NewIntObj</A>, <A href="../cFunctions.html">Tcl_GetIntFromObj</A>, <A href="../cFunctions.html">Tcl_SetIntObj</A>
+<H3><A NAME="M12">SEE ALSO</A></H3>
+<B><A HREF="../TclJavaLib/InternalRep.htm">InternalRep</A></B>, <B><A HREF="../TclJavaLib/TclObject.htm">TclObject</A></B>, <B><A HREF="../TclJavaLib/TclList.htm">TclList</A></B>, <B><A HREF="../TclJavaLib/TclIndex.htm">TclIndex</A></B>, <B><A HREF="../TclJavaLib/TclString.htm">TclString</A></B>, <B><A HREF="../TclJavaLib/TclDouble.htm">TclDouble</A></B>, <B><A HREF="../TclJavaLib/TclBoolean.htm">TclBoolean</A></B>, <B><A HREF="../TclJavaLib/ReflectObject.htm">ReflectObject</A></B>
+<H3><A NAME="M13">KEYWORDS</A></H3>
+<A href="../Keywords/I.htm#internal representation">internal representation</A>, <A href="../Keywords/O.htm#object">object</A>, <A href="../Keywords/O.htm#object type">object type</A>, <A href="../Keywords/I.htm#integer">integer</A>
+<HR><PRE>
+<A HREF="../license.html">Copyright</A> &#169; 1996-1998 Sun Microsystems, Inc.
+<A HREF="../license.html">Copyright</A> &#169; 1995-1997 Roger E. Critchlow Jr.</PRE>
+</BODY></HTML>

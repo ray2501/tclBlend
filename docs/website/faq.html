@@ -1,0 +1,213 @@
+<HTML>
+<HEAD>
+   <TITLE>Tcl/Java Project</TITLE>
+</HEAD>
+<BODY BGCOLOR="#FFFFFF">
+<P><TABLE BORDER=0>
+   <TR>
+      <TD VALIGN=top>
+         <!-- START LEFT TABLE -->
+         <P><TABLE BORDER=0>
+            <TR>
+               <TD>
+                  <P><IMG SRC="logo100.gif" ALT="Tcl logo" WIDTH=68 HEIGHT=100 ALIGN=bottom></P>
+               </TD>
+            </TR>
+            <TR>
+               <TD>
+                  <P><BR>
+                  <TABLE BORDER=0>
+                     <TR>
+                        <TD WIDTH=10>
+                           <P></P>
+                        </TD>
+                        <TD>
+                           <P>
+                           <A HREF="index.html">Home</A><BR>
+                           <A HREF="getstart.html">Getting-Started</A><BR>
+                           <A HREF="download.html">Download</A><BR>
+                           <A HREF="mail.html">Mailing-Lists</A><BR>
+                           <A HREF="manual.html">Manual</A><BR>
+                           <A HREF="faq.html">FAQ</A><BR>
+                           <A HREF="links.html">Links</A><BR>
+                           </P>
+                        </TD>
+                     </TR>
+                  </TABLE>
+                  </P>
+               </TD>
+            </TR>
+         </TABLE>
+         </P>
+         <!-- END LEFT TABLE -->
+      </TD>
+      <TD WIDTH=2 BGCOLOR="#000000">
+         <P>i</P>
+      </TD>
+      <TD WIDTH=6>
+         <P></P>
+      </TD>
+      <TD>
+         <P><BR>
+         <BR>
+         </P>
+         
+         <H2>Tcl/Java FAQ</H2>
+         
+         <P>
+         <TABLE BORDER=0 CELLPADDING=4 WIDTH="95%">
+            <TR BGCOLOR="#C8C8C8">
+               <TH>
+                  <P>Question Index</P>
+               </TH>
+            </TR>
+         </TABLE>
+         <UL>
+         <LI><A HREF="#jdk_versions">Which JDK versions are supported?</A>
+         <LI><A HREF="#tcl_versions">Which Tcl versions are supported?</A>
+         <LI><A HREF="#help">Where can I get help if I run into problems?</A>
+         <LI><A HREF="#swank">Is Tk implemented in Jacl?</A>
+         <LI><A HREF="#array">How do I create an array of Java objects?</A>
+         <LI><A HREF="#64bit">How are 64 bit values handled?</A>
+         <LI><A HREF="#threads">Does Tcl Blend work with green threads on Solaris or Linux?</A>
+         <LI><A HREF="#stubs">Is Tcl Blend stubs enabled?</A>
+         <LI><A HREF="#browser">Does Jacl or Tcl Blend work inside a web browser?</A>
+         <LI><A HREF="#mac">Is there a Mac port?</A>
+         </UL>
+         <BR>
+
+         <TABLE BORDER=0 CELLPADDING=4 WIDTH="95%">
+            <TR BGCOLOR="#C8C8C8">
+               <TH>
+                  <P>Questions and Answers</P>
+               </TH>
+            </TR>
+         </TABLE>
+
+         <P>
+         <A NAME="jdk_versions">
+         <B>Which JDK versions are supported?</B><BR>
+         JDK versions 1.1, 1.2, 1.3, and 1.4 are known to work well
+         with both Jacl and Tcl Blend. JDK 1.5 seems to work fine
+         but more testing is needed before it can be considered stable.
+         Some JDK implementations contain bugs that effect either
+         Tcl Blend or Jacl.
+         </P>
+
+         <P>
+         <A NAME="tcl_versions">
+         <B>Which Tcl versions are supported?</B><BR>
+         Tcl Blend works with Tcl 8.3 and Tcl 8.4. Tcl 8.4.2
+         or newer is required when building from source under Windows.
+         Jacl is its own implementaiton of Tcl, so it does
+         not depend on or interact with the C version of Tcl
+         at all.
+         </P>
+
+         <P>
+         <A NAME="help">
+         <B>Where can I get help if I run into problems?</B><BR>
+         Don't panic! Help is just a couple of clicks away.
+         There is a Tcl/Java users mailing list dedicated
+         to helping end users with any problems they might
+         encounter. A searchable archive of posts to the
+         mailing list is available, so you can take a look
+         at questions other users have posted. Before you
+         can post your own questions, you will have to
+         subscribe to the mailing list. One is required
+         to subscribe before posting in order to keep
+         spammers from abusing the list. It is easy to
+         subscribe, unsubscribe, and view the archive
+         at the <A HREF="mail.html">Mailing-Lists</A> page.
+         </P>
+
+         <P>
+         <A NAME="swank">
+         <B>Is Tk implemented in Jacl?</B><BR>
+         Jacl is an implementation of Tcl, not Tk.
+         The
+         <a href="http://www.onemoonscientific.com/swank/index.html">Swank project</a>
+         is a set of Java classes that wrap Java's swing widgets into
+         Tk commands. Swank is very pre-alpha, and we need
+         developers to jump in and help out.
+         </P>
+
+         <P>
+         <A NAME="array">
+         <B>How do I create an array of Java objects?</B><BR>
+         An array object is created with the java::new command.
+         To create an <code>int[5]</code> array with
+         values 11 through 15, you would enter:<br>
+         <pre><code>
+         set arrayObj [java::new {int[]} 5 {11 12 99 14 15}]
+         $arrayObj set 2 13
+         </code></pre>
+
+         Note that in the above example the array type is passed
+         with brackets around it. This is required because the
+         square brace syntax is used to indicate a command substitution
+         in Tcl, so passing <code>int[]</code> instead of <code>{int[]}</code>
+         generates an error because Tcl interprets <code>[]</code> as the empty
+         string and passes the string <code>int</code> to the java::new command.
+         </P>
+
+         <P>
+         <A NAME="64bit">
+         <B>How are 64 bit values handled?</B><BR>
+         Jacl does not support 64 bit values in Tcl scripts. Tcl 8.4
+         does support 64 bit values in regular Tcl commands in some
+         configurations. Both Jacl and Tcl Blend support passing 64
+         bit values to Java methods that expect a <code>long</code>
+         or <code>java.lang.Long</code> type. If a 64 bit value is
+         returned by a Java method, it will be treated as a string.
+         </P>
+
+         <P>
+         <A NAME="threads">
+         <B>Does Tcl Blend work with green threads on Solaris or Linux?</B><BR>
+         No, Tcl Blend requires a native threads JVM. Initially we
+         intended to make Tcl Blend work with a green threads JVM,
+         but there are just too many problems to justify supporting
+         this configuration.
+         </P>
+
+         <P>
+         <A NAME="stubs">
+         <B>Is Tcl Blend stubs enabled?</B><BR>
+         No, Tcl's stubs mechanism does not work with Tcl Blend. As
+         of version 1.3, Tcl Blend supports loading of both Tcl Blend
+         and Tcl into an existing JVM. To implement this feature,
+         the Tcl Blend shared library needs to know the specific
+         version of Tcl it was compiled with. Tcl's stubs mechanism
+         is designed to support loading an extension into multiple
+         versions of Tcl without the need for a recompile.
+         </P>
+
+         <P>
+         <A NAME="browser">
+         <B>Does Jacl or Tcl Blend work inside a web browser?</B><BR>
+         No. Running Jacl inside a web browser or Tcl Blend inside
+         the Tcl plugin is not supported. There are far too many
+         issues related to security and flaky Java implementations
+         inside browsers to make this feasible. For example, both
+         the Netscape and IE implementations of Java disallow
+         introspection of Java classes, so commands in the java
+         package would not work. It is just not worth the trouble
+         of trying to support running things in a web browser.
+         </P>
+
+         <P>
+         <A NAME="mac">
+         <B>Is there a Mac port?</B><BR>
+         No, there has historically been little or no interest
+         expressed in running Jacl or Tcl Blend on the Mac. Some
+         user have reported that Jacl works just fine on MacOSX.
+         </P>
+
+      </TD>
+   </TR>
+</TABLE>
+
+<HR>
+</BODY>
+</HTML>

@@ -1,0 +1,31 @@
+<HTML><HEAD><TITLE>TclJava Library Procedures - AssocData manual page</TITLE></HEAD><BODY>
+<H3><A NAME="M2">INTERFACE</A></H3>
+tcl.lang.AssocData -- Used by extensions to associate their own
+data with a Tcl interpreter.
+<H3><A NAME="M3">METHODS</A></H3>
+<P>abstract void <B>disposeAssocData</B>(Interp interp)
+<H3><A NAME="M4">ARGUMENTS</A></H3>
+<DL>
+<P><DT>Interp <B>interp</B> ()<DD>
+The interpreter from which the association is deleted.
+<P></DL>
+<H3><A NAME="M5">DESCRIPTION</A></H3>
+The <B>AssocData</B> interface is used by extensions to associate
+their own data with a Tcl interpreter.  When the interpreter is
+disposed via <I>interp</I>.<B><A HREF="../TclJavaLib/dispose.htm">dispose</A></B>, the <B>disposeAssocData</B>
+methods of all the registered AssocData instances are called to
+perform the necessary clean up.  Note that if an association is
+removed as a result of the <I>interp</I>.<B><A HREF="../TclJavaLib/setAssocData.htm">setAssocData</A></B> or
+<I>interp</I>.<B><A HREF="../TclJavaLib/setAssocData.htm">deleteAssocData</A></B> calls, the <B>disposeAssocData</B>
+method of the removed AssocData instance is <I>NOT</I> called.
+
+<H3><A NAME="M6">EQUIVALENT C FUNCTIONS</A></H3>
+<A href="../cFunctions.htmll">Tcl_CmdDeleteProc</A>
+<H3><A NAME="M7">SEE ALSO</A></H3>
+<B><A HREF="../TclJavaLib/Interp.htm">Interp</A></B>, <B><A HREF="../TclJavaLib/setAssocData.htm">setAssocData</A></B>
+<H3><A NAME="M8">KEYWORDS</A></H3>
+<A href="../Keywords/A.htm#association">association</A>, <A href="../Keywords/D.htm#data">data</A>, <A href="../Keywords/D.htm#deletion procedure">deletion procedure</A>, <A href="../Keywords/I.htm#interpreter">interpreter</A>
+<HR><PRE>
+<A HREF="../license.html">Copyright</A> &#169; 1998 Sun Microsystems, Inc.
+<A HREF="../license.html">Copyright</A> &#169; 1995-1997 Roger E. Critchlow Jr.</PRE>
+</BODY></HTML>

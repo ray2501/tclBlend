@@ -1,0 +1,88 @@
+<HTML><HEAD><TITLE>TclJava Library Procedures - backgdErr manual page</TITLE></HEAD><BODY>
+<DL>
+<DD><A HREF="backgdErr.htm#M2" NAME="L276">CLASS</A>
+<DL><DD>tcl.lang.Interp -- This manual entry contains Interp methods that
+report Tcl background errors.</DL>
+<DD><A HREF="backgdErr.htm#M3" NAME="L277">METHODS</A>
+<DL><DD>void <B>backgroundError</B>()</DL>
+<DL><DD>void <B>addErrorInfo</B>(String <I>message</I>)</DL>
+<DL><DD>void <B>setErrorCode</B>(TclObject <I>code</I>)</DL>
+<DD><A HREF="backgdErr.htm#M4" NAME="L278">OTHER METHODS</A>
+<DD><A HREF="backgdErr.htm#M5" NAME="L279">ARGUMENTS</A>
+<DL>
+</DL>
+<DD><A HREF="backgdErr.htm#M6" NAME="L280">DESCRIPTION</A>
+<DL>
+<DD><A HREF="backgdErr.htm#M7" NAME="L281"><B>backgroundError</B></A>
+<DD><A HREF="backgdErr.htm#M8" NAME="L282"><B>addErrorInfo</B></A>
+<DD><A HREF="backgdErr.htm#M9" NAME="L283"><B>setErrorCode</B></A>
+</DL>
+<DD><A HREF="backgdErr.htm#M10" NAME="L284">EQUIVALENT C FUNCTIONS</A>
+<DD><A HREF="backgdErr.htm#M11" NAME="L285">SEE ALSO</A>
+<DD><A HREF="backgdErr.htm#M12" NAME="L286">KEYWORDS</A>
+</DL><HR>
+<H3><A NAME="M2">CLASS</A></H3>
+tcl.lang.Interp -- This manual entry contains Interp methods that
+report Tcl background errors.
+<H3><A NAME="M3">METHODS</A></H3>
+<P>void <B>backgroundError</B>()
+<P>void <B>addErrorInfo</B>(String <I>message</I>)
+<P>void <B>setErrorCode</B>(TclObject <I>code</I>)
+<H3><A NAME="M4">OTHER METHODS</A></H3>
+<B><A HREF="../TclJavaLib/setVar.htm">setVar</A></B>, 
+<B><A HREF="../TclJavaLib/traceVar.htm">traceVar</A></B>, 
+<B><A HREF="../TclJavaLib/createCmd.htm">createCommand</A></B>,
+<B><A HREF="../TclJavaLib/Eval.htm">eval</A></B>, 
+<B><A HREF="../TclJavaLib/setResult.htm">setResult</A></B>, 
+<BR>
+<B><A HREF="../TclJavaLib/getNotifier.htm">getNotifier</A></B>, 
+<B><A HREF="../TclJavaLib/setAssocData.htm">setAssocData</A></B>, 
+<B><A HREF="../TclJavaLib/dispose.htm">dispose</A></B>, 
+<B><A HREF="../TclJavaLib/pkgRequire.htm">pkgRequire</A></B>
+
+<H3><A NAME="M5">ARGUMENTS</A></H3>
+<DL>
+<P><DT>String <B>message</B> ()<DD>
+Message to appear in global errorInfo Tcl variable.
+<P><DT>TclObject <B>code</B> ()<DD>
+TclObject to become value of global errorCode Tcl variable.
+<P></DL>
+<H3><A NAME="M6">DESCRIPTION</A></H3>
+The procedures described here are utilities for reporting Tcl errors
+that occurred in background processing.  See the manual entry
+<B><A HREF="../TclJavaLib/setResult.htm">setResult</A></B> for information on storing result values.
+<P>
+<DL>
+<P><DT><A NAME="M7"><B>backgroundError</B></A><DD>
+The <B>backgroundError</B> method is typically invoked when a Tcl error
+occurs during &quot;background processing&quot; such as executing an event
+handler.  When backgroundError() is called, it saves the current
+result, errorCode and errorInfo and will invoke the &quot;bgerror&quot; command
+at a later time as an idle callback.  If no bgerror command exists, or
+if the bgerror command returns with an error condition, then
+backgroundError() reports the error itself by printing a message on
+the standard error output.  It is possible for many background errors
+to accumulate before bgerror is invoked.  When this happens, each of
+the errors is processed in order.  However, if bgerror returns a break
+exception, then all remaining error reports for the interpreter are
+skipped.
+<P><DT><A NAME="M8"><B>addErrorInfo</B></A><DD>
+The <B>addErrorInfo</B> method appends <I>message</I> to the
+errorInfo object in the interpreter.  The errorInfo object is mirrored
+in Tcl scripts via the &quot;errorInfo&quot; global variable.
+<P><DT><A NAME="M9"><B>setErrorCode</B></A><DD>
+The <B>setErrorCode</B> method sets the interpreter's errorCode object
+to the value of <I>code</I>.  The errorCode object is mirrored in Tcl
+scripts via the &quot;errorCode&quot; global variable.
+
+<P></DL>
+<H3><A NAME="M10">EQUIVALENT C FUNCTIONS</A></H3>
+<A href="../cFunctions.html">Tcl_BackgroundError</A>, <A href="../cFunctions.html">Tcl_AddErrorInfo</A>, <A href="../cFunctions.html">Tcl_SetObjErrorCode</A>
+<H3><A NAME="M11">SEE ALSO</A></H3>
+<B><A HREF="../TclJavaLib/Interp.htm">Interp</A></B>, <B><A HREF="../TclJavaLib/TclException.htm">TclException</A></B>, <B><A HREF="../TclJavaLib/runtimeError.htm">TclRuntimeError</A></B>, <B><A HREF="../TclJavaLib/TclEvent.htm">TclEvent</A></B>, <B><A HREF="../TclJavaLib/dispose.htm">dispose</A></B>, <B><A HREF="../TclJavaLib/setAssocData.htm">setAssocData</A></B>
+<H3><A NAME="M12">KEYWORDS</A></H3>
+<A href="../Keywords/B.htm#background">background</A>, <A href="../Keywords/B.htm#bgerror">bgerror</A>, <A href="../Keywords/E.htm#error">error</A>, <A href="../Keywords/I.htm#interpreter">interpreter</A>
+<HR><PRE>
+<A HREF="../license.html">Copyright</A> &#169; 1994-1998 Sun Microsystems, Inc.
+<A HREF="../license.html">Copyright</A> &#169; 1995-1997 Roger E. Critchlow Jr.</PRE>
+</BODY></HTML>

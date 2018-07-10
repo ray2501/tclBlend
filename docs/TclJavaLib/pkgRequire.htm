@@ -1,0 +1,95 @@
+<HTML><HEAD><TITLE>TclJava Library Procedures - packageRequire manual page</TITLE></HEAD><BODY>
+<DL>
+<DD><A HREF="pkgRequire.htm#M2" NAME="L315">CLASS</A>
+<DL><DD>tcl.lang.Interp -- This manual entry contains methods that declare
+presence of or dependence on a package.</DL>
+<DD><A HREF="pkgRequire.htm#M3" NAME="L316">METHODS</A>
+<DL><DD>public final String <B>pkgRequire</B>(String <I>pkgname</I>, String <I>version</I>, boolean <I>exact</I>) throws TclException</DL>
+<DL><DD>public final void <B>pkgProvide</B>(String <I>pkgname</I>, String <I>version</I>) throws TclException</DL>
+<DD><A HREF="pkgRequire.htm#M4" NAME="L317">OTHER METHODS</A>
+<DD><A HREF="pkgRequire.htm#M5" NAME="L318">ARGUMENTS</A>
+<DL>
+</DL>
+<DD><A HREF="pkgRequire.htm#M6" NAME="L319">DESCRIPTION</A>
+<DL>
+<DD><A HREF="pkgRequire.htm#M7" NAME="L320"><B>pkgRequire</B></A>
+<DD><A HREF="pkgRequire.htm#M8" NAME="L321"><B>pkgProvide</B></A>
+</DL>
+<DD><A HREF="pkgRequire.htm#M9" NAME="L322">EQUIVALENT C FUNCTIONS</A>
+<DD><A HREF="pkgRequire.htm#M10" NAME="L323">SEE ALSO</A>
+<DD><A HREF="pkgRequire.htm#M11" NAME="L324">KEYWORDS</A>
+</DL><HR>
+<H3><A NAME="M2">CLASS</A></H3>
+tcl.lang.Interp -- This manual entry contains methods that declare
+presence of or dependence on a package.
+<H3><A NAME="M3">METHODS</A></H3>
+<P>public final String <B>pkgRequire</B>(String <I>pkgname</I>, String <I>version</I>, boolean <I>exact</I>) throws TclException
+<P>public final void <B>pkgProvide</B>(String <I>pkgname</I>, String <I>version</I>) throws TclException
+<H3><A NAME="M4">OTHER METHODS</A></H3>
+<B><A HREF="../TclJavaLib/dispose.htm">dispose</A></B>,
+<B><A HREF="../TclJavaLib/setVar.htm">setVar</A></B>, 
+<B><A HREF="../TclJavaLib/traceVar.htm">traceVar</A></B>, 
+<B><A HREF="../TclJavaLib/createCmd.htm">createCommand</A></B>,
+<B><A HREF="../TclJavaLib/Eval.htm">eval</A></B>, 
+<BR>
+<B><A HREF="../TclJavaLib/setResult.htm">setResult</A></B>,
+<B><A HREF="../TclJavaLib/backgdErr.htm">backgroundError</A></B>,
+<B><A HREF="../TclJavaLib/getNotifier.htm">getNotifier</A></B>, 
+<B><A HREF="../TclJavaLib/setAssocData.htm">setAssocData</A></B>
+
+<H3><A NAME="M5">ARGUMENTS</A></H3>
+<DL>
+<P><DT>String <B>pkgname</B> ()<DD>
+Name of package to require or provide.
+<P><DT>String <B>version</B> ()<DD>
+A version name consisting of one or more decimal numbers separated by
+dots, specifying which version of the package <I>pkgname</I> to require
+or provide; null means use the latest version available.
+<P><DT>boolean <B>exact</B> ()<DD>
+Specifies whether to use the exact version specified by <I>version</I>
+or the latest one available whose major version number is the same as
+that of <I>version</I>.
+<P></DL>
+<H3><A NAME="M6">DESCRIPTION</A></H3>
+These procedures provide Java library interfaces to Tcl's package and
+version management facilities.
+<P>
+<DL>
+<P><DT><A NAME="M7"><B>pkgRequire</B></A><DD>
+The <B>pkgRequire</B> method is called by code that depends on a
+particular <I>version</I> of the package, <I>pkgname</I>.  If the
+package is not already provided in the interpreter, this method
+invokes a Tcl script to provide it.  If <I>version</I> is not null, and
+<I>exact</I> is true, then the version specified by <I>version</I> is
+provided.  Otherwise, the lastest available version is provided.  If
+the package is already provided and the presently provided version
+matches the one specified by the <I>version</I> and <I>exact</I>
+arguments (as described above), then no conflict exists, and no action
+is taken.
+<P>
+If successful, this method returns the version string for the newly
+(or previously) provided version of the package, which may be
+different from the &quot;version&quot; argument.  If the caller's requirements
+cannot be met (e.g. the version requested conflicts with a currently
+provided version, or the required version cannot be found, or the
+script to provide the required version generates an error), a
+TclException is thrown.
+<P><DT><A NAME="M8"><B>pkgProvide</B></A><DD>
+The <B>pkgProvide</B> method declares the presence of a particular
+<I>version</I> of the package, <I>pkgname</I>, in the interpreter.  If
+there is already another version of the package loaded in this
+interpreter, then an exception is thrown.  Otherwise, the interpreter
+remembers that this package is available, so that no other version of
+the package may be provided.
+
+<P></DL>
+<H3><A NAME="M9">EQUIVALENT C FUNCTIONS</A></H3>
+<A href="../cFunctions.html">Tcl_PkgRequire</A>, <A href="../cFunctions.html">Tcl_PkgProvide</A>
+<H3><A NAME="M10">SEE ALSO</A></H3>
+<B><A HREF="../TclJavaLib/Interp.htm">Interp</A></B>, <B>package</B>
+<H3><A NAME="M11">KEYWORDS</A></H3>
+<A href="../Keywords/I.htm#interpreter">interpreter</A>, <A href="../Keywords/P.htm#package">package</A>, <A href="../Keywords/P.htm#provide">provide</A>, <A href="../Keywords/R.htm#require">require</A>, <A href="../Keywords/V.htm#version">version</A>
+<HR><PRE>
+<A HREF="../license.html">Copyright</A> &#169; 1994-1998 Sun Microsystems, Inc.
+<A HREF="../license.html">Copyright</A> &#169; 1995-1997 Roger E. Critchlow Jr.</PRE>
+</BODY></HTML>

@@ -1,0 +1,783 @@
+# EventAdaptor.test --
+#
+#	Tests the implementation of the EventAdaptor.java file.
+#
+# Copyright (c) 1997 by Sun Microsystems, Inc.
+#
+# See the file "license.terms" for information on usage and redistribution
+# of this file, and for a DISCLAIMER OF ALL WARRANTIES.
+#
+# SCCS: @(#) EventAdaptor.test 1.3 98/01/14 16:38:46
+
+# Note: This test file must be sourced from the parent directory
+#       or else the defs file may not be properly loaded.
+
+if {[lsearch [namespace children] ::tcltest] == -1} {
+    package require tcltest
+    namespace import -force ::tcltest::*
+}
+
+setupJavaPackage
+
+test EventAdaptor-1.1 {EventAdaptor._processEvent} {
+    set x [java::new tcl.lang.TesterBean]
+    set kk ""
+    java::bind $x tcl.lang.Tester1Listener.method3 {
+	lappend kk Hello
+    }
+    list [catch {$x fire3 [java::null]} msg] $msg $kk
+} {0 {} Hello}
+
+test EventAdaptor-1.2 {EventAdaptor._processEvent} {
+    set x [java::new tcl.lang.TesterBean]
+    set kk ""
+    java::bind $x tcl.lang.Tester1Listener.method3 {
+	lappend kk Hello
+	java::throw [java::new SecurityException blah]
+    }
+    list [catch {$x fire3 [java::null]} msg] $msg $kk
+} {1 {java.lang.SecurityException: blah} Hello}
+
+test EventAdaptor-1.3 {EventAdaptor._processEvent} {
+    set x [java::new tcl.lang.TesterBean]
+    set kk ""
+    java::bind $x tcl.lang.Tester1Listener.method4 {
+	lappend kk Hello
+	java::throw [java::new SecurityException blah]
+    }
+    list [catch {$x fire4 [java::null] yes 0 [java::null]} msg] $msg $kk
+} {1 {java.lang.SecurityException: blah} Hello}
+
+test EventAdaptor-1.4 {EventAdaptor._processEvent} {
+    set x [java::new tcl.lang.TesterBean]
+    set kk ""
+    java::bind $x tcl.lang.Tester1Listener.method4 {
+	lappend kk Hello
+	java::throw [java::new NullPointerException blah]
+    }
+    list [catch {$x fire4 [java::null] yes 0 [java::null]} msg] $msg $kk
+} {1 {java.lang.NullPointerException: blah} Hello}
+
+test EventAdaptor-1.5 {EventAdaptor._processEvent} {
+    set x [java::new tcl.lang.TesterBean]
+    set kk ""
+    java::bind $x tcl.lang.Tester1Listener.method4 {
+	lappend kk Hello
+	java::throw [java::new NumberFormatException blah]
+    }
+    list [catch {$x fire4 [java::null] yes 0 [java::null]} msg] $msg $kk
+} {1 {java.lang.NumberFormatException: blah} Hello}
+
+test EventAdaptor-1.6 {EventAdaptor._processEvent} {
+    set x [java::new tcl.lang.TesterBean]
+    set kk ""
+    java::bind $x tcl.lang.Tester1Listener.method4 {
+	lappend kk Hello
+	java::throw [java::new IllegalAccessError blah]
+    }
+    list [catch {$x fire4 [java::null] yes 0 [java::null]} msg] $msg $kk
+} {1 {java.lang.IllegalAccessError: blah} Hello}
+
+test EventAdaptor-1.7 {EventAdaptor._processEvent} {
+    set x [java::new tcl.lang.TesterBean]
+    set kk ""
+    java::bind $x tcl.lang.Tester1Listener.method3 {
+	lappend kk Hello
+	return
+	lappend kk Hello
+    }
+    list [catch {$x fire3 [java::null]} msg] $msg $kk
+} {0 {} Hello}
+
+proc bgerror {msg} {
+    global errorCode errorInfo info
+    set info ""
+    lappend info $msg $errorCode $errorInfo
+}
+
+test EventAdaptor-2.1 {EventAdaptor._wrongException} {
+    set x [java::new tcl.lang.TesterBean]
+    set info ""
+    set errorInfo ""
+    java::bind $x tcl.lang.Tester1Listener.method4 {
+	error xxx
+    }
+    catch {$x fire4 [java::null] yes 0 [java::null]}
+    update
+    set info
+} {xxx NONE {xxx
+    while executing
+"error xxx"
+    (command bound to event)}}
+
+test EventAdaptor-2.2 {EventAdaptor._wrongException} {
+    set x [java::new tcl.lang.TesterBean]
+    set info ""
+    set errorInfo ""
+    java::bind $x tcl.lang.Tester1Listener.method4 {
+	java::throw [java::new Exception blah]
+    }
+    catch {$x fire4 [java::null] yes 0 [java::null]}
+    update
+    list [lindex $info 0] [lindex $info 2]
+} {{unexpected exception: java.lang.Exception: blah} {java.lang.Exception: blah
+    while executing
+"java::throw [java::new Exception blah]"
+    (command bound to event)}}
+
+test EventAdaptor-2.3 {EventAdaptor._wrongException} {
+    set x [java::new tcl.lang.TesterBean]
+    set info ""
+    set errorInfo ""
+    java::bind $x tcl.lang.Tester1Listener.method4 {
+	java::throw [java::new Throwable blah]
+    }
+    catch {$x fire4 [java::null] yes 0 [java::null]}
+    update
+    list [lindex $info 0] [lindex $info 2]
+} {{unexpected exception: java.lang.Throwable: blah} {java.lang.Throwable: blah
+    while executing
+"java::throw [java::new Throwable blah]"
+    (command bound to event)}}
+
+# Wrapping and unwrapping of a TclException inside a ReflectException
+#
+
+test EventAdaptor-2.4 {EventAdaptor._wrongException} {
+    set x [java::new tcl.lang.TesterBean]
+    set info ""
+    set errorInfo ""
+    java::bind $x tcl.lang.Tester1Listener.method4 {
+	java::throw [java::new tcl.lang.TclException [java::getinterp] blahblahblah]
+    }
+    catch {$x fire4 [java::null] yes 0 [java::null]}
+    update
+    list [lindex $info 0] [lindex $info 2]
+} {blahblahblah {blahblahblah
+    while executing
+"java::throw [java::new tcl.lang.TclException [java::getinterp] blahblahblah]"
+    (command bound to event)}}
+
+# unchecked exceptions do not cause bgerror
+#
+test EventAdaptor-2.5 {EventAdaptor._wrongException} {
+    set x [java::new tcl.lang.TesterBean]
+    set info ""
+    set errorInfo ""
+    java::bind $x tcl.lang.Tester1Listener.method4 {
+	java::throw [java::new Error blah]
+    }
+    set msg [list [catch {$x fire4 [java::null] yes 0 [java::null]} msg] $msg $errorInfo]
+    update
+    list [lindex $info 0] [lindex $info 2] $msg
+} {{} {} {1 {java.lang.Error: blah} {java.lang.Error: blah
+    while executing
+"java::throw [java::new Error blah]"
+    invoked from within
+"$x fire4 [java::null] yes 0 [java::null]"}}}
+
+test EventAdaptor-2.6 {EventAdaptor._wrongException} {
+    set x [java::new tcl.lang.TesterBean]
+    set info ""
+    set errorInfo ""
+    java::bind $x tcl.lang.Tester1Listener.method4 {
+	java::throw [java::new RuntimeException blah]
+    }
+    set msg [list [catch {$x fire4 [java::null] yes 0 [java::null]} msg] $msg $errorInfo]
+    update
+    list [lindex $info 0] [lindex $info 2] $msg
+} {{} {} {1 {java.lang.RuntimeException: blah} {java.lang.RuntimeException: blah
+    while executing
+"java::throw [java::new RuntimeException blah]"
+    invoked from within
+"$x fire4 [java::null] yes 0 [java::null]"}}}
+
+#
+# BOOLEAN
+#
+
+test EventAdaptor-3.1 {EventAdaptor._return_boolean} {
+    set x [java::new tcl.lang.TesterBean]
+    set info ""
+    set errorInfo ""
+    java::bind $x tcl.lang.Tester1Listener.method_boolean {
+	return true
+    }
+    set msg [list [catch {$x fire_boolean [java::null]} msg] $msg $errorInfo]
+    update
+    list [lindex $info 0] [lindex $info 2] $msg
+} {{} {} {0 1 {}}}
+
+test EventAdaptor-3.2 {EventAdaptor._return_boolean} {
+    set x [java::new tcl.lang.TesterBean]
+    set info ""
+    set errorInfo ""
+    java::bind $x tcl.lang.Tester1Listener.method_boolean {
+	return false
+    }
+    set msg [list [catch {$x fire_boolean [java::null]} msg] $msg $errorInfo]
+    update
+    list [lindex $info 0] [lindex $info 2] $msg
+} {{} {} {0 0 {}}}
+
+# bad value -- call bgerror and return "undefined value"
+
+test EventAdaptor-3.3 {EventAdaptor._return_boolean} {
+    set x [java::new tcl.lang.TesterBean]
+    set info ""
+    java::bind $x tcl.lang.Tester1Listener.method_boolean {
+	return blah
+    }
+    set msg [list [catch {$x fire_boolean [java::null]} msg] $msg]
+    update
+    list [lindex $info 0] [lindex $info 2] $msg
+} {{expected boolean value but got "blah"} {expected boolean value but got "blah"
+    (attempting to return boolean from binding)} {0 0}}
+
+# exception -- call bgerror and return "undefined value"
+
+test EventAdaptor-3.4 {EventAdaptor._return_boolean} {
+    set x [java::new tcl.lang.TesterBean]
+    set info ""
+    java::bind $x tcl.lang.Tester1Listener.method_boolean {
+	error blah
+    }
+    set msg [list [catch {$x fire_boolean [java::null]} msg] $msg]
+    update
+    list [lindex $info 0] [lindex $info 2] $msg
+} {blah {blah
+    while executing
+"error blah"
+    (command bound to event)} {0 0}}
+
+#
+# BYTE
+#
+
+test EventAdaptor-4.1 {EventAdaptor._return_byte} {
+    set x [java::new tcl.lang.TesterBean]
+    set info ""
+    set errorInfo ""
+    java::bind $x tcl.lang.Tester1Listener.method_byte {
+	return 10
+    }
+    set msg [list [catch {$x fire_byte [java::null]} msg] $msg $errorInfo]
+    update
+    list [lindex $info 0] [lindex $info 2] $msg
+} {{} {} {0 10 {}}}
+
+test EventAdaptor-4.2 {EventAdaptor._return_byte} {
+    set x [java::new tcl.lang.TesterBean]
+    set info ""
+    set errorInfo ""
+    java::bind $x tcl.lang.Tester1Listener.method_byte {
+	return -10
+    }
+    set msg [list [catch {$x fire_byte [java::null]} msg] $msg $errorInfo]
+    update
+    list [lindex $info 0] [lindex $info 2] $msg
+} {{} {} {0 -10 {}}}
+
+test EventAdaptor-4.3 {EventAdaptor._return_byte} {
+    set x [java::new tcl.lang.TesterBean]
+    set info ""
+    set errorInfo ""
+    java::bind $x tcl.lang.Tester1Listener.method_byte {
+	return [expr 10 + 256]
+    }
+    set msg [list [catch {$x fire_byte [java::null]} msg] $msg $errorInfo]
+    update
+    list [lindex $info 0] [lindex $info 2] $msg
+} {{} {} {0 10 {}}}
+
+# bad value -- call bgerror and return "undefined value"
+
+test EventAdaptor-4.4 {EventAdaptor._return_byte} {
+    set x [java::new tcl.lang.TesterBean]
+    set info ""
+    java::bind $x tcl.lang.Tester1Listener.method_byte {
+	return blah
+    }
+    set msg [list [catch {$x fire_byte [java::null]} msg] $msg]
+    update
+    list [lindex $info 0] [lindex $info 2] $msg
+} {{expected integer but got "blah"} {expected integer but got "blah"
+    (attempting to return integer number from binding)} {0 0}}
+
+# exception -- call bgerror and return "undefined value"
+
+test EventAdaptor-4.5 {EventAdaptor._return_byte} {
+    set x [java::new tcl.lang.TesterBean]
+    set info ""
+    java::bind $x tcl.lang.Tester1Listener.method_byte {
+	error blah
+    }
+    set msg [list [catch {$x fire_byte [java::null]} msg] $msg]
+    update
+    list [lindex $info 0] [lindex $info 2] $msg
+} {blah {blah
+    while executing
+"error blah"
+    (command bound to event)} {0 0}}
+
+#
+# CHAR
+#
+
+test EventAdaptor-5.1 {EventAdaptor._return_char} {
+    set x [java::new tcl.lang.TesterBean]
+    set info ""
+    set errorInfo ""
+    java::bind $x tcl.lang.Tester1Listener.method_char {
+	return C
+    }
+    set msg [list [catch {$x fire_char [java::null]} msg] $msg $errorInfo]
+    update
+    list [lindex $info 0] [lindex $info 2] $msg
+} {{} {} {0 C {}}}
+
+# bad value -- call bgerror and return "undefined value"
+
+test EventAdaptor-5.2 {EventAdaptor._return_char} {
+    set x [java::new tcl.lang.TesterBean]
+    set info ""
+    java::bind $x tcl.lang.Tester1Listener.method_char {
+	return blah
+    }
+    set msg [list [catch {$x fire_char [java::null]} msg] $msg]
+    update
+    list [lindex $info 0] [lindex $info 2] $msg
+} {{expecting character but got "blah"} {expecting character but got "blah"
+    (attempting to return character from binding)} {0 {}}}
+
+test EventAdaptor-5.3 {EventAdaptor._return_char} {
+    set x [java::new tcl.lang.TesterBean]
+    set info ""
+    java::bind $x tcl.lang.Tester1Listener.method_char {
+	return ""
+    }
+    set msg [list [catch {$x fire_char [java::null]} msg] $msg]
+    update
+    list [lindex $info 0] [lindex $info 2] $msg
+} {{expecting character but got ""} {expecting character but got ""
+    (attempting to return character from binding)} {0 {}}}
+
+# exception -- call bgerror and return "undefined value"
+
+test EventAdaptor-5.4 {EventAdaptor._return_char} {
+    set x [java::new tcl.lang.TesterBean]
+    set info ""
+    java::bind $x tcl.lang.Tester1Listener.method_char {
+	error blah
+    }
+    set msg [list [catch {$x fire_char [java::null]} msg] $msg]
+    update
+    list [lindex $info 0] [lindex $info 2] $msg
+} {blah {blah
+    while executing
+"error blah"
+    (command bound to event)} {0 {}}}
+
+#
+# DOUBLE
+#
+
+test EventAdaptor-6.1 {EventAdaptor._return_double} {
+    set x [java::new tcl.lang.TesterBean]
+    set info ""
+    set errorInfo ""
+    java::bind $x tcl.lang.Tester1Listener.method_double {
+	return 12.0
+    }
+    set msg [list [catch {$x fire_double [java::null]} msg] $msg $errorInfo]
+    update
+    list [lindex $info 0] [lindex $info 2] $msg
+} {{} {} {0 12.0 {}}}
+
+# bad value -- call bgerror and return "undefined value"
+
+test EventAdaptor-6.2 {EventAdaptor._return_double} {
+    set x [java::new tcl.lang.TesterBean]
+    set info ""
+    java::bind $x tcl.lang.Tester1Listener.method_double {
+	return blah
+    }
+    set msg [list [catch {$x fire_double [java::null]} msg] $msg]
+    update
+    list [lindex $info 0] [lindex $info 2] $msg
+} {{expected floating-point number but got "blah"} {expected floating-point number but got "blah"
+    (attempting to return floating-point number from binding)} {0 0.0}}
+
+# exception -- call bgerror and return "undefined value"
+
+test EventAdaptor-6.3 {EventAdaptor._return_double} {
+    set x [java::new tcl.lang.TesterBean]
+    set info ""
+    java::bind $x tcl.lang.Tester1Listener.method_double {
+	error blah
+    }
+    set msg [list [catch {$x fire_double [java::null]} msg] $msg]
+    update
+    list [lindex $info 0] [lindex $info 2] $msg
+} {blah {blah
+    while executing
+"error blah"
+    (command bound to event)} {0 0.0}}
+
+#
+# FLOAT
+#
+
+test EventAdaptor-7.1 {EventAdaptor._return_float} {
+    set x [java::new tcl.lang.TesterBean]
+    set info ""
+    set errorInfo ""
+    java::bind $x tcl.lang.Tester1Listener.method_float {
+	return 12.0
+    }
+    set msg [list [catch {$x fire_float [java::null]} msg] $msg $errorInfo]
+    update
+    list [lindex $info 0] [lindex $info 2] $msg
+} {{} {} {0 12.0 {}}}
+
+# bad value -- call bgerror and return "undefined value"
+
+test EventAdaptor-7.2 {EventAdaptor._return_float} {
+    set x [java::new tcl.lang.TesterBean]
+    set info ""
+    java::bind $x tcl.lang.Tester1Listener.method_float {
+	return blah
+    }
+    set msg [list [catch {$x fire_float [java::null]} msg] $msg]
+    update
+    list [lindex $info 0] [lindex $info 2] $msg
+} {{expected floating-point number but got "blah"} {expected floating-point number but got "blah"
+    (attempting to return floating-point number from binding)} {0 0.0}}
+
+# exception -- call bgerror and return "undefined value"
+
+test EventAdaptor-7.3 {EventAdaptor._return_float} {
+    set x [java::new tcl.lang.TesterBean]
+    set info ""
+    java::bind $x tcl.lang.Tester1Listener.method_float {
+	error blah
+    }
+    set msg [list [catch {$x fire_float [java::null]} msg] $msg]
+    update
+    list [lindex $info 0] [lindex $info 2] $msg
+} {blah {blah
+    while executing
+"error blah"
+    (command bound to event)} {0 0.0}}
+
+#
+# INT
+#
+
+test EventAdaptor-8.1 {EventAdaptor._return_int} {
+    set x [java::new tcl.lang.TesterBean]
+    set info ""
+    set errorInfo ""
+    java::bind $x tcl.lang.Tester1Listener.method_int {
+	return 10
+    }
+    set msg [list [catch {$x fire_int [java::null]} msg] $msg $errorInfo]
+    update
+    list [lindex $info 0] [lindex $info 2] $msg
+} {{} {} {0 10 {}}}
+
+test EventAdaptor-8.2 {EventAdaptor._return_int} {
+    set x [java::new tcl.lang.TesterBean]
+    set info ""
+    set errorInfo ""
+    java::bind $x tcl.lang.Tester1Listener.method_int {
+	return -10
+    }
+    set msg [list [catch {$x fire_int [java::null]} msg] $msg $errorInfo]
+    update
+    list [lindex $info 0] [lindex $info 2] $msg
+} {{} {} {0 -10 {}}}
+
+test EventAdaptor-8.3 {EventAdaptor._return_int} {
+    set x [java::new tcl.lang.TesterBean]
+    set info ""
+    set errorInfo ""
+    java::bind $x tcl.lang.Tester1Listener.method_int {
+	return [expr 10 + 65536]
+    }
+    set msg [list [catch {$x fire_int [java::null]} msg] $msg $errorInfo]
+    update
+    list [lindex $info 0] [lindex $info 2] $msg
+} {{} {} {0 65546 {}}}
+
+# bad value -- call bgerror and return "undefined value"
+
+test EventAdaptor-8.4 {EventAdaptor._return_int} {
+    set x [java::new tcl.lang.TesterBean]
+    set info ""
+    java::bind $x tcl.lang.Tester1Listener.method_int {
+	return blah
+    }
+    set msg [list [catch {$x fire_int [java::null]} msg] $msg]
+    update
+    list [lindex $info 0] [lindex $info 2] $msg
+} {{expected integer but got "blah"} {expected integer but got "blah"
+    (attempting to return integer number from binding)} {0 0}}
+
+# exception -- call bgerror and return "undefined value"
+
+test EventAdaptor-8.5 {EventAdaptor._return_int} {
+    set x [java::new tcl.lang.TesterBean]
+    set info ""
+    java::bind $x tcl.lang.Tester1Listener.method_int {
+	error blah
+    }
+    set msg [list [catch {$x fire_int [java::null]} msg] $msg]
+    update
+    list [lindex $info 0] [lindex $info 2] $msg
+} {blah {blah
+    while executing
+"error blah"
+    (command bound to event)} {0 0}}
+
+#
+# LONG
+#
+
+test EventAdaptor-9.1 {EventAdaptor._return_long} {
+    set x [java::new tcl.lang.TesterBean]
+    set info ""
+    set errorInfo ""
+    java::bind $x tcl.lang.Tester1Listener.method_long {
+	return 10
+    }
+    set msg [list [catch {$x fire_long [java::null]} msg] $msg $errorInfo]
+    update
+    list [lindex $info 0] [lindex $info 2] $msg
+} {{} {} {0 10 {}}}
+
+test EventAdaptor-9.2 {EventAdaptor._return_long} {
+    set x [java::new tcl.lang.TesterBean]
+    set info ""
+    set errorInfo ""
+    java::bind $x tcl.lang.Tester1Listener.method_long {
+	return -10
+    }
+    set msg [list [catch {$x fire_long [java::null]} msg] $msg $errorInfo]
+    update
+    list [lindex $info 0] [lindex $info 2] $msg
+} {{} {} {0 -10 {}}}
+
+test EventAdaptor-9.3 {EventAdaptor._return_long} {
+    set x [java::new tcl.lang.TesterBean]
+    set info ""
+    set errorInfo ""
+    java::bind $x tcl.lang.Tester1Listener.method_long {
+	return [expr 10 + 65536]
+    }
+    set msg [list [catch {$x fire_long [java::null]} msg] $msg $errorInfo]
+    update
+    list [lindex $info 0] [lindex $info 2] $msg
+} {{} {} {0 65546 {}}}
+
+# bad value -- call bgerror and return "undefined value"
+
+test EventAdaptor-9.4 {EventAdaptor._return_long} {
+    set x [java::new tcl.lang.TesterBean]
+    set info ""
+    java::bind $x tcl.lang.Tester1Listener.method_long {
+	return blah
+    }
+    set msg [list [catch {$x fire_long [java::null]} msg] $msg]
+    update
+    list [lindex $info 0] [lindex $info 2] $msg
+} {{expected integer but got "blah"} {expected integer but got "blah"
+    (attempting to return integer number from binding)} {0 0}}
+
+# exception -- call bgerror and return "undefined value"
+
+test EventAdaptor-9.5 {EventAdaptor._return_long} {
+    set x [java::new tcl.lang.TesterBean]
+    set info ""
+    java::bind $x tcl.lang.Tester1Listener.method_long {
+	error blah
+    }
+    set msg [list [catch {$x fire_long [java::null]} msg] $msg]
+    update
+    list [lindex $info 0] [lindex $info 2] $msg
+} {blah {blah
+    while executing
+"error blah"
+    (command bound to event)} {0 0}}
+
+#
+# SHORT
+#
+
+test EventAdaptor-10.1 {EventAdaptor._return_short} {
+    set x [java::new tcl.lang.TesterBean]
+    set info ""
+    set errorInfo ""
+    java::bind $x tcl.lang.Tester1Listener.method_short {
+	return 10
+    }
+    set msg [list [catch {$x fire_short [java::null]} msg] $msg $errorInfo]
+    update
+    list [lindex $info 0] [lindex $info 2] $msg
+} {{} {} {0 10 {}}}
+
+test EventAdaptor-10.2 {EventAdaptor._return_short} {
+    set x [java::new tcl.lang.TesterBean]
+    set info ""
+    set errorInfo ""
+    java::bind $x tcl.lang.Tester1Listener.method_short {
+	return -10
+    }
+    set msg [list [catch {$x fire_short [java::null]} msg] $msg $errorInfo]
+    update
+    list [lindex $info 0] [lindex $info 2] $msg
+} {{} {} {0 -10 {}}}
+
+test EventAdaptor-10.3 {EventAdaptor._return_short} {
+    set x [java::new tcl.lang.TesterBean]
+    set info ""
+    set errorInfo ""
+    java::bind $x tcl.lang.Tester1Listener.method_short {
+	return [expr 10 + 65536]
+    }
+    set msg [list [catch {$x fire_short [java::null]} msg] $msg $errorInfo]
+    update
+    list [lindex $info 0] [lindex $info 2] $msg
+} {{} {} {0 10 {}}}
+
+# bad value -- call bgerror and return "undefined value"
+
+test EventAdaptor-10.4 {EventAdaptor._return_short} {
+    set x [java::new tcl.lang.TesterBean]
+    set info ""
+    java::bind $x tcl.lang.Tester1Listener.method_short {
+	return blah
+    }
+    set msg [list [catch {$x fire_short [java::null]} msg] $msg]
+    update
+    list [lindex $info 0] [lindex $info 2] $msg
+} {{expected integer but got "blah"} {expected integer but got "blah"
+    (attempting to return integer number from binding)} {0 0}}
+
+# exception -- call bgerror and return "undefined value"
+
+test EventAdaptor-10.5 {EventAdaptor._return_short} {
+    set x [java::new tcl.lang.TesterBean]
+    set info ""
+    java::bind $x tcl.lang.Tester1Listener.method_short {
+	error blah
+    }
+    set msg [list [catch {$x fire_short [java::null]} msg] $msg]
+    update
+    list [lindex $info 0] [lindex $info 2] $msg
+} {blah {blah
+    while executing
+"error blah"
+    (command bound to event)} {0 0}}
+
+#
+# OBJECT
+#
+
+test EventAdaptor-11.1 {EventAdaptor._return_Object} {
+    set x [java::new tcl.lang.TesterBean]
+    set info ""
+    set errorInfo ""
+    java::bind $x tcl.lang.Tester1Listener.method_Object {
+	return [java::new {Integer int} 1234]
+    }
+    set msg [list [catch {[$x fire_Object [java::null]] toString} msg] $msg $errorInfo]
+    update
+    list [lindex $info 0] [lindex $info 2] $msg
+} {{} {} {0 1234 {}}}
+
+test EventAdaptor-11.2 {EventAdaptor._return_Object} {
+    set x [java::new tcl.lang.TesterBean]
+    set info ""
+    set errorInfo ""
+    java::bind $x tcl.lang.Tester1Listener.method_Object {
+	return [java::new Object]
+    }
+    set msg [list [catch {$x fire_Object [java::null]} msg] [java::info class $msg] $errorInfo]
+    update
+    list [lindex $info 0] [lindex $info 2] $msg
+} {{} {} {0 java.lang.Object {}}}
+
+test EventAdaptor-11.3 {EventAdaptor._return_Object} {
+    set x [java::new tcl.lang.TesterBean]
+    set info ""
+    set errorInfo ""
+    java::bind $x tcl.lang.Tester1Listener.method_String {
+	return "this is a string"
+    }
+    set msg [list [catch {$x fire_String [java::null]} msg] $msg $errorInfo]
+    update
+    list [lindex $info 0] [lindex $info 2] $msg
+} {{} {} {0 {this is a string} {}}}
+
+test EventAdaptor-11.4 {EventAdaptor._return_Object} {
+    set x [java::new tcl.lang.TesterBean]
+    set info ""
+    set errorInfo ""
+    set vector [java::new java.util.Vector]
+    java::bind $x tcl.lang.Tester1Listener.method_Vector {
+	return $vector
+    }
+    set msg [list [catch {$x fire_Vector [java::null]} msg] [java::info class $msg] $errorInfo]
+    update
+    list [lindex $info 0] [lindex $info 2] $msg
+} {{} {} {0 java.util.Vector {}}}
+
+# bad value -- call bgerror and return "undefined value"
+
+test EventAdaptor-11.5 {EventAdaptor._return_Object} {
+    set x [java::new tcl.lang.TesterBean]
+    set info ""
+    java::bind $x tcl.lang.Tester1Listener.method_Object {
+	return blah
+    }
+    set msg [list [catch {$x fire_Object [java::null]} msg] $msg]
+    update
+    list [lindex $info 0] [lindex $info 2] $msg
+} {{unknown java object "blah"} {unknown java object "blah"
+    (attempting to return object from binding)} {0 java0x0}}
+
+
+# exception -- call bgerror and return "undefined value"
+
+test EventAdaptor-11.6 {EventAdaptor._return_Object} {
+    set x [java::new tcl.lang.TesterBean]
+    set info ""
+    java::bind $x tcl.lang.Tester1Listener.method_Object {
+	error blah
+    }
+    set msg [list [catch {$x fire_Object [java::null]} msg] $msg]
+    update
+    list [lindex $info 0] [lindex $info 2] $msg
+} {blah {blah
+    while executing
+"error blah"
+    (command bound to event)} {0 java0x0}}
+
+# type-cast error -- call bgerror and return "undefined value"
+
+set handle [java::new {Integer int} 1234]
+
+test EventAdaptor-11.7 {EventAdaptor._return_Object} {
+    set x [java::new tcl.lang.TesterBean]
+    set info ""
+    java::bind $x tcl.lang.Tester1Listener.method_Vector {
+	return $handle
+    }
+    set msg [list [catch {$x fire_Vector [java::null]} msg] $msg]
+    update
+    list [lindex $info 0] [lindex $info 2] $msg
+} "{cannot cast object ${handle} (1234) to required type java.util.Vector} {cannot cast object ${handle} (1234) to required type java.util.Vector
+    (attempting to return object from binding)} {0 java0x0}"
+
+catch {rename bgerror {}}

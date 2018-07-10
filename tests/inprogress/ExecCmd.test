@@ -1,0 +1,281 @@
+# Commands covered:  exec
+#
+# This file contains a collection of tests for one or more of the Tcl
+# built-in commands.  Sourcing this file into Tcl runs the tests and
+# generates output for errors.  No output means no errors were found.
+#
+# Copyright (c) 1998 Moses DeJong
+#
+# See the file "license.terms" for information on usage and redistribution
+# of this file, and for a DISCLAIMER OF ALL WARRANTIES.
+#
+# SCCS: @(#) exec.test 1.54 96/08/27 14:40:01
+
+if {[lsearch [namespace children] ::tcltest] == -1} {
+    package require tcltest
+    namespace import -force ::tcltest::*
+}
+
+# If exec is not defined just return with no error
+# Some platforms like the Macintosh do not have the exec command
+if {[info commands exec] == ""} {
+    puts "exec not implemented for this machine"
+    return
+}
+
+
+#If we were set up with the name of the java executable in our
+#system environment then use that executable name when invoking
+#the java VM, otherwise use the name "java"
+
+if {[info exists env(JAVA)]} {
+  set JAVA $env(JAVA)
+} else {
+  set JAVA java
+}
+
+
+if {0} {
+puts "JAVA is \"$JAVA\""
+puts "CLASSPATH is \"$env(CLASSPATH)\""
+}
+
+
+
+# note! exec IO redirection does not work in JACL
+# also current directory execution only works on UNIX
+# it almost works on windows but it is kind of buggy.
+# curse those guys at Sun for giving us a buggy JDK!
+
+
+test exec-1.1 {basic} {
+  catch {exec} err
+  list [catch {exec} err] $err
+} {1 {wrong # args: should be "exec ?switches? arg ?arg ...?"}}
+
+test exec-1.2 {-keepnewline switch} {
+    list [catch {exec -keepnewline} msg] $msg
+} {1 {wrong # args: should be "exec ?switches? arg ?arg ...?"}}
+
+test exec-1.3 {unknown switch} {
+    list [catch {exec -gorp} msg] $msg
+} {1 {bad switch "-gorp": must be -keepnewline or --}}
+
+
+
+
+
+
+if {$tcl_platform(platform) == "unix" ||
+($tcl_platform(platform) == "java" &&
+	 $tcl_platform(host_platform) == "unix")} {
+
+test exec-unix-1.1 {basic exec operation} {unixExecs} {
+    exec echo a b c
+} "a b c"
+
+set arg {12345678901234567890123456789012345678901234567890}
+set arg "$arg$arg$arg$arg$arg$arg"
+test exec-unix-1.2 {long command lines} {unixExecs} {
+    exec echo $arg
+} $arg
+unset arg
+
+
+test exec-unix-1.3 {-keepnewline switch} {unixExecs} {
+    exec -keepnewline echo foo
+} "foo\n"
+
+test exec-unix-1.4 {-keepnewline switch} {unixExecs} {
+    exec echo foo
+} "foo"
+
+test exec-unix-1.5 {shell subst} {
+    exec echo \; pwd \; echo \$HOME NO \{more\}
+} {; pwd ; echo $HOME NO {more}}
+
+
+}
+#end unix only test block
+
+
+
+
+
+#currently there is inconsistency between case of charcters
+#returned by the pwd command on a windows box. We will use
+#this command to do a tolower on file and directory names
+#before they are compared on a windows box
+
+#this function returns true if they represent the same file
+#or directory and false otherwise
+
+proc is_same_file { f1 f2 } {
+  global tcl_platform
+
+  if {$tcl_platform(platform) == "windows" ||
+                     ($tcl_platform(platform) == "java" &&
+                     $tcl_platform(host_platform) == "windows")} {
+	set f1 [string tolower $f1]
+	set f2 [string tolower $f2]
+  }
+  
+  return [expr {! [string compare $f1 $f2]}]
+}
+
+
+
+
+
+#test to see if the curent directory is correctly saved
+
+test exec-2.1 {current directory test} {
+    set startdir [pwd]
+    #puts "startdir  = \"$startdir\""
+    set name tmpdir
+    file mkdir $name
+    cd $name
+    set err [catch {exec $JAVA -classpath $env(CLASSPATH) tests.exec.PWD} cwd]
+    cd $startdir
+    file delete -force $name
+    if {$err} {
+        error $cwd
+    }
+    #puts "\"[file join $startdir $name]\" == \"$cwd\""
+    is_same_file [file join $startdir $name] $cwd
+} {1}
+
+
+#test to make sure that directory names with spaces or other
+#strange letters in them are not mangled by the exec cmd
+
+test exec-2.2 {funny directory names} {
+    set startdir [pwd]
+    set name "one two"
+    file mkdir $name
+    cd $name
+    set err [catch {exec $JAVA -classpath $env(CLASSPATH) tests.exec.PWD} cwd]
+    cd $startdir
+    file delete -force $name
+    if {$err} {
+        error $cwd
+    }
+    is_same_file [file join $startdir $name] $cwd
+} {1}
+
+test exec-2.3 {funny directory names} {
+    set startdir [pwd]
+    set name "one\$two"
+    file mkdir $name
+    cd $name
+    set err [catch {exec $JAVA -classpath $env(CLASSPATH) tests.exec.PWD} cwd]
+    cd $startdir
+    file delete -force $name
+    if {$err} {
+        error $cwd
+    }
+    is_same_file [file join $startdir $name] $cwd
+} {1}
+
+test exec-2.3 {funny directory names} {
+    set startdir [pwd]
+    set name "d%OS%r"
+    file mkdir $name
+    cd $name
+    set err [catch {exec $JAVA -classpath $env(CLASSPATH) tests.exec.PWD} cwd]
+    cd $startdir
+    file delete -force $name
+    if {$err} {
+        error $cwd
+    }
+    is_same_file [file join $startdir $name] $cwd
+} {1}
+
+test exec-2.4 {funny directory names} {
+    set startdir [pwd]
+    set name reallylongdirname
+    file mkdir $name
+    cd $name
+    set err [catch {exec $JAVA -classpath $env(CLASSPATH) tests.exec.PWD} cwd]
+    cd $startdir
+    file delete -force $name
+    if {$err} {
+        error $cwd
+    }
+    is_same_file [file join $startdir $name] $cwd
+} {1}
+
+
+#delete the file compare procedure
+rename is_same_file ""
+
+
+
+
+
+#test return values of execed programs
+
+test exec-3.1 {exec return values} {
+    list [catch {exec $JAVA -classpath $env(CLASSPATH) tests.exec.ExecErr} err] $err
+} "1 \{!stdout!\n!stderr!\}"
+
+test exec-3.2 {exec return values} {
+    list [catch {exec $JAVA -classpath $env(CLASSPATH) tests.exec.ExecNoErr} err] $err
+} "1 \{!stdout!\n!stderr!\}"
+
+test exec-3.3 {exec return values} {
+    list [catch {exec $JAVA -classpath $env(CLASSPATH) tests.exec.ExecNoErr2} err] $err
+} "0 !stdout!"
+
+test exec-3.4 {exec return values} {
+    list [catch {exec $JAVA -classpath $env(CLASSPATH) tests.exec.ExecEmptyErr} err] $err
+} {1 {child process exited abnormally}}
+
+test exec-3.5 {exec return values} {
+    list [catch {exec $JAVA -classpath $env(CLASSPATH) tests.exec.ExecEmptyErr2} err] $err
+} "1 \{!stdout!\nchild process exited abnormally\}"
+
+test exec-3.5 {exec return values} {
+    set pair [list {tcl/lang/AfterCmd$AfterAssocData.class} \
+	 {tcl/lang/AfterCmd$TimerInfo.class}]
+    list [catch {exec $JAVA -classpath $env(CLASSPATH) tests.exec.PrintArgs $pair "last\$ one"} err] $err
+} "0 \{\{tcl/lang/AfterCmd\$AfterAssocData.class\} \{tcl/lang/AfterCmd\$TimerInfo.class\}\nlast\$ one\}"
+
+test exec-3.6 {exec with lots of stdout and stderr output} {
+    set status [catch {exec $JAVA -classpath $env(CLASSPATH) tests.exec.ExecLotsOutput} output]
+
+    set expected "[string repeat OOO 1000]\n[string repeat EEE 1000]"
+    if {[string compare $output $expected] == 0} {
+        set match 1
+    } else {
+        set match 0
+    }
+    list $status $match
+} {1 1}
+
+
+test exec-4.1 { setting of errorCode when exit value != 0 } {unixOnly} {
+    # NOTE: This test ignores PID since we can't find that in Java.
+
+    set abnormal {child process exited abnormally}
+
+    if {![catch {exec false} err]} {
+        set result "exception not raised"
+    } elseif {$err != $abnormal} {
+        set result "expected $abnormal got $err"
+    } elseif {[lindex $errorCode 0] != "CHILDSTATUS" ||
+        [lindex $errorCode 2] != "1"} {
+        set result "expected {CHILDSTATUS ?PID? 1} got $errorCode"
+    } else {
+        set result ok
+    }
+} ok
+
+test exec-4.2 { no error when exit value == 0 } {unixOnly} {
+    list [catch {exec true} err] $err
+} {0 {}}
+
+
+# Need pid cmd and way to find a child's pid!
+
+

@@ -1,0 +1,108 @@
+<HTML><HEAD><TITLE>TclJava Library Procedures - TclIndex manual page</TITLE></HEAD><BODY>
+<DL>
+<DD><A HREF="TclIndex.htm#M2" NAME="L172">CLASS</A>
+<DL><DD>tcl.lang.TclIndex -- This class provides an efficient way to match a
+string with a predefined array of strings.</DL>
+<DD><A HREF="TclIndex.htm#M3" NAME="L173">IMPLEMENTS</A>
+<DL><DD>tcl.lang.InternalRep
+</DL>
+<DD><A HREF="TclIndex.htm#M4" NAME="L174">METHODS</A>
+<DL><DD>static int <B>get</B>(Interp <I>interp</I>, TclObject <I>tobj</I>, String <I>table[]</I>, String <I>msg</I>, int <I>flags</I>) throws TclException</DL>
+<DD><A HREF="TclIndex.htm#M5" NAME="L175">ARGUMENTS</A>
+<DL>
+</DL>
+<DD><A HREF="TclIndex.htm#M6" NAME="L176">DESCRIPTION</A>
+<DL>
+<DD><A HREF="TclIndex.htm#M7" NAME="L177"><B>get</B></A>
+</DL>
+<DD><A HREF="TclIndex.htm#M8" NAME="L178">EXAMPLE</A>
+<DD><A HREF="TclIndex.htm#M9" NAME="L179">EQUIVALENT C FUNCTIONS</A>
+<DD><A HREF="TclIndex.htm#M10" NAME="L180">SEE ALSO</A>
+<DD><A HREF="TclIndex.htm#M11" NAME="L181">KEYWORDS</A>
+</DL><HR>
+<H3><A NAME="M2">CLASS</A></H3>
+tcl.lang.TclIndex -- This class provides an efficient way to match a
+string with a predefined array of strings.
+<H3><A NAME="M3">IMPLEMENTS</A></H3>
+tcl.lang.InternalRep
+
+<H3><A NAME="M4">METHODS</A></H3>
+<P>static int <B>get</B>(Interp <I>interp</I>, TclObject <I>tobj</I>, String <I>table[]</I>, String <I>msg</I>, int <I>flags</I>) throws TclException
+<H3><A NAME="M5">ARGUMENTS</A></H3>
+<DL>
+<P><DT>Interp <B>interp</B><DD>
+If an error occurs while converting <I>tobj</I> to a string object,
+an error message is left in the interpreter's result object
+unless <I>interp</I> is null.
+<P><DT>TclObject <B>tobj</B><DD>
+TclObject containing the String to compare to those of <I>table[]</I>.
+If the internal representation of <I>tobj</I> is not TclString, the
+method attempts to convert it to TclString.
+<P><DT>String <B>table[]</B><DD>
+Table of strings to compare against the string internal to <I>tobj</I>.
+<P><DT>String <B>msg</B><DD>
+If an error occurs, <I>msg</I> is included in the error message to
+indicate what was being looked up.
+<P><DT>int <B>flags</B><DD>
+If TCL.EXACT flag is specified, only exact matches are accepted.
+Otherwise, matches include unique abbreviations.
+<P></DL>
+<H3><A NAME="M6">DESCRIPTION</A></H3>
+The <B>TclIndex</B> class provides an efficient way to look up
+keywords, switch names, option names, and similar things where the
+value of an object must be one of a predefined set of values.  We
+commonly use this class to identify the subcommand or switch of a Tcl
+command.
+<P>
+<DL>
+<P><DT><A NAME="M7"><B>get</B></A><DD>
+The <B>get</B> method compares the internal string value of <I>tobj</I>
+against each of the strings in <I>table</I> to find a match.  A match
+occurs if <I>tobj</I>'s string value is identical to one of the strings
+in <I>table</I>, or if it is a unique abbreviation for exactly one of
+the strings in <I>table</I> and the TCL.EXACT <I>flag</I> was not
+specified.
+<P>
+If a match is made, the index of the matching entry is returned, and
+the internal representation of <I>tobj</I> is modified to hold the
+address of <I>table</I> and the index of the matching entry.  If
+TclIndex.get() is invoked again with the same tobj and table arguments
+(e.g. during a re-invocation of a Tcl command), it returns the
+matching index immediately without having to redo the lookup
+operation.
+<P>
+If there is no matching entry, a TclException is thrown, and an error
+message is left in <I>interp</I>'s result if <I>interp</I> isn't null.
+The <I>msg</I> argument is included in the error message to indicate
+what kind of data that was being looked up.
+
+<P></DL>
+<H3><A NAME="M8">EXAMPLE</A></H3>
+<DL><P><DD>
+Suppose the <B>foo</B> command requires the use of one of
+the options in the following array of strings:
+<PRE>static final private String opts[] = {
+	&quot;first&quot;,
+	&quot;second&quot;,
+	&quot;third&quot;
+};</PRE>
+When a call is made to <B>foo</B>, we use the <B>get</B> method to find
+out which option was specified in the first argument to the <B>foo</B>
+command,<I>argv[1]</I>:
+<PRE>int opt = TclIndex.get(interp, argv[1], opts, &quot;option&quot;, 0);</PRE>
+If <I>argv[1]</I>'s internal string representation is either &quot;second&quot;,
+&quot;sec&quot;, or &quot;s&quot; a match is made.  However, if <I>argv[1]</I>'s internal
+string representation is &quot;scd&quot;, no match is made, and the <B>get</B>
+method generates the following error message:
+<PRE>bad option &quot;scd&quot;: must be first, second, or third.</PRE>
+</DL>
+<H3><A NAME="M9">EQUIVALENT C FUNCTIONS</A></H3>
+<A href="../cFunctions.html">Tcl_GetIndexFromObj</A>
+<H3><A NAME="M10">SEE ALSO</A></H3>
+<B><A HREF="../TclJavaLib/InternalRep.htm">InternalRep</A></B>, <B><A HREF="../TclJavaLib/TclObject.htm">TclObject</A></B>, <B><A HREF="../TclJavaLib/TclString.htm">TclString</A></B>, <B><A HREF="../TclJavaLib/TclInteger.htm">TclInteger</A></B>, <B>createCmd</B>, <B><A HREF="../TclJavaLib/TclException.htm">TclException</A></B>
+<H3><A NAME="M11">KEYWORDS</A></H3>
+<A href="../Keywords/I.htm#index">index</A>, <A href="../Keywords/I.htm#internal representation">internal representation</A>, <A href="../Keywords/O.htm#object">object</A>, <A href="../Keywords/O.htm#object type">object type</A>, <A href="../Keywords/S.htm#string">string</A>, <A href="../Keywords/E.htm#exception">exception</A>
+<HR><PRE>
+<A HREF="../license.html">Copyright</A> &#169; 1996-1998 Sun Microsystems, Inc.
+<A HREF="../license.html">Copyright</A> &#169; 1995-1997 Roger E. Critchlow Jr.</PRE>
+</BODY></HTML>

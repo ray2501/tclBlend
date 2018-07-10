@@ -1,0 +1,188 @@
+<HTML><HEAD><TITLE>TclJava Library Procedures - setVar manual page</TITLE></HEAD><BODY>
+<DL>
+<DD><A HREF="setVar.htm#M2" NAME="L355">CLASS</A>
+<DL><DD>tcl.lang.Interp -- This manual entry contains Interp methods that manipulate
+Tcl variables.</DL>
+<DD><A HREF="setVar.htm#M3" NAME="L356">METHODS</A>
+<DL><DD>void <B>setVar</B>(String <I>name</I>, TclObject <I>value</I>, int <I>flags</I>) throws TclException</DL>
+<DL><DD>void <B>setVar</B>(String <I>part1</I>, String <I>part2</I>, TclObject<I>value</I>, int <I>flags</I>) throws TclException</DL>
+<DL><DD>TclObject <B>getVar</B>(String <I>name</I>, int <I>flags</I>) throws TclException</DL>
+<DL><DD>TclObject <B>getVar</B>(String <I>part1</I>, String <I>part2</I>, int <I>flags</I>) throws TclException</DL>
+<DL><DD>void <B>unsetVar</B>(String <I>name</I>, int <I>flags</I>) throws TclException</DL>
+<DL><DD>void <B>unsetVar</B>(String <I>part1</I>, String <I>part2</I>, int <I>flags</I>) throws TclException</DL>
+<DD><A HREF="setVar.htm#M4" NAME="L357">OTHER METHODS</A>
+<DD><A HREF="setVar.htm#M5" NAME="L358">ARGUMENTS</A>
+<DL>
+</DL>
+<DD><A HREF="setVar.htm#M6" NAME="L359">DESCRIPTION</A>
+<DL>
+<DD><A HREF="setVar.htm#M7" NAME="L360"><B>setVar</B></A>
+<DD><A HREF="setVar.htm#M8" NAME="L361"><B>getVar</B></A>
+<DD><A HREF="setVar.htm#M9" NAME="L362"><B>unsetVar</B></A>
+</DL>
+<DD><A HREF="setVar.htm#M10" NAME="L363">OVERLOADING</A>
+<DL>
+</DL>
+<DD><A HREF="setVar.htm#M11" NAME="L364">FLAGS</A>
+<DL>
+<DD><A HREF="setVar.htm#M12" NAME="L365"><B>TCL.GLOBAL_ONLY</B></A>
+<DD><A HREF="setVar.htm#M13" NAME="L366"><B>TCL.NAMESPACE_ONLY</B></A>
+<DD><A HREF="setVar.htm#M14" NAME="L367"><B>TCL.APPEND_VALUE</B></A>
+<DD><A HREF="setVar.htm#M15" NAME="L368"><B>TCL.LIST_ELEMENT</B></A>
+</DL>
+<DD><A HREF="setVar.htm#M16" NAME="L369">EQUIVALENT C FUNCTIONS</A>
+<DD><A HREF="setVar.htm#M17" NAME="L370">SEE ALSO</A>
+<DD><A HREF="setVar.htm#M18" NAME="L371">KEYWORDS</A>
+</DL><HR>
+<H3><A NAME="M2">CLASS</A></H3>
+tcl.lang.Interp -- This manual entry contains Interp methods that manipulate
+Tcl variables.
+<H3><A NAME="M3">METHODS</A></H3>
+<P>void <B>setVar</B>(String <I>name</I>, TclObject <I>value</I>, int <I>flags</I>) throws TclException
+<P>void <B>setVar</B>(String <I>part1</I>, String <I>part2</I>, TclObject<I>value</I>, int <I>flags</I>) throws TclException
+<P>TclObject <B>getVar</B>(String <I>name</I>, int <I>flags</I>) throws TclException
+<P>TclObject <B>getVar</B>(String <I>part1</I>, String <I>part2</I>, int <I>flags</I>) throws TclException
+<P>void <B>unsetVar</B>(String <I>name</I>, int <I>flags</I>) throws TclException
+<P>void <B>unsetVar</B>(String <I>part1</I>, String <I>part2</I>, int <I>flags</I>) throws TclException
+<H3><A NAME="M4">OTHER METHODS</A></H3>
+<B><A HREF="../TclJavaLib/createCmd.htm">createCommand</A></B>,
+<B><A HREF="../TclJavaLib/traceVar.htm">traceVar</A></B>, 
+<B><A HREF="../TclJavaLib/Eval.htm">eval</A></B>, 
+<B><A HREF="../TclJavaLib/setResult.htm">setResult</A></B>, 
+<B><A HREF="../TclJavaLib/backgdErr.htm">backgroundError</A></B>,
+<BR>
+<B><A HREF="../TclJavaLib/getNotifier.htm">getNotifier</A></B>, 
+<B><A HREF="../TclJavaLib/setAssocData.htm">setAssocData</A></B>, 
+<B><A HREF="../TclJavaLib/dispose.htm">dispose</A></B>, 
+<B><A HREF="../TclJavaLib/pkgRequire.htm">pkgRequire</A></B>
+
+<H3><A NAME="M5">ARGUMENTS</A></H3>
+<DL>
+<P><DT>String <B>name</B> ()<DD>
+Name of variable.  May refer to a scalar variable or an array variable
+with a parenthesized index.
+<P><DT>String <B>part1</B> ()<DD>
+Name of scalar or array variable.  If <I>part2</I>
+is null, <I>part1</I> is treated like <I>name</I>.  Otherwise,
+<I>part1</I> must be an array variable with no index.
+<P><DT>String <B>part2</B> ()<DD>
+If not null, gives name of element within array; in this
+case <I>part1</I> must refer to an array variable with no index.
+<P><DT>TclObject <B>value</B> ()<DD>
+The TclObject containing the new value for the variable.
+<P><DT>int <B>flags</B> ()<DD>
+OR-ed combination of bits providing additional information. See below
+for valid values.
+<P></DL>
+<H3><A NAME="M6">DESCRIPTION</A></H3>
+These methods are used to create, modify, read, and delete
+Tcl variables from Java code.
+<P>
+<DL>
+<P><DT><A NAME="M7"><B>setVar</B></A><DD>
+The <B>setVar</B> methods create a new variable or modify the existing
+variable whose name is <I>name</I> or the combination of <I>part1</I>
+and <I>part2</I>.  See the <B>OVERLOADING</B> section below to learn how
+arguments <I>part1</I>
+and <I>part2</I> are combined to form a valid variable name.  These
+methods set the given variable to the value given by <I>value</I> and
+return void.  If an error occurs in setting the variable (e.g. an
+array variable is referenced without giving an index into the array) a
+<B><A HREF="../TclJavaLib/TclException.htm">TclException</A></B> is generated and an error message is left in
+<I>interp</I>'s result unless the <B>TCL.DONT_THROW_EXCEPTION</B>
+<I>flag</I> bit is set.
+<P><DT><A NAME="M8"><B>getVar</B></A><DD>
+The <B>getVar</B> methods return the current value of the variable
+whose name is <I>name</I> or the combination of <I>part1</I> and
+<I>part2</I> (as described for the <B>setVar</B> method above).  The
+return value is a
+<B><A HREF="../TclJavaLib/TclObject.htm">TclObject</A></B> containing the variable's value.  If an error occurs
+while reading the variable (e.g. the variable doesn't exist or an
+array element is specified for a scalar variable), then a
+<B><A HREF="../TclJavaLib/TclException.htm">TclException</A></B> is generated and an error message is left in
+<I>interp</I>'s result unless the <B>TCL.DONT_THROW_EXCEPTION</B>
+<I>flag</I> bit is set.
+<P><DT><A NAME="M9"><B>unsetVar</B></A><DD>
+The <B>unsetVar</B> methods may be used to remove a variable, so that
+future attempts to read the variable will generate exceptions.  The
+arguments to these methods are treated in the same way as the
+arguments to the methods above.  If the variable cannot be removed
+because it doesn't exist then a <B><A HREF="../TclJavaLib/TclException.htm">TclException</A></B> is generated and an
+error message is left in <I>interp</I>'s result unless the
+<B>TCL.DONT_THROW_EXCEPTION</B> <I>flag</I> bit is set.  If an array
+element is specified, the given element is removed but the array
+remains.  If an array name is specified without an index, then the
+entire array is removed.
+
+<P></DL>
+<H3><A NAME="M10">OVERLOADING</A></H3>
+These methods are overloaded to allow three different ways to specify
+variable names.
+<P>
+<DL>
+<P><DT>[1]<DD>
+If <B>setVar</B>, <B>getVar</B>, or <B>unsetVar</B> is invoked with the
+<I>name</I> argument, the variable name is given as a single string,
+<I>name</I>.  If <I>name</I> contains an open parenthesis and ends with
+a close parenthesis, then the value between the parentheses is treated
+as an index (which can have any string value) and the characters
+before the first open parenthesis are treated as the name of an array
+variable.  If <I>name</I> doesn't have parentheses as described above,
+then the entire string is treated as the name of a scalar variable.
+<P><DT>[2]<DD>
+If the <I>part1</I> and <I>part2</I> arguments are provided and
+<I>part2</I> is not null, then the variable <I>part1</I>(<I>part2</I>) is
+specified.  The <I>part1</I> argument contains the array name, and the
+<I>part2</I> argument contains the index.
+<P><DT>[3]<DD>
+If the <I>part1</I> and <I>part2</I> arguments are provided and
+<I>part2</I> is null, then <I>part1</I> is treated the same as the
+<I>name</I> argument in step [1].
+
+<P></DL>
+<H3><A NAME="M11">FLAGS</A></H3>
+The <I>flags</I> argument may be used to specify any of several options
+to the methods.  It consists of an OR-ed combination of the following
+bits.
+<P>
+<DL>
+<P><DT><A NAME="M12"><B>TCL.GLOBAL_ONLY</B></A><DD>
+Under normal circumstances, the procedures look up variables as follows.
+If a procedure call is active in <B><A HREF="../TclJavaLib/Interp.htm">Interp</A></B>,
+the variable is looked up at the current level of procedure call.
+Otherwise, the variable is looked up first in the current namespace,
+then in the global namespace.
+However, if this bit is set in <I>flags</I> then the variable
+is looked up only in the global namespace,
+even if there is an active procedure call.
+If both <B>TCL.GLOBAL_ONLY</B> and <B>TCL.NAMESPACE_ONLY</B> are given,
+<B>TCL.GLOBAL_ONLY</B> is ignored.
+<P><DT><A NAME="M13"><B>TCL.NAMESPACE_ONLY</B></A><DD>
+If this bit is set in <I>flags</I> then the variable
+is looked up only in the current namespace; if a procedure is active,
+its variables are ignored, and the global namespace is also ignored unless
+it is the current namespace.
+<P><DT><A NAME="M14"><B>TCL.APPEND_VALUE</B></A><DD>
+If this bit is set then <I>value</I> is appended to variable's the
+current value instead of replacing it.  If the variable is currently
+undefined, then the bit is ignored.  This bit is only used by the
+<B>setVar</B> methods.
+<P><DT><A NAME="M15"><B>TCL.LIST_ELEMENT</B></A><DD>
+If this bit is set, then <I>value</I> is converted to a valid
+Tcl list element before setting (or appending to) the variable.
+A separator space is appended before the new list element unless
+the list element is going to be the first element in a list or
+sublist (i.e. the variable's current value is empty, or contains
+the single character ``{'', or ends in `` }'').
+
+<P></DL>
+<H3><A NAME="M16">EQUIVALENT C FUNCTIONS</A></H3>
+<A href="../cFunctions.html">Tcl_SetVar</A>, <A href="../cFunctions.html">Tcl_SetVar2</A>, <A href="../cFunctions.html">Tcl_GetVar</A>, <A href="../cFunctions.html">Tcl_GetVar2</A>, <A href="../cFunctions.html">Tcl_UnsetVar</A>, <A href="../cFunctions.html">Tcl_UnsetVar2</A>
+<H3><A NAME="M17">SEE ALSO</A></H3>
+<B><A HREF="../TclJavaLib/Interp.htm">Interp</A></B>, <B><A HREF="../TclJavaLib/setResult.htm">setResult</A></B>, <B><A HREF="../TclJavaLib/traceVar.htm">traceVar</A></B>
+<H3><A NAME="M18">KEYWORDS</A></H3>
+<A href="../Keywords/A.htm#array">array</A>, <A href="../Keywords/G.htm#get">get</A>, <A href="../Keywords/I.htm#interpreter">interpreter</A>, <A href="../Keywords/O.htm#object">object</A>, <A href="../Keywords/S.htm#scalar">scalar</A>, <A href="../Keywords/S.htm#set">set</A>, <A href="../Keywords/U.htm#unset">unset</A>, <A href="../Keywords/V.htm#variable">variable</A>
+<HR><PRE>
+<A HREF="../license.html">Copyright</A> &#169; 1998 by Sun Microsystems, Inc.
+<A HREF="../license.html">Copyright</A> &#169; 1995-1997 Roger E. Critchlow Jr.</PRE>
+</BODY></HTML>

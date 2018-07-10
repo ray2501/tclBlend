@@ -1,0 +1,259 @@
+# This will test the commands in the xputils.tcl file
+
+lappend auto_path [pwd]
+package require XpUtils
+
+# We assume that these tests are run from tcljava/src/xputils,
+# if this changes the path to the defs file will need to be fixed
+
+if {[lsearch [namespace children] ::tcltest] == -1} {
+    package require tcltest
+    namespace import -force ::tcltest::*
+}
+
+cd ../../tests
+source defs
+
+
+# FIXME : fix path on mac
+
+switch $tcl_platform(platform) {
+  unix {
+    set PATH_SEPARATOR :
+  }
+  windows {
+    set PATH_SEPARATOR \;
+  }
+  mac -
+  default {
+    error "unsupported platform \"$tcl_platform(platform)\""	
+  }
+}
+
+test 1.1 {getPathSeparator} {
+  XpUtils::getPathSeparator
+} $PATH_SEPARATOR
+
+
+
+
+
+
+# Test series 2.0 : shared lib expansion using expandSharedLibName
+
+# Record the state of tcl_platform(debug) so we can reset it later
+set wasPlatformDebugSet [info exists tcl_platform(debug)]
+
+# The shared lib extension (like .dll or .so)
+set SHLIB_SUFFIX [info sharedlibextension]
+
+# The shared lib prefix
+set SHLIB_PREFIX ""
+
+
+if {$tcl_platform(platform) == "unix"} {
+  set SHLIB_PREFIX lib
+}
+
+catch {unset tcl_platform(debug)}
+
+test 2.0 {expandSharedLibName : no dbgx without tcl_platform(debug)} {
+  XpUtils::expandSharedLibName foo
+} ${SHLIB_PREFIX}foo${SHLIB_SUFFIX}
+
+test 2.1 {expandSharedLibName : no dbgx without tcl_platform(debug)} {
+  XpUtils::expandSharedLibName foo ""
+} ${SHLIB_PREFIX}foo${SHLIB_SUFFIX}
+
+test 2.2 {expandSharedLibName : no dbgx without tcl_platform(debug)} {
+  XpUtils::expandSharedLibName foo "g"
+} ${SHLIB_PREFIX}foo${SHLIB_SUFFIX}
+
+set tcl_platform(debug) 1
+
+test 2.3 {expandSharedLibName : use passed in dbgx passed} {
+  XpUtils::expandSharedLibName foo g
+} ${SHLIB_PREFIX}foog${SHLIB_SUFFIX}
+
+test 2.4 {expandSharedLibName : use passed in dbgx passed} {
+  XpUtils::expandSharedLibName foo _g
+} ${SHLIB_PREFIX}foo_g${SHLIB_SUFFIX}
+
+
+
+if {$tcl_platform(platform) == "unix"} {
+
+test 2.5 {expandSharedLibName : automatic suffix based on platform} {
+  XpUtils::expandSharedLibName foo
+} libfoog[info sharedlibextension]
+
+}
+
+if {$tcl_platform(platform) == "windows"} {
+
+test 2.6 {expandSharedLibName : automatic suffix based on platform} {
+  XpUtils::expandSharedLibName foo
+} food.dll
+
+}
+
+if {$tcl_platform(platform) == "mac"} {
+
+# FIXME : add mac test case
+
+
+}
+
+# Cleanup after test series 2
+
+if {$wasPlatformDebugSet} {
+  set tcl_platform(debug) 1
+} else {
+  catch {unset tcl_platform(debug)}
+}
+
+
+
+# Test series 3 : XpUtils::getTmpDir function
+
+if {$tcl_platform(platform) == "unix"} {
+
+test 3.0 {XpUtils::getTmpDir} {
+  XpUtils::getTmpDir
+} /tmp
+
+}
+
+if {$tcl_platform(platform) == "windows"} {
+
+test 3.1 {XpUtils::getTmpDir} {
+  if {[info exists env(TEMP)]} {
+    set old_tmp $env(TEMP)
+  }
+  set env(TEMP) C:/tmp
+  set res [XpUtils::getTmpDir]
+  if {[info exists old_tmp]} {
+    set env(TEMP) $old_tmp
+  } else {
+    unset env(TEMP)
+  }
+  set res
+} C:/tmp
+
+}
+
+if {$tcl_platform(platform) == "mac"} {
+
+# FIXME : add mac test case
+
+
+}
+
+
+
+
+# Test series 4 : XpUtils::splitpath function
+
+
+if {$tcl_platform(platform) == "unix"} {
+
+test 4.0 {XpUtils::splitpath} {
+  XpUtils::splitpath one:two
+} {one two}
+
+test 4.1 {XpUtils::splitpath} {
+  XpUtils::splitpath one::two:
+} {one two}
+
+}
+
+if {$tcl_platform(platform) == "windows"} {
+
+test 4.2 {XpUtils::splitpath} {
+  XpUtils::splitpath one\;two
+} {one two}
+
+test 4.3 {XpUtils::splitpath} {
+  XpUtils::splitpath one\;\;two\;
+} {one two}
+
+}
+
+if {$tcl_platform(platform) == "mac"} {
+
+# FIXME : add mac test case
+
+
+}
+
+
+
+
+# Test series 5 : XpUtils::appendpath
+
+
+if {$tcl_platform(platform) == "unix"} {
+
+test 5.1 {XpUtils::appendpath} {
+  set env(TMP_PATH) one:two
+  XpUtils::appendpath env(TMP_PATH) three
+  set path $env(TMP_PATH)
+  unset env(TMP_PATH)
+  set path
+} {one:two:three}
+
+}
+
+if {$tcl_platform(platform) == "windows"} {
+
+test 5.2 {XpUtils::appendpath} {
+  set env(TMP_PATH) {one;two}
+  XpUtils::appendpath env(TMP_PATH) three
+  set path $env(TMP_PATH)
+  unset env(TMP_PATH)
+  set path
+} {one;two;three}
+
+}
+
+if {$tcl_platform(platform) == "mac"} {
+
+# FIXME : add mac test case
+
+
+}
+
+
+# Test series 6 : XpUtils::prependpath
+
+
+if {$tcl_platform(platform) == "unix"} {
+
+test 6.1 {XpUtils::prependpath} {
+  set env(TMP_PATH) one:two
+  XpUtils::prependpath env(TMP_PATH) three
+  set path $env(TMP_PATH)
+  unset env(TMP_PATH)
+  set path
+} {three:one:two}
+
+}
+
+if {$tcl_platform(platform) == "windows"} {
+
+test 6.2 {XpUtils::prependpath} {
+  set env(TMP_PATH) {one;two}
+  XpUtils::prependpath env(TMP_PATH) three
+  set path $env(TMP_PATH)
+  unset env(TMP_PATH)
+  set path
+} {three;one;two}
+
+}
+
+if {$tcl_platform(platform) == "mac"} {
+
+# FIXME : add mac test case
+
+
+}

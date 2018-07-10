@@ -1,0 +1,186 @@
+# JavaEventCmd.test --
+#
+#	This file contains white-box tests for the JavaEventCmd class.
+#
+# Copyright (c) 1997 by Sun Microsystems, Inc.
+#
+# See the file "license.terms" for information on usage and redistribution
+# of this file, and for a DISCLAIMER OF ALL WARRANTIES.
+#
+# RCS: @(#) $Id: JavaEventCmd.test,v 1.2 2000/12/22 09:47:15 mdejong Exp $
+
+if {[lsearch [namespace children] ::tcltest] == -1} {
+    package require tcltest
+    namespace import -force ::tcltest::*
+}
+
+setupJavaPackage
+
+proc setup {} {
+    global errorCode errorInfo info info_short
+    set errorCode NONE
+    set errorInfo ""
+    set info ""
+    set info_short ""
+}
+proc bgerror {msg} {
+    global errorCode errorInfo info info_short
+    set info ""
+    lappend info $msg $errorCode $errorInfo
+    set info_short $msg
+}
+
+test JavaEvent-1.1 {cmdProc} {
+    list [catch {java::event a b c d} msg] $msg
+} {1 {wrong # args: should be "java::event ?-index num? ?propertyName?"}}
+
+test JavaEvent-1.2 {cmdProc} {
+    list [catch {java::event -foo b c} msg] $msg
+} {1 {bad option "-foo": must be -index}}
+
+test JavaEvent-1.3 {cmdProc} {
+    list [catch {java::event -index foo} msg] $msg
+} {1 {expected integer but got "foo"}}
+
+test JavaEvent-1.4 {cmdProc} {
+    list [catch {java::event} msg] $msg
+} {1 {"java::event" cannot be invoked outside of an event handler}}
+
+test JavaEvent-1.5 {cmdProc} {
+    set x [java::new tcl.lang.TesterBean]
+    java::bind $x tcl.lang.Tester1Listener.method0 {
+	lappend kk [java::info class [java::event -index 1234]]
+    }
+    setup
+    $x fire0
+    update
+    set info_short
+} {event parameter #1234 doesn't exist}
+
+test JavaEvent-1.5 {cmdProc} {
+    set x [java::new tcl.lang.TesterBean]
+    set kk ""
+    java::bind $x tcl.lang.Tester1Listener.method0 {
+	lappend kk [java::info class [java::event -index 0]]
+    }
+    setup
+    $x fire0
+    update
+    list $info_short $kk
+} {{} tcl.lang.Tester1Event}
+
+
+set list [list 0 2 C 2.0 3.0 4433 66789 123 string_val]
+
+foreach i {0 1 2 3 4 5 6 7 8} {
+    set val [lindex $list $i]
+
+    test JavaEvent-2.$i {cmdProc} {
+	set x [java::new tcl.lang.TesterBean]
+	set kk ""
+	java::bind $x tcl.lang.Tester1Listener.method2 {
+	    lappend kk [java::event -index $i]
+	}
+	setup
+	eval $x fire2 $list
+	update
+	list $info_short $kk
+    } [list {} $val]
+}
+
+test JavaEvent-3.1 {cmdProc} {
+    set x [java::new tcl.lang.TesterBean]
+    java::bind $x tcl.lang.Tester1Listener.method0 {
+	lappend kk [java::info class [java::event foobar]]
+    }
+    setup
+    $x fire0
+    update
+    set info_short
+} {unknown property "foobar"}
+
+test JavaEvent-3.2 {cmdProc} {
+    set x [java::new tcl.lang.TesterBean]
+    java::bind $x tcl.lang.Tester1Listener.method0 {
+	lappend kk [java::info class [java::event -index]]
+    }
+    setup
+    $x fire0
+    update
+    set info_short
+} {unknown property "-index"}
+
+test JavaEvent-3.3 {cmdProc} {
+    set x [java::new tcl.lang.TesterBean]
+    java::bind $x tcl.lang.Tester1Listener.method0 {
+	lappend kk [java::info class [java::event -index 0 foobar]]
+    }
+    setup
+    $x fire0
+    update
+    set info_short
+} {unknown property "foobar"}
+
+test JavaEvent-3.4 {cmdProc} {
+    set x [java::new tcl.lang.TesterBean]
+    java::bind $x tcl.lang.Tester1Listener.method0 {
+	lappend kk [java::event intValue]
+    }
+    set kk ""
+    setup
+    $x fire0
+    update
+    list $info_short $kk
+} {{} 1234}
+
+test JavaEvent-3.5 {cmdProc} {
+    set x [java::new tcl.lang.TesterBean]
+    java::bind $x tcl.lang.Tester1Listener.method0 {
+	lappend kk [java::event stringValue]
+    }
+    set kk ""
+    setup
+    $x fire0
+    update
+    list $info_short $kk
+} {{} {{string value}}}
+
+test JavaEvent-3.6 {cmdProc} {
+    set x [java::new tcl.lang.TesterBean]
+    java::bind $x tcl.lang.Tester1Listener.method0 {
+	lappend kk [java::event stringValue_null]
+    }
+    set kk ""
+    setup
+    $x fire0
+    update
+    list $info_short $kk
+} {{} {{}}}
+
+test JavaEvent-3.7 {cmdProc} {
+    set x [java::new tcl.lang.TesterBean]
+    java::bind $x tcl.lang.Tester1Listener.method0 {
+	lappend kk [java::event stringValue_empty]
+    }
+    set kk ""
+    setup
+    $x fire0
+    update
+    list $info_short $kk
+} {{} {{}}}
+
+test JavaEvent-3.8 {cmdProc} {
+    set x [java::new tcl.lang.TesterBean]
+    java::bind $x tcl.lang.Tester1Listener.method0 {
+	lappend kk [java::event objectValue_null]
+    }
+    set kk ""
+    setup
+    $x fire0
+    update
+    list $info_short $kk
+} {{} java0x0}
+
+# cleanup
+::tcltest::cleanupTests
+return

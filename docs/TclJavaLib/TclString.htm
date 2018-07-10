@@ -1,0 +1,63 @@
+<HTML><HEAD><TITLE>TclJava Library Procedures - TclString manual page</TITLE></HEAD><BODY>
+<DL>
+<DD><A HREF="TclString.htm#M2" NAME="L233">CLASS</A>
+<DL><DD>tcl.lang.TclString -- This class is used to create and modify Tcl string
+objects.</DL>
+<DD><A HREF="TclString.htm#M3" NAME="L234">IMPLEMENTS</A>
+<DL><DD>tcl.lang.InternalRep
+</DL>
+<DD><A HREF="TclString.htm#M4" NAME="L235">METHODS</A>
+<DL><DD>static TclObject <B>newInstance</B>(String <I>strValue</I>)</DL>
+<DL><DD>static void <B>append</B>(TclObject <I>tobj</I>, String <I>string</I>)</DL>
+<DD><A HREF="TclString.htm#M5" NAME="L236">ARGUMENTS</A>
+<DL>
+</DL>
+<DD><A HREF="TclString.htm#M6" NAME="L237">DESCRIPTION</A>
+<DL>
+<DD><A HREF="TclString.htm#M7" NAME="L238"><B>newInstance</B></A>
+<DD><A HREF="TclString.htm#M8" NAME="L239"><B>append</B></A>
+</DL>
+<DD><A HREF="TclString.htm#M9" NAME="L240">EQUIVALENT C FUNCTIONS</A>
+<DD><A HREF="TclString.htm#M10" NAME="L241">SEE ALSO</A>
+<DD><A HREF="TclString.htm#M11" NAME="L242">KEYWORDS</A>
+</DL><HR>
+<H3><A NAME="M2">CLASS</A></H3>
+tcl.lang.TclString -- This class is used to create and modify Tcl string
+objects.
+<H3><A NAME="M3">IMPLEMENTS</A></H3>
+tcl.lang.InternalRep
+
+<H3><A NAME="M4">METHODS</A></H3>
+<P>static TclObject <B>newInstance</B>(String <I>strValue</I>)
+<P>static void <B>append</B>(TclObject <I>tobj</I>, String <I>string</I>)
+<H3><A NAME="M5">ARGUMENTS</A></H3>
+<DL>
+<P><DT>TclObject <B>tobj</B><DD>
+TclObject to append a string to.  If the internal representation of
+<I>tobj</I> is not TclString, the method converts it to TclString.
+<P><DT>String <B>strValue</B><DD>
+Value of internal string in newly created TclObject.
+<P><DT>String <B>string</B><DD>
+String to append to the end of the string in the internal
+representation of <I>tobj</I>.
+<P></DL>
+<H3><A NAME="M6">DESCRIPTION</A></H3>
+<DL>
+<P><DT><A NAME="M7"><B>newInstance</B></A><DD>
+The <B>newInstance</B> method creates and returns a new TclString whose internal
+representation contains the string <I>strValue</I>.
+<P><DT><A NAME="M8"><B>append</B></A><DD>
+The <B>append</B> method concatenates <I>string</I> to the end of the String
+internally to <I>tobj</I>.
+
+<P></DL>
+<H3><A NAME="M9">EQUIVALENT C FUNCTIONS</A></H3>
+<A href="../cFunctions.html">Tcl_NewStringObj</A>, <A href="../cFunctions.html">Tcl_AppendToObj</A>
+<H3><A NAME="M10">SEE ALSO</A></H3>
+<B><A HREF="../TclJavaLib/InternalRep.htm">InternalRep</A></B>, <B><A HREF="../TclJavaLib/TclObject.htm">TclObject</A></B>, <B><A HREF="../TclJavaLib/TclList.htm">TclList</A></B>, <B><A HREF="../TclJavaLib/TclIndex.htm">TclIndex</A></B>, <B><A HREF="../TclJavaLib/TclDouble.htm">TclDouble</A></B>, <B><A HREF="../TclJavaLib/TclInteger.htm">TclInteger</A></B>, <B><A HREF="../TclJavaLib/TclBoolean.htm">TclBoolean</A></B>, <B><A HREF="../TclJavaLib/ReflectObject.htm">ReflectObject</A></B>
+<H3><A NAME="M11">KEYWORDS</A></H3>
+<A href="../Keywords/I.htm#internal representation">internal representation</A>, <A href="../Keywords/O.htm#object">object</A>, <A href="../Keywords/O.htm#object type">object type</A>, <A href="../Keywords/S.htm#string">string</A>, <A href="../Keywords/A.htm#append">append</A>
+<HR><PRE>
+<A HREF="../license.html">Copyright</A> &#169; 1996-1998 Sun Microsystems, Inc.
+<A HREF="../license.html">Copyright</A> &#169; 1995-1997 Roger E. Critchlow Jr.</PRE>
+</BODY></HTML>

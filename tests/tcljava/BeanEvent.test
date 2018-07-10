@@ -1,0 +1,196 @@
+# BeanEvent.test --
+#
+#	Tests the implementation of the BeanEvent.java file.
+#
+# Copyright (c) 1997 by Sun Microsystems, Inc.
+#
+# See the file "license.terms" for information on usage and redistribution
+# of this file, and for a DISCLAIMER OF ALL WARRANTIES.
+#
+# SCCS: @(#) BeanEvent.test 1.4 98/01/14 16:38:42
+
+if {[lsearch [namespace children] ::tcltest] == -1} {
+    package require tcltest
+    namespace import -force ::tcltest::*
+}
+
+setupJavaPackage
+
+proc bgerror {msg} {
+    global errorCode errorInfo info
+    set info ""
+    lappend info bgerror $msg $errorCode $errorInfo
+}
+
+test BeanEvent-1.1 {BeanEvent.processEvent} {
+    set x [java::new tcl.lang.TesterBean]
+    set info ""
+    set errorInfo ""
+    java::bind $x tcl.lang.Tester1Listener.method_boolean {
+	set kk true
+    }
+    set msg [list [catch {$x fire_boolean [java::null]} msg] $msg $errorInfo]
+    update
+    list [lindex $info 0] [lindex $info 2] $msg
+} {{} {} {0 1 {}}}
+
+test BeanEvent-1.2 {BeanEvent.processEvent} {
+    set x [java::new tcl.lang.TesterBean]
+    set info ""
+    set errorInfo ""
+    java::bind $x tcl.lang.Tester1Listener.method0 {
+	java::throw [java::new java.lang.Exception blah]
+    }
+    set msg [list [catch {$x fire0} msg] $msg]
+    update
+    list [lindex $info 0] [lindex $info 1] [lindex $info 3] $msg
+} {bgerror {unexpected exception: java.lang.Exception: blah} {java.lang.Exception: blah
+    while executing
+"java::throw [java::new java.lang.Exception blah]"
+    (command bound to event)} {0 {}}}
+
+test BeanEvent-1.3 {BeanEvent.processEvent} {
+    set x [java::new tcl.lang.TesterBean]
+    set info ""
+    set errorInfo ""
+    java::bind $x tcl.lang.Tester1Listener.method0 {
+	java::call java.lang.Class forName xx
+    }
+    set msg [list [catch {$x fire0} msg] $msg]
+    update
+    list [lindex $info 0] [lindex $info 1] [lindex $info 3] $msg
+} {bgerror {unexpected exception: java.lang.ClassNotFoundException: xx} {java.lang.ClassNotFoundException: xx
+    while executing
+"java::call java.lang.Class forName xx"
+    (command bound to event)} {0 {}}}
+
+test BeanEvent-1.4 {BeanEvent.processEvent} {
+    set x [java::new tcl.lang.TesterBean]
+    set info ""
+    set errorInfo ""
+    java::bind $x tcl.lang.Tester1Listener.method0 {
+	return kk
+    }
+    set msg [list [catch {$x fire0} msg] $msg]
+    update
+    list [lindex $info 0] [lindex $info 1] [lindex $info 3] $msg
+} {{} {} {} {0 {}}}
+
+test BeanEvent-1.5 {BeanEvent.processEvent} {
+    set x [java::new tcl.lang.TesterBean]
+    set info ""
+    set errorInfo ""
+    java::bind $x tcl.lang.Tester1Listener.method0 {
+	return -code ok
+    }
+    set msg [list [catch {$x fire0} msg] $msg]
+    update
+    list [lindex $info 0] [lindex $info 1] [lindex $info 3] $msg
+} {{} {} {} {0 {}}}
+
+test BeanEvent-1.6 {BeanEvent.processEvent} {
+    set x [java::new tcl.lang.TesterBean]
+    set info ""
+    set errorInfo ""
+    java::bind $x tcl.lang.Tester1Listener.method0 {
+	error blah
+    }
+    set msg [list [catch {$x fire0} msg] $msg]
+    update
+    list [lindex $info 0] [lindex $info 1] [lindex $info 3] $msg
+} {bgerror blah {blah
+    while executing
+"error blah"
+    (command bound to event)} {0 {}}}
+
+test BeanEvent-1.7 {BeanEvent.processEvent} {
+    set x [java::new tcl.lang.TesterBean]
+    set info ""
+    set errorInfo ""
+    java::bind $x tcl.lang.Tester1Listener.method0 {
+	break
+    }
+    set msg [list [catch {$x fire0} msg] $msg]
+    update
+    list [lindex $info 0] [lindex $info 1] [lindex $info 3] $msg
+} {bgerror {invoked "break" outside of a loop} {invoked "break" outside of a loop
+    (command bound to event)} {0 {}}}
+
+test BeanEvent-1.8 {BeanEvent.processEvent} {
+    set x [java::new tcl.lang.TesterBean]
+    set info ""
+    set errorInfo ""
+    java::bind $x tcl.lang.Tester1Listener.method0 {
+	continue
+    }
+    set msg [list [catch {$x fire0} msg] $msg]
+    update
+    list [lindex $info 0] [lindex $info 1] [lindex $info 3] $msg
+} {bgerror {invoked "continue" outside of a loop} {invoked "continue" outside of a loop
+    (command bound to event)} {0 {}}}
+
+test BeanEvent-1.9 {BeanEvent.processEvent} {
+    set x [java::new tcl.lang.TesterBean]
+    set info ""
+    set errorInfo ""
+    java::bind $x tcl.lang.Tester1Listener.method0 {
+	testcompcode 123 blah
+    }
+    set msg [list [catch {$x fire0} msg] $msg]
+    update
+    list [lindex $info 0] [lindex $info 1] [lindex $info 3] $msg
+} {bgerror blah {blah
+    (command bound to event)} {0 {}}}
+
+test BeanEvent-1.10 {BeanEvent.processEvent, ReflectException} {
+    set x [java::new tcl.lang.TesterBean]
+    set info ""
+    set errorInfo ""
+    java::bind $x tcl.lang.Tester1Listener.method3 {
+	java::throw [java::new SecurityException]
+    }
+    set msg [list [catch {$x fire3 [java::null]} msg] $msg]
+    update
+    list [lindex $info 0] [lindex $info 1] [lindex $info 3] $msg [java::info class [lindex $errorCode 1]]
+} {{} {} {} {1 java.lang.SecurityException} java.lang.Throwable}
+
+test BeanEvent-1.11 {BeanEvent.processEvent, ReflectException} {
+    set x [java::new tcl.lang.TesterBean]
+    set info ""
+    set errorInfo ""
+    java::bind $x tcl.lang.Tester1Listener.method3 {
+	error foo "" [list JAVA [java::new SecurityException]]
+    }
+    set msg [list [catch {$x fire3 [java::null]} msg] $msg]
+    update
+    list [lindex $info 0] [lindex $info 1] [lindex $info 3] $msg [java::info class [lindex $errorCode 1]]
+} {{} {} {} {1 java.lang.SecurityException} java.lang.Throwable}
+
+test BeanEvent-1.12 {BeanEvent.processEvent, ReflectException} {
+    set x [java::new tcl.lang.TesterBean]
+    set info ""
+    set errorInfo ""
+    java::bind $x tcl.lang.Tester1Listener.method3 {
+	error foo "" [list JAVA [java::new Object]]
+    }
+    set msg [list [catch {$x fire3 [java::null]} msg] $msg]
+    update
+    list [lindex $info 0] [lindex $info 1] [lindex $msg 0]
+} {bgerror foo 0}
+
+test BeanEvent-1.13 {BeanEvent.processEvent, ReflectException} {
+    set x [java::new tcl.lang.TesterBean]
+    set info ""
+    set errorInfo ""
+    java::bind $x tcl.lang.Tester1Listener.method3 {
+	error foo "" [list JAVA not_an_object]
+    }
+    set msg [list [catch {$x fire3 [java::null]} msg] $msg]
+    update
+    list [lindex $info 0] [lindex $info 1] [lindex $msg 0]
+} {bgerror foo 0}
+
+# cleanup
+catch {rename bgerror {}}
+::tcltest::cleanupTests
+return

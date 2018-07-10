@@ -1,0 +1,171 @@
+<HTML>
+<TITLE>Tcl/Java Integration Manual</TITLE>
+<BODY>
+<HR>
+<H3>Links from C Library Functions to Java Library Functions</H3>
+<HR>
+
+
+<UL>
+<LI>
+<A HREF="TclJavaLib/TclObject.htm">TclObj.typePtr</A>
+<LI>
+<A HREF="TclJavaLib/backgdErr.htm">Tcl_AddErrorInfo</A>
+<LI>
+<A HREF="TclJavaLib/TclString.htm">Tcl_AppendToObj</A>
+<LI>
+<A HREF="TclJavaLib/backgdErr.htm">Tcl_BackgroundError</A>
+<LI>
+<A HREF="TclJavaLib/CommandWithDispose.htm">Tcl_CmdDeleteProc</A>
+<LI>
+<A HREF="TclJavaLib/Eval.htm">Tcl_CommandComplete</A>
+<LI>
+<A HREF="TclJavaLib/Command.htm">Tcl_CommandProc</A>
+<LI>
+<A HREF="TclJavaLib/TclObject.htm">Tcl_ConvertToType</A>
+<LI>
+<A HREF="TclJavaLib/createCmd.htm">Tcl_CreateCommand</A>
+<LI>
+<A HREF="TclJavaLib/IdleHandler.htm">Tcl_CreateIdleHandler</A>
+<LI>
+<A HREF="TclJavaLib/dispose.htm">Tcl_CreateInterp</A>
+<LI>
+<A HREF="TclJavaLib/TimerHandler.htm">Tcl_CreateTimerHandler</A>
+<LI>
+<A HREF="TclJavaLib/TclObject.htm">Tcl_DecrRefCount</A>
+<LI>
+<A HREF="TclJavaLib/setAssocData.htm">Tcl_DeleteAssocData</A>
+<LI>
+<A HREF="TclJavaLib/createCmd.htm">Tcl_DeleteCommand</A>
+<LI>
+<A HREF="TclJavaLib/Notifier.htm">Tcl_DeleteEvents</A>
+<LI>
+<A HREF="TclJavaLib/dispose.htm">Tcl_DeleteInterp</A>
+<LI>
+<A HREF="TclJavaLib/Notifier.htm">Tcl_DoOneEvent</A>
+<LI>
+<A HREF="TclJavaLib/TclObject.htm">Tcl_DuplicateObj</A>
+<LI>
+<A HREF="TclJavaLib/Eval.htm">Tcl_Eval</A>
+<LI>
+<A HREF="TclJavaLib/Eval.htm">Tcl_EvalFile</A>
+<LI>
+<A HREF="TclJavaLib/Eval.htm">Tcl_EvalObj</A>
+<LI>
+<A HREF="TclJavaLib/EventDeleter.htm">Tcl_EventDeleteProc</A>
+<LI>
+<A HREF="TclJavaLib/TclEvent.htm">Tcl_EventProc</A>
+<LI>
+<A HREF="TclJavaLib/setAssocData.htm">Tcl_GetAssocData</A>
+<LI>
+<A HREF="TclJavaLib/TclBoolean.htm">Tcl_GetBooleanFromObj</A>
+<LI>
+<A HREF="TclJavaLib/createCmd.htm">Tcl_GetCommandInfo</A>
+<LI>
+<A HREF="TclJavaLib/TclDouble.htm">Tcl_GetDoubleFromObj</A>
+<LI>
+<A HREF="TclJavaLib/TclIndex.htm">Tcl_GetIndexFromObj</A>
+<LI>
+<A HREF="TclJavaLib/TclInteger.htm">Tcl_GetIntFromObj</A>
+<LI>
+<A HREF="TclJavaLib/setResult.htm">Tcl_GetObjResult</A>
+<LI>
+<A HREF="TclJavaLib/TclObject.htm">Tcl_GetStringFromObj</A>
+<LI>
+<A HREF="TclJavaLib/setVar.htm">Tcl_GetVar</A>
+<LI>
+<A HREF="TclJavaLib/setVar.htm">Tcl_GetVar2</A>
+<LI>
+<A HREF="TclJavaLib/Eval.htm">Tcl_GlobalEval</A>
+<LI>
+<A HREF="TclJavaLib/TclObject.htm">Tcl_IncrRefCount</A>
+<LI>
+<A HREF="TclJavaLib/TclObject.htm">Tcl_InvalidateStringRep</A>
+<LI>
+<A HREF="TclJavaLib/TclObject.htm">Tcl_IsShared</A>
+<LI>
+<A HREF="TclJavaLib/TclList.htm">Tcl_ListObjAppendList</A>
+<LI>
+<A HREF="TclJavaLib/TclList.htm">Tcl_ListObjGetElements</A>
+<LI>
+<A HREF="TclJavaLib/TclList.htm">Tcl_ListObjIndex</A>
+<LI>
+<A HREF="TclJavaLib/TclList.htm">Tcl_ListObjLength</A>
+<LI>
+<A HREF="TclJavaLib/TclList.htm">Tcl_ListObjReplace</A>
+<LI>
+<A HREF="TclJavaLib/TclBoolean.htm">Tcl_NewBooleanObj</A>
+<LI>
+<A HREF="TclJavaLib/TclDouble.htm">Tcl_NewDoubleObj</A>
+<LI>
+<A HREF="TclJavaLib/TclInteger.htm">Tcl_NewIntObj</A>
+<LI>
+<A HREF="TclJavaLib/TclList.htm">Tcl_NewListObj</A>
+<LI>
+<A HREF="TclJavaLib/TclObject.htm">Tcl_NewObj</A>
+<LI>
+<A HREF="TclJavaLib/TclString.htm">Tcl_NewStringObj</A>
+<LI>
+<A HREF="TclJavaLib/InternalRep.htm">Tcl_ObjType.dupIntRepProc</A>
+<LI>
+<A HREF="TclJavaLib/InternalRep.htm">Tcl_ObjType.freeProc</A>
+<LI>
+<A HREF="TclJavaLib/InternalRep.htm">Tcl_ObjType.updateStringProc</A>
+<LI>
+<A HREF="TclJavaLib/pkgRequire.htm">Tcl_PkgProvide</A>
+<LI>
+<A HREF="TclJavaLib/pkgRequire.htm">Tcl_PkgRequire</A>
+<LI>
+<A HREF="TclJavaLib/Notifier.htm">Tcl_QueueEvent</A>
+<LI>
+<A HREF="TclJavaLib/Eval.htm">Tcl_RecordAndEvalObj</A>
+<LI>
+<A HREF="TclJavaLib/setResult.htm">Tcl_ResetResult</A>
+<LI>
+<A HREF="TclJavaLib/TclEvent.htm">Tcl_ServiceAll</A>
+<LI>
+<A HREF="TclJavaLib/setAssocData.htm">Tcl_SetAssocData</A>
+<LI>
+<A HREF="TclJavaLib/TclDouble.htm">Tcl_SetDoubleObj</A>
+<LI>
+<A HREF="TclJavaLib/TclInteger.htm">Tcl_SetIntObj</A>
+<LI>
+<A HREF="TclJavaLib/backgdErr.htm">Tcl_SetObjErrorCode</A>
+<LI>
+<A HREF="TclJavaLib/setResult.htm">Tcl_SetObjResult</A>
+<LI>
+<A HREF="TclJavaLib/setResult.htm">Tcl_SetResult</A>
+<LI>
+<A HREF="TclJavaLib/setVar.htm">Tcl_SetVar</A>
+<LI>
+<A HREF="TclJavaLib/setVar.htm">Tcl_SetVar2</A>
+<LI>
+<A HREF="TclJavaLib/Util.htm">Tcl_StringMatch</A>
+<LI>
+<A HREF="TclJavaLib/VarTrace.htm">Tcl_TraceProc</A>
+<LI>
+<A HREF="TclJavaLib/traceVar.htm">Tcl_TraceVar</A>
+<LI>
+<A HREF="TclJavaLib/traceVar.htm">Tcl_TraceVar2</A>
+<LI>
+<A HREF="TclJavaLib/setVar.htm">Tcl_UnsetVar</A>
+<LI>
+<A HREF="TclJavaLib/setVar.htm">Tcl_UnsetVar2</A>
+<LI>
+<A HREF="TclJavaLib/traceVar.htm">Tcl_UntraceVar</A>
+<LI>
+<A HREF="TclJavaLib/traceVar.htm">Tcl_UntraceVar2</A>
+<LI>
+<A HREF="TclJavaLib/runtimeError.htm">panic</A>
+
+</UL>
+
+<HR>
+
+<PRE>
+Copyright &#169; 1989-1994 The Regents of the University of California.
+Copyright &#169; 1994-1998 Sun Microsystems, Inc.
+</PRE>
+
+</BODY>
+</HTML>

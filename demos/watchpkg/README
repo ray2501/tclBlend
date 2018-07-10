@@ -1,0 +1,88 @@
+README
+RCS: @(#) $Id: README,v 1.3 2000/10/05 03:10:06 mo Exp $
+
+
+Abstract
+--------
+
+      This demo shows two ways extend Tcl with Java classes.  Both
+      examples use the Java StopWatchThread class.  One interface is
+      written in Java; the other in Tcl.
+
+Why Bother?
+-----------
+
+      To choose an appropriate design for your program, it is
+      important to understand the flexibility and capability
+      supplied by these two interfaces.
+
+      The StopWatchThread class, an extension of the thread class, controls
+      a stopwatch GUI and alternates between halting and counting down by
+      seconds.
+
+      One way to extend Tcl with this class is to write Java code that
+      defines Tcl commands which access StopWatchThread methods.  When we
+      write the interface in Java, we create a "extension" of Tcl commands.
+      The StopWatchExtension contains one Tcl command "sw", through which the
+      user controls communication with a StopWatchThread object.
+
+      "sw" command specs:
+
+	sw new           --> starts a new stopwatch at time 0
+	sw set [seconds] --> sets time to seconds, starts counting down
+	sw stop          --> returns current time, halts the stopwatch
+	sw resume        --> returns current time, starts counting down
+	sw die           --> removes the stopwatch window
+
+
+      The second way to extend Tcl with the StopWatchThread class is to
+      write Tcl procedures which access its methods directly via the
+      the Java Extension.  The swCmd.tcl file contains such code.  The 
+      procedures defined in swCmd.tcl include:
+
+	swNew                --> starts a new stopwatch at time 0;
+	                         returns the watch's id.
+	swSet [id] [seconds] --> sets time to seconds, starts counting down
+	swStop [id]          --> returns current time, halts the stopwatch 
+	swResume [id]        --> returns current time, starts counting down 
+	swDie [id]           --> removes the stopwatch window 
+
+
+Choosing the Best Interface
+---------------------------
+
+      Interfacing Tcl with Java via the Java Extension has several
+      advantages and disadvantages.  Coding in Tcl is quick and easy, which
+      is great for prototyping.  Also, the Java Extension offers a mechanism
+      for dynamically changing code.
+
+      On the other hand, defining new Tcl commands in Java offers more
+      structure and possibly fewer programming errors.  This style of
+      interface may also be more efficient.
+
+Running the Demo
+----------------
+
+      The first thing you will need to do is run "make demos" in your
+      build directory. This will create a demos subdirectory in your
+      build directory and it will compile any .java files the demo uses.
+
+      To run the StopWatch demo by adding the StopWatchExtension
+      ("sw" Tcl command defined in Java), type
+      "java::load -classpath . StopWatchExtension" at your java enabled
+      Tcl prompt. Now you can execute the "sw" command with the
+      appropriate arguments.
+
+      To add the sw* Tcl procedures, after adding the
+      StopWatchExtension (as shown above), type
+      "source swCmd.tcl" at the Tcl command prompt.
+      to create a new stop watch object and save
+      a reference to the Tcl object, type:
+
+      % set sw [swNew]
+
+      To set the countdown time, type:
+
+      % swSet $sw 10
+
+      You get the idea.

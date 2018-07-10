@@ -1,0 +1,165 @@
+# This file contains support code for the Tcl test suite. It is
+# loaded by the all.tcl file in this directory.
+
+# It would be nice if we could purge if {$tcl_platform(platform) == "java"}
+# sorts of tests from the test suite !
+
+# Locate tcltest executable
+
+if {$tcl_platform(platform) != "java"} {
+    set tcltest [list [info nameofexecutable]]
+    if {$tcltest == "{}"} {
+      set tcltest {}
+      puts \
+	"Unable to find tcltest executable, multiple process tests will fail."
+    }
+}
+
+proc setupJavaPackage {} {
+    global tcl_platform errorInfo
+
+    if {[catch {package require java}]} {
+	error "Unable to find the java package. Skipping entire test.:\n$errorInfo"
+    }
+
+    if {[info command jtest] == "jtest"} {
+        # Extension already loaded
+        return
+    }
+
+    if {$tcl_platform(platform) == "java"} {
+	set cls tcl.lang.JavaTestExtension
+    } else {
+	set cls tcl.lang.NativeTestExtension
+    }
+
+    if {[catch {java::load $cls} errMsg]} {
+	puts "Unable to load $cls. Some tests may fail.\n$errMsg"
+    }
+}
+
+
+# Tcl only implementation of commands defined in generic/tclTest.c
+
+if {[info commands testgetplatform] == ""} {
+
+proc testgetplatform { } {
+  package require java
+  if {[java::call System getProperty file.separator] == "\\"} {
+    return "windows"
+  } else {
+    if {[java::call System getProperty os.name] == "Mac OS"} {
+      return "mac"
+    } else {
+      return "unix"
+    }
+  }
+}
+
+}
+
+
+if {[info commands testchmod] == ""} {
+
+# Java does not provide access to chmod type functionality
+# so we need to use the shell to do it.
+
+proc testchmod { mode file args } {
+    if {[testgetplatform] != "unix"} {
+        error "testchmod only implemented on UNIX"
+    }
+    set cmd "chmod $mode [concat $file $args]"
+    #puts "now to exec \"$cmd\""
+    exec /bin/sh -c $cmd
+}
+
+}
+
+
+
+if {$tcl_platform(platform) == "java"} {
+
+# Try to set a variable, if it does not exist raise an error
+
+proc testseterr { args } {
+  if {[llength $args] == 1} {
+    set result "before get"
+    set varname [lindex $args 0]
+    if {[catch {uplevel 1 [list set $varname]} val]} {
+      # There was an error, set an error message
+      error $val
+    }
+    lappend result $val
+    return $result
+  } elseif {[llength $args] == 2} {
+    set result "before set"
+    set varname [lindex $args 0]
+    uplevel 1 [list set $varname [lindex $args 1]]
+    if {[catch {uplevel 1 [list set $varname]} val]} {
+      # There was an error, just return the set value
+      set val [lindex $args 1]
+    }
+    lappend result $val
+    return $result
+  } else {
+    error "wrong # args: should be \"testseterr varName ?newValue?\""
+  }
+}
+
+# Try to set a variable, if it does not exist return {}
+
+proc testsetnoerr { args } {
+  if {[llength $args] == 1} {
+    set result "before get"
+    set varname [lindex $args 0]
+    if {[catch {uplevel 1 [list set $varname]} val]} {
+      # There was an error, return partial result
+      error $result
+    }
+    lappend result $val
+    return $result
+  } elseif {[llength $args] == 2} {
+    set result "before set"
+    set varname [lindex $args 0]
+    if {[catch {
+      uplevel 1 [list set $varname [lindex $args 1]]
+      uplevel 1 [list set $varname]} val]} {
+      error $result
+    }
+    lappend result $val
+    return $result
+  } else {
+    error "wrong # args: should be \"testsetnoerr varName ?newValue?\""
+  }
+}
+
+
+
+# These commands are used in tcl/assocd.test file
+
+proc testsetassocdata {var data} {
+    package require java
+    set this [java::getinterp]
+    set assocData [java::new tcl.lang.Test2AssocData $data]
+    $this setAssocData $var $assocData
+}
+
+proc testgetassocdata {var} {
+    package require java
+    set this [java::getinterp]
+    set assocData [$this getAssocData $var]
+    set assocData [java::cast {tcl.lang.Test2AssocData} $assocData]
+    if {[java::isnull $assocData]} {
+        return
+    }
+    $assocData getData
+}
+
+proc testdelassocdata {var} {
+    package require java
+    set this [java::getinterp]
+    $this deleteAssocData $var
+}
+
+
+} ; # end Jacl only test defines block

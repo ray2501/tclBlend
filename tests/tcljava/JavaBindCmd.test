@@ -1,0 +1,151 @@
+# JavaBindCmd.test --
+#
+#	Tests the implementation of the JavaBindCmd.java file.
+#
+# Copyright (c) 1997 by Sun Microsystems, Inc.
+#
+# See the file "license.terms" for information on usage and redistribution
+# of this file, and for a DISCLAIMER OF ALL WARRANTIES.
+#
+# RCS: @(#) $Id: JavaBindCmd.test,v 1.4 2000/12/22 09:47:15 mdejong Exp $
+
+if {[lsearch [namespace children] ::tcltest] == -1} {
+    package require tcltest
+    namespace import -force ::tcltest::*
+}
+
+setupJavaPackage
+
+test JavaBindCmd-1.1 {JavaBind.cmdProc} {
+    list [catch {java::bind} msg] $msg
+} {1 {wrong # args: should be "java::bind javaObj ?eventName? ?command?"}}
+
+test JavaBindCmd-1.2 {JavaBind.cmdProc} {
+    list [catch {java::bind x x x x} msg] $msg
+} {1 {wrong # args: should be "java::bind javaObj ?eventName? ?command?"}}
+
+test JavaBindCmd-1.3 {JavaBind.cmdProc} {
+    list [catch {java::bind kk} msg] $msg
+} {1 {unknown java object "kk"}}
+
+test JavaBindCmd-1.4 {JavaBind.cmdProc} {
+    set x [java::new tcl.lang.TesterBean]
+    lsort [java::bind $x]
+} {}
+
+test JavaBindCmd-1.5 {JavaBind.cmdProc} {
+    set x [java::new tcl.lang.TesterBean]
+    java::bind $x tcl.lang.Tester1Listener.method1 {puts foo}
+    java::bind $x tcl.lang.Tester1Listener.method2 {puts bar}
+    java::bind $x tcl.lang.Tester2Listener.method0 {puts blah}
+    lsort [java::bind $x]
+} {tcl.lang.Tester1Listener.method1 tcl.lang.Tester1Listener.method2 tcl.lang.Tester2Listener.method0}
+
+test JavaBindCmd-1.6 {JavaBind.cmdProc} {
+    set x [java::new tcl.lang.TesterBean]
+    list [catch {java::bind $x tcl.lang.Tester1Listener.method1} msg] $msg
+} {0 {}}
+
+test JavaBindCmd-1.7 {JavaBind.cmdProc} {
+    set x [java::new tcl.lang.TesterBean]
+    list [catch {java::bind $x tcl.lang.Tester1Listener.method1 {}} msg] $msg
+} {0 {}}
+
+test JavaBindCmd-1.8 {JavaBind.cmdProc} {
+    set x [java::new tcl.lang.TesterBean]
+    java::bind $x tcl.lang.Tester1Listener.method1 {puts hello}
+    java::bind $x tcl.lang.Tester1Listener.method1
+} {puts hello}
+
+test JavaBindCmd-1.9 {JavaBind.cmdProc} {
+    set x [java::new tcl.lang.TesterBean]
+    java::bind $x tcl.lang.Tester1Listener.method1 {puts hello}
+    java::bind $x tcl.lang.Tester1Listener.method1 ""
+    java::bind $x tcl.lang.Tester1Listener.method1
+} {}
+
+test JavaBindCmd-2.1 {JavaBind.getEventMethod} {
+    set x [java::new tcl.lang.NoEventBean]
+    list [catch {java::bind $x Foo} msg] $msg
+} {1 {unknown event "Foo"}} 
+
+test JavaBindCmd-2.2 {JavaBind.getEventMethod} {
+    set x [java::new tcl.lang.NoEventBean]
+    list [catch {java::bind $x baz.toh.Foo} msg] $msg
+} {1 {unknown event "baz.toh.Foo"}} 
+
+test JavaBindCmd-2.3 {JavaBind.getEventMethod} {
+    set x [java::new tcl.lang.TesterBean]
+    list [catch {java::bind $x Foo} msg] $msg
+} {1 {unknown event "Foo"}} 
+
+test JavaBindCmd-2.4 {JavaBind.getEventMethod} {
+    set x [java::new tcl.lang.TesterBean]
+    list [catch {java::bind $x baz.toh.Foo} msg] $msg
+} {1 {unknown event "baz.toh.Foo"}} 
+
+test JavaBindCmd-2.5 {JavaBind.getEventMethod} {
+    set x [java::new tcl.lang.TesterBean]
+    list [catch {java::bind $x method0} msg] $msg
+} {1 {ambiguous event "method0"}} 
+
+test JavaBindCmd-2.6 {JavaBind.getEventMethod} {
+    set x [java::new tcl.lang.TesterBean]
+    list [catch {java::bind $x method1} msg] $msg
+} {0 {}} 
+
+test JavaBindCmd-2.7 {JavaBind.getEventMethod} {
+    set x [java::new tcl.lang.TesterBean]
+    list [catch {java::bind $x tcl.lang.Tester1Listener.method0} msg] $msg
+} {0 {}}
+
+test JavaBindCmd-2.8 {JavaBind.getEventMethod} {
+    set x [java::new tcl.lang.TesterBean]
+    list [catch {java::bind $x tcl.lang.Tester2Listener.method0} msg] $msg
+} {0 {}}
+
+#
+# This test will create another thread and generate a bindable
+# events to simulate an AWT widget.
+#
+
+test JavaBindCmd-3.0 {JavaBind callback invoked from another thread} {
+    set b [java::new tests.javabind.Bind]
+    set action 0
+
+    java::bind $b actionPerformed {
+      set action 1
+    }
+
+    # Start up the other thread, it will generate an actionPerformed
+    # event that should invoke our Tcl callback
+    $b doLater
+
+    # Wait for a little bit, to give the other thread time to
+    # start running and enter an event in the notifier queue.
+
+    set done 0
+    after 2000 "set done 1"
+    vwait done
+
+    # process all outstanding events in the queue
+    update
+
+    set results [list]
+
+    if {[$b wasStarted]} {
+      lappend results Started
+    }
+
+    if {[$b wasStopped]} {
+      lappend results Finished
+    } else {
+      lappend results Deadlocked
+    }
+
+    lappend results $action
+} {Started Finished 1}
+
+# cleanup
+::tcltest::cleanupTests
+return

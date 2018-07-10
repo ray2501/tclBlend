@@ -1,0 +1,618 @@
+<HTML>
+<TITLE>
+What's new in Tcl/Java?
+</TITLE>
+
+<BODY>
+<HR>
+
+<H3>
+What's new in Tcl/Java?
+</H3>
+
+<HR>
+
+<ul>
+<li>
+<A HREF="#14">Version 1.4:</A>
+</li>
+<li>
+<A HREF="#13">Version 1.3:</A>
+</li>
+<li>
+<A HREF="#12">Version 1.2:</A>
+</li>
+<li>
+<A HREF="#11">Version 1.1:</A>
+</li>
+</ul>
+
+<HR>
+
+<DL>
+
+<DT>
+<H3>
+<A NAME="14">
+Version 1.4:
+</A>
+</H3>
+</DT>
+
+<DD>
+
+<P>
+Tcl/Java 1.4 includes a number of exciting new features that
+make integrating Tcl and Java even easier.
+</P>
+
+<H4>TJC Compiler</H4>
+
+<p>
+The TJC compiler is by far the most significant new development
+in the Jacl 1.4 release. The TJC compiler is used to convert
+a Tcl proc to Java bytecode that is then executed directly
+inside the JVM. In most cases, a TJC compiled proc will
+execute 10 to 20 times faster than an interpreted proc.
+Jacl's implementation has also been significantly optimized to
+support efficient execution of TJC compiled procs. In
+some cases, TJC compiled procs actually execute more quickly
+than procs compiled with the built-in compiler included in native
+Tcl. The TJC compiler can be used either at runtime or in batch mode.
+</p>
+
+<H4>Itcl Extension</H4>
+
+<p>
+Jacl 1.4 now includes support for the Itcl OO extension. A Jacl
+user would execute the following to load Itcl commands into Jacl:
+<blockquote>
+<code>package require Itcl</code>
+</blockquote>
+This extension was implemented for Jacl by porting the Itcl 3.3
+C source code to Java.
+</p>
+
+
+<H4>Parser Extension</H4>
+
+<p>
+Jacl 1.4 now includes support for the TclPro's Tcl parser extension.
+A Jacl user would execute the following to load Parser commands into Jacl:
+<blockquote>
+<code>package require parser</code>
+</blockquote>
+The parser extension version 1.4 was implemented for Jacl by porting
+the C source code to Java.
+</p>
+
+<H4>expr command</H4>
+
+<p>
+Jacl's expr implementation now supports the 'eq' and 'ne'
+string equality operators.
+</p>
+
+<H4>java::for command</H4>
+
+<p>
+The java package includes a new <code>java::for</code> command.
+This command provides a mapping to Java's enhanced for
+loop statement and provides a simplified way to loop over
+the elements of a Collection or array object. See the
+documentation for usage examples.
+</p>
+
+<H4>Inner Classes</H4>
+
+<p>
+Inner classes are now fully supported in the Java package.
+In earlier versions of Tcl/Java, an inner class like
+<code>java.util.Map.Entry</code> would be indicated by a
+string like <code>java.util.Map\$Entry</code>.
+This usage worked in some cases, but it was ugly and
+did not support imported class names via <code>java::import</code>.
+The new implementation makes it possible to pass
+<code>java.util.Map.Entry</code> or import <code>java.util.Map</code>
+and then pass <code>Map.Entry</code> to any of the <code>java::*</code>
+commands.
+</p>
+
+<H4>Classloader Implementation</H4>
+
+<p>
+The TclClassLoader used in Jacl and Tcl Blend to load Java
+classes and resources has been updated to make use of the
+class loader delagation model introduced in JDK 1.2. Loading
+of classes and resources is now be delagated to the thread
+context class loader. This change fixes class and resource
+loading problems found in Java app server environments like
+WebSphere, Tomcat, and others. A number of bugs related to
+loading classes from the <code>env(TCL_CLASSPATH)</code>
+path have been fixed and support for loading resources from
+the <code>env(TCL_CLASSPATH)</code> path has been added.
+</p>
+
+<H4>SetInterrupt API for Jacl</H4>
+
+<p>
+A new <code>Interp.setInterrupt()</code> API makes it possible for
+the user to interrupt a running Jacl interpreter and unwind
+the stack. For example, this API could be used to implement
+a service thread that would timeout and cleanup after a
+certain amount of time. See
+<A HREF="SetInterrupted.html">SetInterrupted</A> for more info.
+</p>
+
+<H4>JPDA debug support</H4>
+
+<p>
+Jacl can now be started in a debug mode that makes
+it easy to attach a Java debugger. A Java debugger that
+supports JPDA will automatically load and display the source
+code that implement Jacl. To start Jacl in debug mode,
+simply set the <code>JACL_DEBUG</code> env variable to "1" before running
+<code>jaclsh</code> or <code>jaclsh.bat</code>.
+Info about how to attach to the shell will be printed to the console.
+</p>
+
+</DD>
+
+</DL>
+
+
+
+
+
+
+
+<DL>
+
+<DT>
+<H3>
+<A NAME="13">
+Version 1.3:
+</A>
+</H3>
+</DT>
+
+<DD>
+
+<P>
+This section covers features introduced in Tcl/Java 1.3.
+</P>
+
+<H4>regexp command</H4>
+
+<p>
+A new implementation of Jacl's regexp and regsub commands has been
+donated by Colin Stevens of Sun Labs fame. This replaces the
+Oro regexp implementation. It was binary only and could no longer
+be supported. Jacl is now 100% Open Source.
+</p>
+
+<H4>binary command</H4>
+
+<p>
+An implementation of Tcl's binary command has been added to Jacl.
+This new command passes all of the Tcl regression tests for the
+binary command. Thanks go to Christian Krone for this command.
+</p>
+
+<H4>history command</H4>
+
+<p>
+An implementation of Tcl's history command has been added to Jacl.
+This new command passes all of the Tcl regression tests for the
+history command. Thanks go to Christian Krone for this command.
+</p>
+
+<H4>interp command</H4>
+
+<p>
+An implementation of Tcl's interp command has been added to Jacl.
+This new command passes all of the Tcl regression tests for the
+interp command. Thanks go to Christian Krone for this command.
+</p>
+
+<H4>fconfigure command</H4>
+
+<p>
+The fconfigure command has been added to Jacl. Thanks go to
+Bruce Johnson for providing the initial implementation
+of this command.
+</p>
+
+<H4>encoding command</H4>
+
+<p>
+The encoding command has been added to Jacl. Thanks go to
+Bruce Johnson for providing the initial implementation
+of this command.
+</p>
+
+<H4>socket command</H4>
+
+<p>
+The socket command has been added to Jacl. Both client sockets
+and server sockets are supported. Thanks go to Neil Madden
+for providing the the initial implementation of this command.
+</p>
+
+<H4>file volumes command</H4>
+
+<p>
+The file volumes subcommand has been added to Jacl. The
+implementation makes use of the File.listRoots() method
+introduced in JDK 1.2, so a newer JDK is required to
+make use of this functionality. Thanks go to Shawn Boyce
+for providing the initial implementation of this command.
+</p>
+
+<H4>array unset command</H4>
+
+<p>
+The array unset subcommand has been added to the Jacl's array command.
+</p>
+
+<H4>exec command</H4>
+
+<p>
+Jacl can now exec a process in the background by passing
+the & flag on the exec command line. Exec will also use
+a second thread to read IO if running under JDK 1.3 or newer.
+The exec command has been fixed so that will not deadlock
+under Win XP.
+</p>
+
+<H4>info hostname command</H4>
+
+<p>
+The info hostname command is now implemented in Jacl.
+Tahnks go to Alexander Pasadyn for providing the
+implementation of this command.
+</p>
+
+
+<H4>New IO subsystem for Jacl</H4>
+
+<p>
+The Tcl IO subsystem has been ported to Jacl. Encoding, buffering,
+and line translations for channels now match Tcl semantics.
+Non-blocking IO and the fileevent command are not implemented.
+</p>
+
+<H4>Ref Counting in Tcl Blend</H4>
+
+<p>
+A new reference counting system has been implemented for
+Tcl Blend. A newly created CObject or TclList no longer
+increments the ref count the native Tcl_Obj. Instead,
+the ref count for a Tcl_Obj is incremented when
+TclObject.preserve() is invoked and decremented
+when TclObject.release() is invoked. If a TclList
+created inside a Java method is never released,
+it will be cleaned up when the Java method returns.
+This new ref counting system does not depend on the
+Java garbage collector and should not suffer from
+the memory leaks or shutdown issues that plagued
+the previous implementation.
+</p>
+
+<H4>Tcl/Java API</H4>
+
+<p>
+The <code>TclObject.takeExclusive()</code> method has a number
+of problems, and has been deprecated in favor of the new
+<code>TclObject.duplicate()</code> method.
+This new duplicate method works identically to <code>Tcl_DuplicateObj</code>.
+Old code that makes used of the <code>takeExclusive()</code> method will still
+work, but it should be updated to use duplicate as time permits.
+See the TclObject manual entry for an example of how to use this
+new duplicate method.
+</p>
+
+<H4>Tcl Blend Threading</H4>
+
+<p>
+Earlier versions of Tcl Blend made use of a global lock that
+serialized each Java method call. In the new version,
+Tcl Blend's JNI code has been rewritten to get rid of this
+global lock. This change significantly simplifies the code
+and should increase performance when Java methods are invoked
+from multiple threads.
+</p>
+
+<H4>Reflected Method/Constructor/Field Access</H4>
+
+<p>
+A new approach to reflected method, constructor, and field
+access has been implemented. In the previous implementation,
+package scoped entities were considered when accessing a field,
+when attempting to resolve a method signature, or when choosing
+a constructor. In the new implementation, these package scoped
+entities are only considered when a custom package invoker
+is defined for the package.
+</p>
+
+<H4>Reflected Object Access</H4>
+
+<p>
+A new approach to reflected object access has been implemented.
+In the previous implementation, inaccessible objects could
+be reflected in the interpreter. This type of access would
+be illegal in Java code, so new Class accessibility checks
+have been added to each of the java methods. An exception
+will now be raised on any attempt to interact with an
+inaccessible class.
+</p>
+
+<H4>Passing TclObjects to Java</H4>
+
+<p>
+It is now possible to pass a TclObject directly to a Java method.
+In previous versions it was possible to pass a TclObject contained
+in a ReflectObject, but it was not possible to pass the actual
+TclObject that contained the ReflectObject. The new implementation
+makes it possible to directly pass the containing TclObject assuming
+it is not a ReflectObject that contains a TclObject.
+</p>
+
+<H4>JVM Support</H4>
+
+<p>
+A completely new build system has been added. It now supports
+the IBM Java-2 1.3 JVM. The new build system also adds
+support for the Kaffe Open JVM with Tcl Blend. Jacl has worked
+with Kaffe for some time, but now both Tcl Blend and Jacl can
+be used with Kaffe. In addition, both Jacl and Tcl Blend
+can be compiled with JDK 1.5. Earlier versions made use of
+variables named enum which is now a reserved word in JDK 1.5.
+Both Jacl and Tcl Blend can be built under Windows using the
+mingw+msys package, user no longer need to have VC++ installed
+to build.
+</p>
+
+<H4>JVM Options</H4>
+
+<p>
+The <code>tclblend_init</code> variable has provided a means to
+pass a single JVM option to a JDK 1.2 or newer JVM. This support
+has been improved so that multiple JVM options can now be passed.
+</p>
+
+</DD>
+</DL>
+
+
+
+
+
+
+
+
+
+
+
+<DL>
+
+<DT>
+<H3>
+<A NAME="12">
+Version 1.2:
+</A>
+</H3>
+</DT>
+
+<DD>
+
+<P>
+This section covers features introduced in Tcl/Java 1.2.
+</P>
+
+<H4>java::try command</H4>
+
+<p>
+A new <code>java::try</code> command has been added to the java package.
+This command provides a Tcl binding to Java's try-catch-finally
+construct. The command is able to manage multiple error
+conditions unlike Tcl's <code>catch</code> command.
+The new command can also be used to catch Tcl errors and
+Java exceptions independently. See the docs on the
+<code>java::try</code> command for more information.
+</p>
+
+<H4>java::import command</H4>
+
+<p>
+A new <code>java::import</code> command has been added. This
+command works like the import statement in the Java language,
+it provides a means to specify Java class names in a shortened format.
+For example, one could import the class <code>java.util.Hashtable</code>
+and then use the simple class name <code>Hashtable</code> instead of
+the fully qualified name <code>java.util.Hashtable</code>.
+</p>
+
+
+<H4>java::autolock command</H4>
+
+<p>
+The new java::autolock command can be used in interactive
+sessions to keep java object references from being garbage
+collected. This can be really handy when you want to quickly
+test out a java class without the hassle of garbage collection.
+</p>
+
+<H4>clock command</H4>
+
+<p>
+An implementation of Tcl's clock command has been added to Jacl.
+Jacl's new clock command uses Java's time and date APIs to provide
+the clock functionality that Tcl users enjoy. This implementation
+is fully compatible with the clock command from Tcl 8.0.
+</p>
+
+
+<H4>Namespace Support for Jacl</H4>
+
+<p>
+The namespace features from the Tcl 8.1 core have been ported
+over to Jacl. This adds the "namespace" command and the "variable"
+command. Support is still at an early stage and more feedback
+is needed but this is still an exciting development for Jacl.
+</p>
+
+<H4>Typed Null Reflection</H4>
+
+<p>
+In Tcl/Java 1.1, a single reflect object was used to represent
+the null Java object. In Java code, the special null object reference
+can have no type or it can be referenced as any type. We therefore needed
+to fix Tcl's reflection system so that it acted more like Java. To do
+this, the implementation was changed to support a type for a reflected
+null object. A reflected null object's type can be queried at runtime
+with the java::info command and it can be changed with the java::cast
+command. To get a reference to an untyped null object in the reflection
+system one would use the java::null command.
+</p>
+
+<H4>Signature Matching</H4>
+
+<p>
+The signature matching system introduced in Tcl/Java 1.1 did not
+work correctly when the null Java object was given as an argument to
+a method or constructor. This has been fixed in 1.2 and the matching
+system has been updated to take a null objects reflection type into
+account when disambiguating an overloaded method signature. In addition,
+the signature matching system will now provide a more descriptive error
+message in the case of an ambiguous signature.
+</p>
+
+<H4>Unicode Support</H4>
+
+<p>
+Unicode support has been added to the Jacl parser. Users should now
+be able to pass and unicode string form Java to Jacl and vice versa.
+Tcl Blend will also support Unicode strings (encoded as UTF-8) when
+compiled with Tcl 8.1 or better.
+</p>
+
+<H4>New Demo</H4>
+
+<p>
+Tcl/Java 1.2 includes a new pack demo which shows how a Java AWT
+layout manager and the Tcl/Java reflection system can be used to
+provide a Tk like pack command for Java widgets. This command can
+be used just like the pack command in Tk. The demo also includes
+an example of how the layout manager can be used in stand alone
+Java code.
+</p>
+
+<H4>JVM/OS Support</H4>
+
+<p>
+Tcl/Java 1.2 adds support for Tcl Blend on Linux and IRIX systems.
+Tcl/Java on Linux works with both the JDK 1.1 and JDK 1.2 ports.
+Earlier versions of Tcl Blend did not works on these systems.
+Support for the Kaffe JVM was also added. Support for Tcl 8.1 and
+8.2 has also been added.
+</p>
+
+</DD>
+</DL>
+
+
+
+
+
+
+
+<DL>
+
+<DT>
+<H3>
+<A NAME="11">
+Version 1.1:
+</A>
+</H3>
+</DT>
+
+<DD>
+
+<P>
+This section covers features introduced in Tcl/Java 1.1.
+</P>
+
+<H4>java::cast command</H4>
+
+<p>
+A new <code>java::cast</code> command has been added. This command can be used
+to change the reflected type of Java objects inside an interp.
+See the documentation for more info and examples on how this new command works.
+</p>
+
+<H4>file nativename command</H4>
+
+<p>
+The nativename subcommand was added to the file command in
+Jacl. On Windows, "file nativename C:/dir" now returns "C:\dir".
+</p>
+
+<H4>Signature Matching</H4>
+
+<p>
+Java method invocations now use an argument matching system to
+automatically determine which Java method a user intended
+to invoke based on the types of the arguments to method. In version
+1.0 only the number of arguments to the method were used to disambiguate
+overloaded method invocations.
+</p>
+
+<H4>Typed Reflection</H4>
+
+<p>
+Tcl/Java now represents all reflected Java objects (A reflected Java
+object is one that has been added to the interp and has a Tcl command
+associated with it) as a pairing of instance and Class objects.
+A single Java object can be referenced as more then one Java Class
+type. For example, a <code>String</code> object can be referenced as type
+<code>String</code> or as type <code>Object</code>. Java array objects
+have also been updated to support typed object reflection.
+</p>
+
+<H4>Execution Time Improvements</H4>
+
+<p>
+Jacl is much faster. The Tcl parser has been completely rewritten,
+it uses less memory and executes more quickly.
+</p>
+
+<H4>Regexp Package</H4>
+
+<p>
+In Jacl 1.0, the regexp command could only be used in the binary
+release of Jacl. We have extracted the needed class files and placed
+the in the source release of Jacl 1.1. The source to the regular
+expression code is still not provided, just the binary .class files.
+</p>
+
+<H4>exec command</H4>
+
+<p>
+Jacl's exec command for unix and windows has been improved.
+In Jacl 1.0, the exec command did not treat some strings
+correctly during an exec which could cause some very strange errors.
+Commands with a '$' of ' ' char did not work as expected.
+</p>
+
+
+</DD>
+</DL>
+
+
+
+<br>
+
+</BODY>
+</HTML>
+

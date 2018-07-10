@@ -1,0 +1,163 @@
+# These are some utility methods used to test out
+# unicode substitutions made by the parser.
+
+if {[lsearch [namespace children] ::tcltest] == -1} {
+    package require tcltest
+    namespace import -force ::tcltest::*
+}
+
+setupJavaPackage
+
+test unicode-1.0 {unicode replacement} {
+    string length abc\u7266x
+} 5
+
+test unicode-1.1 {unicode replacement} {
+    string length \u7266\u8345
+} 2
+
+test unicode-1.2 {unicode replacement} {
+    string index \u7266\u8345 2
+} {}
+
+test unicode-2.0 {unicode substitution, 0 - 535} {
+    #puts "doing unicode substitution/conversion test for range 0 - 535"
+    #puts "this can take several minutes"
+    #flush stdout
+
+    set max 535
+
+    for {set i 0} {$i <= $max} {incr i} { 
+        set n [format %04x $i]
+        eval "set c \\u${n}"
+        if {[string length $c] != 1} {
+            error "incorrect conversion of \\u${n}, length [string length $c]"
+        }
+        set s [java::new String $c]
+        if {$c != [$s toString]} {
+             error "unicode value $max not passed through properly"
+        }
+    }
+    set i
+} 536
+
+test unicode-2.1 {unicode substitution, 536 - 65535} {
+    #puts "doing unicode substitution/conversion test for range 536 - 65535"
+    #puts "this can take several minutes"
+    #flush stdout
+
+    set min 536
+    set max 65535 ; # aka pow(2,16) - 1
+    
+    # Construct a buffer of 1000 unicode escape patterns to pass to the format command
+
+    set pattern \\u%04x
+    set format_pattern ""
+
+    append format_pattern $pattern
+    append format_pattern $pattern
+    append format_pattern $pattern
+    append format_pattern $pattern
+    append format_pattern $pattern
+
+    append format_pattern $format_pattern
+    append format_pattern $format_pattern
+    append format_pattern $format_pattern
+
+    set format_pattern_40 $format_pattern
+
+    append format_pattern $format_pattern
+    append format_pattern $format_pattern
+    append format_pattern $format_pattern
+
+    set format_pattern_320 $format_pattern
+
+    append format_pattern $format_pattern
+
+    append format_pattern $format_pattern_320
+    append format_pattern $format_pattern_40
+
+    if {([string length $format_pattern] / [string length $pattern]) != 1000} {
+      error "invalid format pattern size, was [string length $format_pattern]"
+    }
+
+    # Construct a string of the arguments to the format function
+    # The arguments are of the form "${S}535 ... ${S}999 ${T}000 ... ${T}534"
+    # This will alllow us to set S to 1 and T to 2 to get 1535 ... 2534.
+
+    set format_arguments ""
+
+    for {set i 536} {$i < 1000} {incr i} {
+        append format_arguments "\${S}$i "
+    }
+
+    for {set i 1000} {$i <= 1535} {incr i} {
+        append format_arguments "\${T}[string range $i 1 end] "
+    }
+
+    # For each 1000 char buffer, we eval the following
+    # set str [eval {format $format_pattern} $format_arguments]
+    # eval {set uni_buff} $str
+
+    # Loop over 1000 unicode chars at a time, from 536 to 65535 (65 loops)
+    for {set loop 0} {$loop < 65} {incr loop} {
+        #puts "creating unicode buffer for range $min -> [expr {$min + 999}]"
+        #flush stdout
+
+        if {$loop == 0} {
+            set S ""
+            set T 1
+        } else {
+            set S $loop
+            set T [expr {$loop + 1}]
+        }
+        # Conjure up a format command with 1000 format patterns
+        # and 1000 arguments that are determined by the values of S and T
+
+        #set subst_format_arguments [subst -nocommands -nobackslashes $format_arguments]
+        #puts "subst_format_arguments is $subst_format_arguments"
+
+        eval {set uni_buff} [eval {format $format_pattern} $format_arguments]
+
+        # Make sure we generated a buffer of 1000 unicode characters
+        set uni_buff_len [string length $uni_buff]
+        if {$uni_buff_len != 1000} {
+            error "incorrect conversion of uni_buff, length was \
+                $uni_buff_len, expected length of 1000"
+        }
+
+        # Pass this string to Java, this could convert from UTF8 to Unicode
+        #puts "creating Java String"
+        set s [java::new String $uni_buff]      
+        
+        # Get a Tcl string back from Java, this could convert from Unicode to UTF8
+        set ts [$s toString]
+
+        if {[string compare $uni_buff $ts] != 0} {
+             error "unicode buffer for range $min -> [expr {$min + 999}]\
+                 was not passed through properly"
+        }
+
+        incr min 1000
+    }
+    set min
+} 65536
+
+test unicode-3.1 {scan encoded string} {knownbug} {
+    set enc [encoding convertto iso2022-jp "\u4e00\u4e01"]
+    set len [string length $enc]
+    set results $len
+    for {set i 0} {$i < $len} {incr i} {
+        set c [string index $enc $i]
+        set int_c [scan $c %c]
+        lappend results $int_c
+    }
+    set results
+} {10 27 36 66 48 108 67 122 27 40 66}
+
+test unicode-3.2 {convert to encoded string} {knownbug} {
+    set str "\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\"
+    set enc [encoding convertto jis0208 $str]
+    string compare $enc "!)!)!)!)!)!)!)!)!)!)!)!)!)!)!)"
+} 0
+

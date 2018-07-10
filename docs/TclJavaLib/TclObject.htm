@@ -1,0 +1,168 @@
+<HTML><HEAD><TITLE>TclJava Library Procedures - TclObject manual page</TITLE></HEAD><BODY>
+<DL>
+<DD><A HREF="TclObject.htm#M2" NAME="L216">CLASS</A>
+<DL><DD>tcl.lang.TclObject -- the basic notion of an &quot;object&quot; in Tcl.</DL>
+<DD><A HREF="TclObject.htm#M3" NAME="L217">CONSTRUCTORS</A>
+<DD><A HREF="TclObject.htm#M4" NAME="L218">METHODS</A>
+<DL><DD><B>TclObject</B>(InternalRep <I>rep</I>)</DL>
+<DL><DD>void <B>setInternalRep</B>(InternalRep <I>rep</I>)</DL>
+<DL><DD>InternalRep <B>getInternalRep</B>()</DL>
+<DL><DD>String <B>toString</B>()</DL>
+<DL><DD>void <B>invalidateStringRep</B>()</DL>
+<DL><DD>void <B>preserve</B>()</DL>
+<DL><DD>void <B>release</B>()</DL>
+<DL><DD>boolean <B>isShared</B>()</DL>
+<DL><DD>TclObject <B>duplicate</B>()</DL>
+<DD><A HREF="TclObject.htm#M5" NAME="L219">ARGUMENTS</A>
+<DL>
+</DL>
+<DD><A HREF="TclObject.htm#M6" NAME="L220">DESCRIPTION</A>
+<DL>
+<DD><A HREF="TclObject.htm#M7" NAME="L221"><B>TclObject</B></A>
+<DD><A HREF="TclObject.htm#M8" NAME="L222"><B>setInternalRep</B></A>
+<DD><A HREF="TclObject.htm#M9" NAME="L223"><B>getInternalRep</B></A>
+<DD><A HREF="TclObject.htm#M10" NAME="L224"><B>toString</B></A>
+<DD><A HREF="TclObject.htm#M11" NAME="L225"><B>invalidateStringRep</B></A>
+<DD><A HREF="TclObject.htm#M12" NAME="L226"><B>preserve</B></A>
+<DD><A HREF="TclObject.htm#M13" NAME="L227"><B>release</B></A>
+<DD><A HREF="TclObject.htm#M14" NAME="L228"><B>isShared</B></A>
+<DD><A HREF="TclObject.htm#M15" NAME="L229"><B>duplicate</B></A>
+</DL>
+<DD><A HREF="TclObject.htm#M16" NAME="L230">EQUIVALENT C FUNCTIONS</A>
+<DD><A HREF="TclObject.htm#M17" NAME="L231">SEE ALSO</A>
+<DD><A HREF="TclObject.htm#M18" NAME="L232">KEYWORDS</A>
+</DL><HR>
+<H3><A NAME="M2">CLASS</A></H3>
+tcl.lang.TclObject -- the basic notion of an &quot;object&quot; in Tcl.
+<H3><A NAME="M3">CONSTRUCTORS</A></H3>
+TclObject
+
+<H3><A NAME="M4">METHODS</A></H3>
+<P><B>TclObject</B>(InternalRep <I>rep</I>)
+<P>void <B>setInternalRep</B>(InternalRep <I>rep</I>)
+<P>InternalRep <B>getInternalRep</B>()
+<P>String <B>toString</B>()
+<P>void <B>invalidateStringRep</B>()
+<P>void <B>preserve</B>()
+<P>void <B>release</B>()
+<P>boolean <B>isShared</B>()
+<P>TclObject <B>duplicate</B>()
+<H3><A NAME="M5">ARGUMENTS</A></H3>
+<DL>
+<P><DT>InternalRep <B>rep</B><DD>
+Internal representation to be stored in newly created TclObject.
+<P></DL>
+<H3><A NAME="M6">DESCRIPTION</A></H3>
+The Java API to the Tcl interpreter is object-based -- in most cases,
+the values passed to and from the Tcl interpreter are instances of
+TclObject. This includes variable values and command arguments.
+<P>
+A TclObject is dual-ported: it behaves like a String but also holds an
+internal representation that can be manipulated more efficiently.  For
+example, a TclList is represented as a TclObject that holds the
+list's string representation as well as a Vector to hold the
+objects for each list element. Dual-ported objects avoid most runtime
+type conversions.  This improves the speed of many operations
+since an appropriate representation is immediately available.
+<P>
+A number internal representations are supported, including:
+TclBoolean, TclDouble, TclList, TclIndex, TclInteger, TclString and
+ReflectObject. Most of these internal representations have a
+newInstance() method, which can be used to create a new TclObject
+instance that contains the specific internal representation.  You
+should always create TclObject instances with the newInstance() 
+methods; use the &quot;new&quot; operator to create TclObject instances only
+when you are writing new internal representations.
+<P>
+The type of the internal representation of Tcl objects can mutate.
+Methods such as <B>setInternalRep</B> and <B>invalidateStringRep</B>
+are facilities for mutating the internal rep.
+<P>
+To improve memory efficiency, TclObject supports copy-on-write
+operations.  When you need to save the value of a TclObject for later
+use, call the <B>preserve</B> method; when you no longer need its
+value, call the <B>release</B> method. Internally, each call to
+<B>preserve</B> will internally increment the &quot;reference count&quot; of the
+TclObject by one; conversely, each call to <B>release</B> decrements
+the reference count by one.
+<P>
+Some methods, such as <B><A HREF="../TclJavaLib/TclList.htm">TclList</A></B>.
+<B>append()</B> and <B><A HREF="../TclJavaLib/TclInteger.htm">TclInteger</A></B>.<B>set()</B>,
+modify the contents of a TclObject. These methods cannot be called with a
+shared TclObject argument. Before calling such a method, take care to
+<b>duplicate</b> any shared object argument.
+<p>
+<b>Shared TclObject Example</b>
+<p>
+<code>
+<pre>
+import tcl.lang.*;
+
+public class ListAppendCmd implements Command {
+    public void 
+    cmdProc(
+        Interp interp,
+        TclObject[] objv)
+    throws TclException
+    {
+        TclObject obj = objv[1];
+        if (obj.isShared())
+            obj = obj.duplicate();
+        TclList.append(interp, obj, TclString.newInstance("hi"));
+        interp.setResult(obj);
+        return;
+    }
+}
+</pre>
+</code>
+<p>
+<DL>
+<P><DT><A NAME="M7"><B>TclObject</B></A><DD>
+The <B>TclObject</B> constructor creates a new TclObject with the
+internal representation of <I>rep</I>.
+<P><DT><A NAME="M8"><B>setInternalRep</B></A><DD>
+The <B>setInternalRep</B> method changes the internal representation
+of the TclObject to the value <I>rep</I>.
+<P><DT><A NAME="M9"><B>getInternalRep</B></A><DD>
+The <B>getInternalRep</B> method returns the internal representation
+of the TclObject.  In most cases, one should <b>not</b> use this method
+to determine how to treat different types. Instead, the code should
+be written so that it attempts to convert to a given type and
+deals with a conversion failure.  For example, an object that
+could be converted into a valid Tcl list might not have a TclList
+internal representation. One would need to attempt the conversion
+to see if it would be successful.
+<P><DT><A NAME="M10"><B>toString</B></A><DD>
+The <B>toString</B> method returns the string representation of the
+TclObject.
+<P><DT><A NAME="M11"><B>invalidateStringRep</B></A><DD>
+The <B>invalidateStringRep</B> method marks the String representation
+of the TclObject as invalid.  This method should be called only by
+subclasses of the InternalRep prior to a call the
+<B>setInternalRep</B>.
+<P><DT><A NAME="M12"><B>preserve</B></A><DD>
+The <B>preserve</B> method increments the &quot;reference count&quot;
+of a TclObject so that it can be used later. Each call to <B>preserve</B>
+should be matched by a call to <B>release</B>.
+<P><DT><A NAME="M13"><B>release</B></A><DD>
+Invoke the  <B>release</B> method when you no longer need access to
+a TclObject. Each call to <B>release</B> will decrement the
+&quot;reference count&quot; of the TclObject by one.
+<P><DT><A NAME="M14"><B>isShared</B></A><DD>
+The <B>isShared</B> method returns true if the TclObject is shared (its
+reference count is greater than one.)
+<P><DT><A NAME="M15"><B>duplicate</B></A><DD>
+The <B>duplicate</B> method returns a copy of the TclObject.
+The TclObject returned by <B>duplicate</B> will always have
+a reference count of 0.
+<P></DL>
+<H3><A NAME="M16">EQUIVALENT C FUNCTIONS</A></H3>
+<A href="../cFunctions.html">Tcl_NewObj</A>, <A href="../cFunctions.html">Tcl_ConvertToType</A>, <A href="../cFunctions.html">TclObj.typePtr</A>, <A href="../cFunctions.html">Tcl_GetStringFromObj</A>, <A href="../cFunctions.html">Tcl_InvalidateStringRep</A>, <A href="../cFunctions.html">Tcl_IncrRefCount</A>, <A href="../cFunctions.html">Tcl_DecrRefCount</A>, <A href="../cFunctions.html">Tcl_IsShared</A>, <A href="../cFunctions.html">Tcl_DuplicateObj</A>
+<H3><A NAME="M17">SEE ALSO</A></H3>
+<B><A HREF="../TclJavaLib/InternalRep.htm">InternalRep</A></B>, <B><A HREF="../TclJavaLib/TclBoolean.htm">TclBoolean</A></B>, <B><A HREF="../TclJavaLib/TclDouble.htm">TclDouble</A></B>, <B><A HREF="../TclJavaLib/TclList.htm">TclList</A></B>, <B><A HREF="../TclJavaLib/TclIndex.htm">TclIndex</A></B>, <B><A HREF="../TclJavaLib/TclInteger.htm">TclInteger</A></B>, <B><A HREF="../TclJavaLib/TclString.htm">TclString</A></B>, <B><A HREF="../TclJavaLib/ReflectObject.htm">ReflectObject</A></B>, <B><A HREF="../TclJavaLib/Interp.htm">Interp</A></B>
+<H3><A NAME="M18">KEYWORDS</A></H3>
+<A href="../Keywords/I.htm#internal representation">internal representation</A>, <A href="../Keywords/O.htm#object">object</A>, <A href="../Keywords/O.htm#object creation">object creation</A>, <A href="../Keywords/O.htm#object type">object type</A>, <A href="../Keywords/R.htm#reference counting">reference counting</A>, <A href="../Keywords/S.htm#string representation">string representation</A>, <A href="../Keywords/T.htm#type conversion">type conversion</A>
+<HR><PRE>
+<A HREF="../license.html">Copyright</A> &#169; 1996-1998 Sun Microsystems, Inc.
+<A HREF="../license.html">Copyright</A> &#169; 1995-1997 Roger E. Critchlow Jr.</PRE>
+</BODY></HTML>

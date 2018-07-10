@@ -1,0 +1,31 @@
+<HTML><HEAD><TITLE>TclJava Library Procedures - EventDeleter manual page</TITLE></HEAD><BODY>
+<H3><A NAME="M2">INTERFACE</A></H3>
+tcl.lang.EventDeleter -- Interface for deleting events from the
+Notifier's event queue.
+<H3><A NAME="M3">METHODS</A></H3>
+<P>int <B>deleteEvent</B>(TclEvent <I>event</I>)
+<H3><A NAME="M4">ARGUMENTS</A></H3>
+<DL>
+<P><DT>TclEvent <B>event</B> ()<DD>
+Check whether this event should be deleted from the event queue.
+<P></DL>
+<H3><A NAME="M5">DESCRIPTION</A></H3>
+The EventDeleter interface is used for specifying which event should
+be deleted from the event queue.  When <B><A HREF="../TclJavaLib/Notifier.htm">deleteEvents</A></B> is called on
+a Notifier instance, it will invoke the <B>deleteEvent</B> method of
+the EventDeleter argument passed to it, once for each event in the
+event queue. <B>deleteEvent</B> returns 1 for all events that should be
+deleted and 0 for events that should remain in the queue.  If
+<B>deleteEvent</B> determines that an event should be removed, it
+should perform appropriate clean up on the event instance.
+
+<H3><A NAME="M6">EQUIVALENT C FUNCTIONS</A></H3>
+<A href="../cFunctions.html">Tcl_EventDeleteProc</A>
+<H3><A NAME="M7">SEE ALSO</A></H3>
+<B><A HREF="../TclJavaLib/TclEvent.htm">TclEvent</A></B>, <B><A HREF="../TclJavaLib/Notifier.htm">Notifier</A></B>
+<H3><A NAME="M8">KEYWORDS</A></H3>
+<A href="../Keywords/E.htm#event">event</A>, <A href="../Keywords/N.htm#notifier">notifier</A>, <A href="../Keywords/E.htm#event queue">event queue</A>
+<HR><PRE>
+<A HREF="../license.html">Copyright</A> &#169; 1998 Sun Microsystems, Inc.
+<A HREF="../license.html">Copyright</A> &#169; 1995-1997 Roger E. Critchlow Jr.</PRE>
+</BODY></HTML>

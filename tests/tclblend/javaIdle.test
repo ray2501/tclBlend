@@ -1,0 +1,59 @@
+# This file tests the functions in javaIdle.c.
+#
+# This file contains a collection of tests for one or more of the Tcl
+# built-in commands.  Sourcing this file into Tcl runs the tests and
+# generates output for errors.  No output means no errors were found.
+#
+# Copyright (c) 1998 by Sun Microsystems, Inc.
+#
+# See the file "license.terms" for information on usage and redistribution
+# of this file, and for a DISCLAIMER OF ALL WARRANTIES.
+#
+# RCS: @(#) $Id: javaIdle.test,v 1.2 2000/12/22 09:47:15 mdejong Exp $
+
+if {[lsearch [namespace children] ::tcltest] == -1} {
+    package require tcltest
+    namespace import -force ::tcltest::*
+}
+
+setupJavaPackage
+
+set notifier [java::call tcl.lang.Notifier getNotifierForThread \
+		  [java::call Thread currentThread]]
+set IDLE_EVENTS [java::field tcl.lang.TCL IDLE_EVENTS]
+
+test javaIdle-1.1 {Java_tcl_lang_IdleHandler_doWhenIdle} {
+    set t [java::new tests.IdleHandlerTest $notifier]
+    set result [java::field $t value]
+    update idletasks
+    lappend result [java::field $t value]
+} {0 1}
+
+test javaIdle-2.1 {Java_tcl_lang_IdleHandler_cancelIdleCall} {
+    set t [java::new tests.IdleHandlerTest $notifier]
+    set result [java::field $t value]
+    $t cancel
+    update idletasks
+    lappend result [java::field $t value]
+} {0 0}
+test javaIdle-2.2 {Java_tcl_lang_IdleHandler_cancelIdleCall} {
+    set t [java::new tests.IdleHandlerTest $notifier]
+    set result [java::field $t value]
+    $t cancel
+    update idletasks
+    $t cancel
+    lappend result [java::field $t value]
+} {0 0}
+
+test javaIdle-3.1 {JavaIdleProc} {
+    set t [java::new tests.IdleHandlerTest $notifier]
+    set result [java::field $t value]
+    java::field $t err true
+    lappend result [catch {$notifier doOneEvent $IDLE_EVENTS} msg] $msg \
+	[java::field $t value]
+} {0 1 {java.lang.NullPointerException: IdleHandlerTest} 1}
+
+# cleanup
+unset notifier
+::tcltest::cleanupTests
+return

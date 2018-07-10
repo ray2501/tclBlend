@@ -1,0 +1,1537 @@
+# Test the implementation of the java::try command
+#
+# This file contains a collection of tests for one or more of the Tcl
+# built-in commands.  Sourcing this file into Tcl runs the tests and
+# generates output for errors.  No output means no errors were found.
+#
+# Copyright (c) 1998 by Moses DeJong.
+#
+# See the file "license.terms" for information on usage and redistribution
+# of this file, and for a DISCLAIMER OF ALL WARRANTIES.
+#
+# RCS: @(#) $Id: JavaTryCmd.test,v 1.4 2002/12/30 22:49:24 mdejong Exp $
+
+if {[lsearch [namespace children] ::tcltest] == -1} {
+    package require tcltest
+    namespace import -force ::tcltest::*
+}
+
+setupJavaPackage
+
+
+# Test series 1.
+# Make sure the common errors are detected
+
+test javatrycmd-1.1 {JavaTryCmd: common errors} {
+    list [catch {
+    java::try
+    } err] $err
+} {1 {wrong # args: should be "java::try script ?catch exception_pair script? ?finally script?"}}
+
+test javatrycmd-1.2 {JavaTryCmd: common errors} {
+    list [catch {
+    java::try {}
+    } err] $err
+} {1 {wrong # args: should be "java::try script ?catch exception_pair script? ?finally script?"}}
+
+test javatrycmd-1.3 {JavaTryCmd: common errors} {
+    list [catch {
+    java::try {} {}
+    } err] $err
+} {1 {wrong # args: should be "java::try script ?catch exception_pair script? ?finally script?"}}
+
+test javatrycmd-1.4 {JavaTryCmd: common errors} {
+    list [catch {
+    java::try {} {} {} {} {}
+    } err] $err
+} {1 {wrong # args: should be "java::try script ?catch exception_pair script? ?finally script?"}}
+
+test javatrycmd-1.5 {JavaTryCmd: common errors} {
+    list [catch {
+    java::try {} {} {} {} {} {} {} {}
+    } err] $err
+} {1 {wrong # args: should be "java::try script ?catch exception_pair script? ?finally script?"}}
+
+test javatrycmd-1.6 {JavaTryCmd: finally keyword where catch should be} {
+    list [catch {
+    java::try {
+	an_undefined_procedure
+    } finally {TclException e} {}
+    } err] $err
+} {1 {invalid catch clause "finally"}}
+
+test javatrycmd-1.7 {JavaTryCmd: catch keyword where finally should be} {
+    list [catch {
+    java::try {} catch {}
+    } err] $err
+} {1 {invalid finally clause "catch"}}
+
+test javatrycmd-1.8 {JavaTryCmd: Exception2 where finally should be} {
+    list [catch {
+    java::try {
+	an_undefined_procedure
+    } catch {Exception1 one} {
+	an_undefined_procedure
+    } {Exception2} {
+	an_undefined_procedure
+    }
+    } err] $err
+} {1 {invalid finally clause "Exception2"}}
+
+test javatrycmd-1.9 {JavaTryCmd: Exception3 where finally should be} {
+    list [catch {
+    java::try {
+	an_undefined_procedure
+    } catch {Exception1 one} {
+	an_undefined_procedure
+    } catch {Exception2 one} {
+	an_undefined_procedure
+    } {Exception3} {
+	an_undefined_procedure
+    }
+    } err] $err
+} {1 {invalid finally clause "Exception3"}}
+
+test javatrycmd-1.10 {JavaTryCmd: 0 arguments to exception_pair} {
+    list [catch {
+    java::try {
+	an_undefined_procedure
+    } catch {} {
+	an_undefined_procedure
+    }
+    } err] $err
+} {1 {invalid exception_pair ""}}
+
+test javatrycmd-1.11 {JavaTryCmd: 1 argument to exceptiong_pair} {
+    list [catch {
+    java::try {
+	an_undefined_procedure
+    } catch {Exception} {
+	an_undefined_procedure
+    }
+    } err] $err
+} {1 {invalid exception_pair "Exception"}}
+
+test javatrycmd-1.12 {JavaTryCmd: 3 arguments to exception pair} {
+    list [catch {
+    java::try {
+	an_undefined_procedure
+    } catch {Exception e1 e2} {
+	an_undefined_procedure
+    }
+    } err] $err
+} {1 {invalid exception_pair "Exception e1 e2"}}
+
+test javatrycmd-1.13 {JavaTryCmd: list of arguments to exception_pair} {
+    list [catch {
+    java::try {
+	an_undefined_procedure
+    } catch {Exception {e1 e2}} {
+	an_undefined_procedure
+    }
+    } err] $err
+} {1 {invalid exception_pair "Exception {e1 e2}"}}
+
+test javatrycmd-1.14 {JavaTryCmd: list of arguments to exception_pair} {
+    list [catch {
+    java::try {
+	an_undefined_procedure
+    } catch {{Exception1 Exception2} e1} {
+	an_undefined_procedure
+    }
+    } err] $err
+} {1 {invalid exception_pair "{Exception1 Exception2} e1"}}
+
+test javatrycmd-1.15 {JavaTryCmd: list of arguments to exception_pair} {
+    list [catch {
+    java::try {
+	an_undefined_procedure
+    } catch {{Exception1 Exception2} {e1 e2}} {
+	an_undefined_procedure
+    }
+    } err] $err
+} {1 {invalid exception_pair "{Exception1 Exception2} {e1 e2}"}}
+
+test javatrycmd-1.16 {JavaTryCmd: empty string arguments to exception_pair} {
+    list [catch {
+    java::try {
+	an_undefined_procedure
+    } catch {Exception1 {}} {
+	an_undefined_procedure
+    }
+    } err] $err
+} {1 {invalid exception_pair "Exception1 {}"}}
+
+test javatrycmd-1.17 {JavaTryCmd: empty string arguments to exception_pair} {
+    list [catch {
+    java::try {
+	an_undefined_procedure
+    } catch {{} e1} {
+	an_undefined_procedure
+    }
+    } err] $err
+} {1 {invalid exception_pair "{} e1"}}
+
+test javatrycmd-1.18 {JavaTryCmd: invalid arguments only checked on error} {
+    catch {
+    java::try {
+	set i 0
+    } catch {{} {}} {
+	#invalid catch clause not checked when no error is raised
+    }
+    }
+} {0}
+
+
+
+
+
+
+
+# Test series 2.
+# Make sure the most simple invocations work
+# we can not rely on the return values of the command or
+# the var setting in the command because we have not checked
+# those features at this point
+
+proc trytest_reset { } {
+    global trytest_value
+    set trytest_value 0
+}
+
+proc trytest_incr { num } {
+    global trytest_value
+    incr trytest_value $num
+}
+
+proc trytest_get { } {
+    global trytest_value
+    return $trytest_value
+}
+
+
+
+trytest_reset
+
+test javatrycmd-2.1 {JavaTryCmd: try-finally} {
+    java::try {
+	trytest_incr 1
+    } finally {
+
+    }
+    trytest_get
+} {1}
+
+trytest_reset
+
+test javatrycmd-2.2 {JavaTryCmd: try-catch} {
+    java::try {
+	trytest_incr 2
+	error ""
+    } catch {TclException ex} {
+	trytest_incr -1
+    }
+    trytest_get
+} {1}
+
+trytest_reset
+
+test javatrycmd-2.3 {JavaTryCmd: try-catch-finally} {
+    java::try {
+	trytest_incr 3
+	error ""
+    } catch {TclException ex} {
+	trytest_incr -1
+    } finally {
+	trytest_incr -1
+    }
+    trytest_get
+} {1}
+
+trytest_reset
+
+test javatrycmd-2.4 {JavaTryCmd: try-catch-catch} {
+    java::try {
+	trytest_incr 2
+	error ""
+    } catch {UnknownException1 ex} {
+	an_undefined_procedure
+    } catch {TclException ex} {
+	trytest_incr -1
+    }
+    trytest_get
+} {1}
+
+trytest_reset
+
+test javatrycmd-2.5 {JavaTryCmd: try-catch-catch-catch} {
+    java::try {
+	trytest_incr 2
+	error ""
+    } catch {UnknownException1 ex} {
+	an_undefined_procedure
+    } catch {UnknownException2 ex} {
+	an_undefined_procedure
+    } catch {TclException ex} {
+	trytest_incr -1
+    }
+    trytest_get
+} {1}
+
+trytest_reset
+
+test javatrycmd-2.6 {JavaTryCmd: try-catch-catch-catch-catch} {
+    java::try {
+	trytest_incr 2
+	error ""
+    } catch {UnknownException1 ex} {
+	an_undefined_procedure
+    } catch {UnknownException2 ex} {
+	an_undefined_procedure
+    } catch {UnknownException3 ex} {
+	an_undefined_procedure
+    } catch {TclException ex} {
+	trytest_incr -1
+    }
+    trytest_get
+} {1}
+
+trytest_reset
+
+test javatrycmd-2.7 {JavaTryCmd: try-catch-catch-finally} {
+    java::try {
+	trytest_incr 3
+	error ""
+    } catch {UnknownException1 ex} {
+	an_undefined_procedure
+    } catch {TclException ex} {
+	trytest_incr -1
+    } finally {
+	trytest_incr -1
+    }
+    trytest_get
+} {1}
+
+trytest_reset
+
+test javatrycmd-2.8 {JavaTryCmd: try-catch-catch-catch-finally} {
+    java::try {
+	trytest_incr 3
+	error ""
+    } catch {UnknownException1 ex} {
+	an_undefined_procedure
+    } catch {UnknownException2 ex} {
+	an_undefined_procedure
+    } catch {TclException ex} {
+	trytest_incr -1
+    } finally {
+	trytest_incr -1
+    }
+    trytest_get
+} {1}
+
+trytest_reset
+
+test javatrycmd-2.9 {JavaTryCmd: try-catch-catch-catch-catch-finally} {
+    java::try {
+	trytest_incr 3
+	error ""
+    } catch {UnknownException1 ex} {
+	an_undefined_procedure
+    } catch {UnknownException2 ex} {
+	an_undefined_procedure
+    } catch {UnknownException3 ex} {
+	an_undefined_procedure
+    } catch {TclException ex} {
+	trytest_incr -1
+    } finally {
+	trytest_incr -1
+    }
+    trytest_get
+} {1}
+
+
+
+
+
+
+# Test series 3.
+# Check return status of the command when dealing with tcl exceptions
+
+
+test javatrycmd-3.1 {JavaTryCmd: error in body block} {
+    global errorCode
+    catch {unset i ; unset i}
+    set ret [catch {
+        java::try {
+	    catch {unset i}
+	    incr i
+        } catch {SomeUnknownException e} {
+        }
+    } err]
+    list $ret $err $errorCode
+} {1 {can't read "i": no such variable} NONE}
+
+test javatrycmd-3.2 {JavaTryCmd: error in body block} {
+    global errorCode
+    catch {unset i ; unset i}
+    set ret [catch {
+        java::try {
+	    catch {unset i}
+	    incr i
+        } finally {
+        }
+    } err]
+    list $ret $err $errorCode
+} {1 {can't read "i": no such variable} NONE}
+
+test javatrycmd-3.3 {JavaTryCmd: catch error in body block} {
+    global errorCode
+    catch {unset i ; unset i}
+    set catch 0
+    set ret [catch {
+        java::try {
+	    catch {unset i}
+	    incr i
+        } catch {TclException e} {
+            set catch 1
+        }
+    } err]
+    list $ret $catch $err $errorCode
+} {0 1 1 NONE}
+
+test javatrycmd-3.4 {JavaTryCmd: error in catch block} {
+    global errorCode
+    catch {unset i ; unset i}
+    set ret [catch {
+        java::try {
+	    catch {unset i}
+	    catch {unset j}
+	    incr i
+        } catch {TclException e} {
+	    incr j
+        }
+    } err]
+    list $ret $err $errorCode
+} {1 {can't read "j": no such variable} NONE}
+
+test javatrycmd-3.5 {JavaTryCmd: different error in catch block} {
+    global errorCode
+    catch {unset i ; unset i}
+    set ret [catch {
+        java::try {
+	    catch {unset i}
+	    incr i
+        } catch {TclException e} {
+	    proc p
+        }
+    } err]
+    list $ret $err $errorCode
+} {1 {wrong # args: should be "proc name args body"} NONE}
+
+test javatrycmd-3.6 {JavaTryCmd: error in finally block} {
+    global errorCode
+    catch {unset i ; unset i}
+    set ret [catch {
+        java::try {
+	    catch {unset i}
+        } finally {
+	    incr i
+        }
+    } err]
+    list $ret $err $errorCode
+} {1 {can't read "i": no such variable} NONE}
+
+test javatrycmd-3.7 {JavaTryCmd: another error in finally block} {
+    global errorCode
+    catch {unset i ; unset i}
+    set ret [catch {
+        java::try {
+	    catch {unset i}
+	    catch {unset j}
+	    incr i
+        } finally {
+	    incr j
+        }
+    } err]
+    list $ret $err $errorCode
+} {1 {can't read "j": no such variable} NONE}
+
+test javatrycmd-3.8 {JavaTryCmd: different error in finally block} {
+    global errorCode
+    catch {unset i ; unset i}
+    set ret [catch {
+        java::try {
+	    catch {unset i}
+	    incr i
+        } finally {
+	    proc p
+        }
+    } err]
+    list $ret $err $errorCode
+} {1 {wrong # args: should be "proc name args body"} NONE}
+
+test javatrycmd-3.9 {JavaTryCmd: catch error in body block, error in finally} {
+    global errorCode
+    catch {unset i ; unset i}
+    set catch 0
+    set ret [catch {
+        java::try {
+	    catch {unset i}
+	    catch {unset j}
+	    incr i
+        } catch {TclException e} {
+            set catch 1
+        } finally {
+	    incr j
+        }
+    } err]
+    list $ret $catch $err $errorCode
+} {1 1 {can't read "j": no such variable} NONE}
+
+test javatrycmd-3.10 {JavaTryCmd: error in body block, error in finally} {
+    global errorCode
+    catch {unset i ; unset i}
+    set catch 0
+    set ret [catch {
+        java::try {
+	    catch {unset i}
+	    catch {unset j}
+	    incr i
+        } catch {SomeUnknownException e} {
+            set catch 1
+        } finally {
+	    incr j
+        }
+    } err]
+    list $catch $ret $err $errorCode
+} {0 1 {can't read "j": no such variable} NONE}
+
+test javatrycmd-3.11 {JavaTryCmd: error in body block, error in finally} {
+    global errorCode
+    catch {unset i ; unset i}
+    set catch 0
+    set ret [catch {
+        java::try {
+	    catch {unset i}
+	    catch {unset j}
+	    incr i
+        } catch {java.io.IOException e} {
+            set catch 1
+        } finally {
+	    incr j
+        }
+    } err]
+    list $ret $catch $err $errorCode
+} {1 0 {can't read "j": no such variable} NONE}
+
+test javatrycmd-3.12 {JavaTryCmd: errors in all three blocks} {
+    global errorCode
+    catch {unset i ; unset i}
+    set catch 0
+    set ret [catch {
+        java::try {
+	    catch {unset i}
+	    catch {unset j}
+	    catch {unset k}
+	    incr i
+        } catch {TclException e} {
+            set catch 1
+	    incr j
+        } finally {
+	    incr k
+        }
+    } err]
+    list $ret $catch $err $errorCode
+} {1 1 {can't read "k": no such variable} NONE}
+
+test javatrycmd-3.13 {JavaTryCmd: errors in all three blocks} {
+    global errorCode
+    catch {unset i ; unset i}
+    set catch 0
+    set ret [catch {
+        java::try {
+	    catch {unset i}
+	    catch {unset j}
+	    catch {unset k}
+	    incr i
+        } catch {IOException e} {
+            set catch 1
+	    incr j
+        } finally {
+	    incr k
+        }
+    } err]
+    list $ret $catch $err $errorCode
+} {1 0 {can't read "k": no such variable} NONE}
+
+test javatrycmd-3.14 {JavaTryCmd: return value} {
+    global errorCode
+    catch {unset i ; unset i}
+    set ret [catch {
+        java::try {
+	    set i 2
+        } finally {
+	    incr i
+        }
+    } err]
+    list $ret $err $i $errorCode
+} {0 2 3 NONE}
+
+test javatrycmd-3.15 {JavaTryCmd: return value} {
+    global errorCode
+    catch {unset i ; unset i}
+    set ret [catch {
+        java::try {
+	    set i 2
+        } catch {TclException e} {
+	    incr i
+        }
+    } err]
+    list $ret $err $i $errorCode
+} {0 2 2 NONE}
+
+test javatrycmd-3.16 {JavaTryCmd: return value with caught error} {
+    global errorCode
+    catch {unset i ; unset i}
+    set ret [catch {
+        java::try {
+	    catch {unset j}
+	    set i 2
+	    incr j
+        } catch {TclException e} {
+	    incr i
+        }
+    } err]
+    list $ret $err $i $errorCode
+} {0 3 3 NONE}
+
+test javatrycmd-3.17 {JavaTryCmd: return value with caught error + finally} {
+    global errorCode
+    catch {unset i ; unset i}
+    set ret [catch {
+        java::try {
+	    catch {unset j}
+	    set i 2
+	    incr j
+        } catch {TclException e} {
+	    incr i
+        } finally {
+	    incr i
+        }
+    } err]
+    list $ret $err $i $errorCode
+} {0 3 4 NONE}
+
+test javatrycmd-3.18 {JavaTryCmd: can not catch with long name} {
+    global errorCode
+    catch {unset i ; unset i}
+    set catch 0
+    set ret [catch {
+        java::try {
+	    catch {unset i}
+	    incr i
+        } catch {tcl.lang.TclException e} {
+            set catch 1
+        }
+    } err]
+    list $ret $catch $err $errorCode
+} {1 0 {can't read "i": no such variable} NONE}
+
+test javatrycmd-3.19 {JavaTryCmd: can not catch with exception name} {
+    global errorCode
+    catch {unset i ; unset i}
+    set catch 0
+    set ret [catch {
+        java::try {
+	    catch {unset i}
+	    incr i
+        } catch {TclVarException e} {
+            set catch 1
+        }
+    } err]
+    list $ret $catch $err $errorCode
+} {1 0 {can't read "i": no such variable} NONE}
+
+
+
+
+
+
+
+
+
+# Test series 4.
+# Check return status of the command when dealing with Java Exceptions
+
+
+test javatrycmd-4.1 {JavaTryCmd: Java exception can not catch Tcl errors} {
+    global errorCode
+    catch {unset i ; unset i}
+    set catch 0
+    set ret [catch {
+        java::try {
+	    catch {unset i}
+	    incr i
+        } catch {Exception e} {
+            set catch 1
+        }
+    } err]
+    list $ret $catch $err $errorCode
+} {1 0 {can't read "i": no such variable} NONE}
+
+test javatrycmd-4.2 {JavaTryCmd: catch Exception} {
+    global errorCode
+    catch {unset i ; unset i}
+    set catch 0
+    set ret [catch {
+        java::try {
+	    java::call java.lang.Double valueOf ""
+        } catch {Exception e} {
+            set catch 1
+        }
+    } err]
+    list $ret $catch $err [lindex $errorCode 0]
+} {0 1 1 JAVA}
+
+test javatrycmd-4.3 {JavaTryCmd: catch NumberFormatException} {
+    global errorCode
+    catch {unset i ; unset i}
+    set catch 0
+    set ret [catch {
+        java::try {
+	    java::call java.lang.Double valueOf ""
+        } catch {NumberFormatException e} {
+            set catch 1
+        }
+    } err]
+    list $ret $catch $err [lindex $errorCode 0]
+} {0 1 1 JAVA}
+
+test javatrycmd-4.4 {JavaTryCmd: catch java.lang.NumberFormatException} {
+    global errorCode
+    catch {unset i ; unset i}
+    set catch 0
+    set ret [catch {
+        java::try {
+	    java::call java.lang.Double valueOf ""
+        } catch {java.lang.NumberFormatException e} {
+            set catch 1
+        }
+    } err]
+    list $ret $catch $err [lindex $errorCode 0]
+} {0 1 1 JAVA}
+
+test javatrycmd-4.5 {JavaTryCmd: catch NullPointerException} {
+    global errorCode
+    catch {unset i ; unset i}
+    set catch 0
+    set ret [catch {
+        java::try {
+	    java::call java.lang.Double valueOf [java::null]
+        } catch {NullPointerException e} {
+            set catch 1
+        }
+    } err]
+    list $ret $catch $err [lindex $errorCode 0]
+} {0 1 1 JAVA}
+
+test javatrycmd-4.6 {JavaTryCmd: catch Throwable} {
+    global errorCode
+    catch {unset i ; unset i}
+    set catch 0
+    set ret [catch {
+        java::try {
+	    # Throwable -> Exception -> IOException -> EOFException
+	    java::throw [java::new java.io.EOFException]
+        } catch {Throwable e} {
+            set catch 1
+        }
+    } err]
+    list $ret $catch $err [lindex $errorCode 0]
+} {0 1 1 JAVA}
+
+test javatrycmd-4.7 {JavaTryCmd: catch Exception} {
+    global errorCode
+    catch {unset i ; unset i}
+    set catch 0
+    set ret [catch {
+        java::try {
+	    # Throwable -> Exception -> IOException -> EOFException
+	    java::throw [java::new java.io.EOFException]
+        } catch {Exception e} {
+            set catch 1
+        }
+    } err]
+    list $ret $catch $err [lindex $errorCode 0]
+} {0 1 1 JAVA}
+
+test javatrycmd-4.8 {JavaTryCmd: catch java.lang.Exception} {
+    global errorCode
+    catch {unset i ; unset i}
+    set catch 0
+    set ret [catch {
+        java::try {
+	    # Throwable -> Exception -> IOException -> EOFException
+	    java::throw [java::new java.io.EOFException]
+        } catch {java.lang.Exception e} {
+            set catch 1
+        }
+    } err]
+    list $ret $catch $err [lindex $errorCode 0]
+} {0 1 1 JAVA}
+
+test javatrycmd-4.9 {JavaTryCmd: catch IOException} {
+    global errorCode
+    catch {unset i ; unset i}
+    set catch 0
+    set ret [catch {
+        java::try {
+	    # Throwable -> Exception -> IOException -> EOFException
+	    java::throw [java::new java.io.EOFException]
+        } catch {IOException e} {
+            set catch 1
+        }
+    } err]
+    list $ret $catch $err [lindex $errorCode 0]
+} {0 1 1 JAVA}
+
+test javatrycmd-4.10 {JavaTryCmd: catch EOFException} {
+    global errorCode
+    catch {unset i ; unset i}
+    set catch 0
+    set ret [catch {
+        java::try {
+	    # Throwable -> Exception -> IOException -> EOFException
+	    java::throw [java::new java.io.EOFException]
+        } catch {EOFException e} {
+            set catch 1
+        }
+    } err]
+    list $ret $catch $err [lindex $errorCode 0]
+} {0 1 1 JAVA}
+
+test javatrycmd-4.11 {JavaTryCmd: don't catch EOFExcept} {
+    global errorCode
+    catch {unset i ; unset i}
+    set catch 0
+    set ret [catch {
+        java::try {
+	    # Throwable -> Exception -> IOException -> EOFException
+	    java::throw [java::new java.io.EOFException]
+        } catch {EOFExcept e} {
+            set catch 1
+        }
+    } err]
+    list $ret $catch $err [lindex $errorCode 0]
+} {1 0 java.io.EOFException JAVA}
+
+test javatrycmd-4.12 {JavaTryCmd: don't catch EOFException} {
+    global errorCode
+    catch {unset i ; unset i}
+    set catch 0
+    set ret [catch {
+        java::try {
+	    # Throwable -> Exception -> IOException -> EOFException
+	    java::throw [java::new java.io.EOFException]
+        } catch {NumberFormatException e} {
+            set catch 1
+        }
+    } err]
+    list $ret $catch $err [lindex $errorCode 0]
+} {1 0 java.io.EOFException JAVA}
+
+test javatrycmd-4.13 {JavaTryCmd: catch Exception in another proc} {
+    global errorCode
+    catch {unset i ; unset i}
+    proc test_throw_exception { } {
+        # Throwable -> Exception -> IOException -> EOFException
+        java::throw [java::new java.io.EOFException]
+    }
+    set catch 0
+    set ret [catch {
+        java::try {
+            test_throw_exception
+        } catch {Exception e} {
+            set catch 1
+        }
+    } err]
+    rename test_throw_exception {}
+    list $ret $catch $err [lindex $errorCode 0]
+} {0 1 1 JAVA}
+
+test javatrycmd-4.14 {JavaTryCmd: catch Exception in another proc} {
+    global errorCode
+    catch {unset i ; unset i}
+    proc test_throw_exception { } {
+        java::call java.lang.Float valueOf ""
+    }
+    set catch 0
+    set ret [catch {
+        java::try {
+            test_throw_exception
+        } catch {Exception e} {
+            set catch 1
+        }
+    } err]
+    rename test_throw_exception {}
+    list $ret $catch $err [lindex $errorCode 0]
+} {0 1 1 JAVA}
+
+test javatrycmd-4.15 {JavaTryCmd: catch Exception before IOException} {
+    global errorCode
+    catch {unset i ; unset i}
+    set catch 0
+    set ret [catch {
+        java::try {
+	    # Throwable -> Exception -> IOException -> EOFException
+	    java::throw [java::new java.io.EOFException]
+        } catch {Exception e} {
+            set catch 1
+        } catch {IOException e} {
+            set catch 2
+        }
+    } err]
+    list $ret $catch $err [lindex $errorCode 0]
+} {0 1 1 JAVA}
+
+test javatrycmd-4.16 {JavaTryCmd: catch IOException before Exception} {
+    global errorCode
+    catch {unset i ; unset i}
+    set catch 0
+    set ret [catch {
+        java::try {
+	    # Throwable -> Exception -> IOException -> EOFException
+	    java::throw [java::new java.io.EOFException]
+        } catch {IOException e} {
+            set catch 1
+        } catch {Exception e} {
+            set catch 2
+        }
+    } err]
+    list $ret $catch $err [lindex $errorCode 0]
+} {0 1 1 JAVA}
+
+test javatrycmd-4.17 {JavaTryCmd: skip NumberFormatException catch Exception} {
+    global errorCode
+    catch {unset i ; unset i}
+    set catch 0
+    set ret [catch {
+        java::try {
+	    # Throwable -> Exception -> IOException -> EOFException
+	    java::throw [java::new java.io.EOFException]
+        } catch {NumberFormatException e} {
+            set catch 1
+        } catch {Exception e} {
+            set catch 2
+        }
+    } err]
+    list $ret $catch $err [lindex $errorCode 0]
+} {0 2 2 JAVA}
+
+test javatrycmd-4.18 {JavaTryCmd: skip TclException catch Exception} {
+    global errorCode
+    catch {unset i ; unset i}
+    set catch 0
+    set ret [catch {
+        java::try {
+	    # Throwable -> Exception -> IOException -> EOFException
+	    java::throw [java::new java.io.EOFException]
+        } catch {TclException e} {
+            set catch 1
+        } catch {Exception e} {
+            set catch 2
+        }
+    } err]
+    list $ret $catch $err [lindex $errorCode 0]
+} {0 2 2 JAVA}
+
+test javatrycmd-4.19 {JavaTryCmd: skip TclException catch Error} {
+    global errorCode
+    catch {unset i ; unset i}
+    set catch 0
+    set ret [catch {
+        java::try {
+	    # Throwable -> Error -> LinkageError
+	    java::throw [java::new LinkageError]
+        } catch {TclException e} {
+            set catch 1
+        } catch {Error e} {
+            set catch 2
+        }
+    } err]
+    list $ret $catch $err [lindex $errorCode 0]
+} {0 2 2 JAVA}
+
+test javatrycmd-4.20 {JavaTryCmd: another exception in catch block} {
+    global errorCode
+    catch {unset i ; unset i}
+    set catch 0
+    set ret [catch {
+        java::try {
+            java::call java.lang.Float valueOf [java::null]
+        } catch {NullPointerException e} {
+            set catch 1
+            java::throw [java::new java.io.IOException]
+        }
+    } err]
+    list $ret $catch $err [lindex $errorCode 0]
+} {1 1 java.io.IOException JAVA}
+
+test javatrycmd-4.21 {JavaTryCmd: another exception in catch block} {
+    global errorCode
+    catch {unset i ; unset i}
+    set catch 0
+    set ret [catch {
+        java::try {
+            java::call java.lang.Integer valueOf ""
+        } catch {NumberFormatException e} {
+            set catch 1
+        } finally {
+            java::throw [java::new java.io.EOFException]
+        }
+    } err]
+    list $ret $catch $err [lindex $errorCode 0]
+} {1 1 java.io.EOFException JAVA}
+
+test javatrycmd-4.22 {JavaTryCmd: another exception in finally block} {
+    global errorCode
+    catch {unset i ; unset i}
+    set finally 0
+    set ret [catch {
+        java::try {
+            java::call java.lang.Integer valueOf [java::null]
+        } finally {
+            set finally 1
+            java::throw [java::new java.io.EOFException]
+        }
+    } err]
+    list $ret $finally $err [lindex $errorCode 0]
+} {1 1 java.io.EOFException JAVA}
+
+
+
+
+
+
+
+
+# Test series 5.
+# test the value of the exception variable when catching Tcl and Java exceptions
+
+test javatrycmd-5.1 {JavaTryCmd: test catch variable value} {
+    global errorCode
+    catch {unset i ; unset i}
+    set catch 0
+    set ret [catch {
+        java::try {
+	    catch {unset i}
+	    incr i
+        } catch {TclException e} {
+            set catch 1
+            set e
+        }
+    } err]
+    list $ret $catch $err $errorCode
+} {0 1 {can't read "i": no such variable} NONE}
+
+test javatrycmd-5.2 {JavaTryCmd: test catch variable value} {
+    global errorCode
+    catch {unset i ; unset i}
+    set catch 0
+    set ret [catch {
+        java::try {
+	    catch {unset j}
+	    incr j
+        } catch {Exception e} {
+            set catch 1
+            set e
+        } catch {TclException e} {
+            set catch 2
+            set e
+        }
+    } err]
+    list $ret $catch $err $errorCode
+} {0 2 {can't read "j": no such variable} NONE}
+
+test javatrycmd-5.3 {JavaTryCmd: test catch variable value} {
+    global errorCode
+    catch {unset i ; unset i}
+    set e ""
+    set catch 0
+    set ret [catch {
+        java::try {
+	    catch {unset i}
+	    incr i
+        } catch {TclException e} {
+            set catch 1
+        }
+    } err]
+    list $ret $catch $e $errorCode
+} {0 1 {can't read "i": no such variable} NONE}
+
+test javatrycmd-5.4 {JavaTryCmd: errors in all three blocks} {
+    global errorCode
+    catch {unset i ; unset i}
+    set e ""
+    set catch 0
+    set ret [catch {
+        java::try {
+	    catch {unset i}
+	    catch {unset j}
+	    catch {unset k}
+	    incr i
+        } catch {TclException e} {
+            set catch 1
+	    incr j
+        } finally {
+	    incr k
+        }
+    } err]
+    list $ret $catch $err $e $errorCode
+} {1 1 {can't read "k": no such variable} {can't read "i": no such variable} NONE}
+
+test javatrycmd-5.5 {JavaTryCmd: catch NumberFormatException} {
+    global errorCode
+    catch {unset i ; unset i}
+    set catch 0
+    set ret [catch {
+        java::try {
+	    java::call java.lang.Long valueOf ""
+        } catch {NumberFormatException e} {
+            set catch 1
+            java::info class $e
+        }
+    } err]
+    list $ret $catch $err [lindex $errorCode 0]
+} {0 1 java.lang.NumberFormatException JAVA}
+
+test javatrycmd-5.6 {JavaTryCmd: catch Exception} {
+    global errorCode
+    catch {unset i ; unset i}
+    set catch 0
+    set ret [catch {
+        java::try {
+	    java::call java.lang.Long valueOf ""
+        } catch {Exception e} {
+            set catch 1
+            java::info class $e
+        }
+    } err]
+    list $ret $catch $err [lindex $errorCode 0]
+} {0 1 java.lang.Exception JAVA}
+
+test javatrycmd-5.7 {JavaTryCmd: catch NumberFormatException} {
+    global errorCode
+    catch {unset i ; unset i}
+    set catch 0
+    catch {unset e}
+    set ret [catch {
+        java::try {
+	    java::call java.lang.Long valueOf ""
+        } catch {NumberFormatException e} {
+            set catch 1
+            java::info class $e
+        }
+    } err]
+    list $ret $catch $err [lindex $errorCode 0]
+} {0 1 java.lang.NumberFormatException JAVA}
+
+test javatrycmd-5.8 {JavaTryCmd: catch Exception in another proc} {
+    global errorCode
+    catch {unset i ; unset i}
+    proc test_throw_exception { } {
+	java::call java.lang.Short valueOf [java::null]
+    }
+    set catch 0
+    catch {unset e}
+    set ret [catch {
+        java::try {
+            test_throw_exception
+        } catch {Exception e} {
+            set catch 1
+            java::info class $e
+        }
+    } err]
+    rename test_throw_exception {}
+    list $ret $catch $err [lindex $errorCode 0]
+} {0 1 java.lang.Exception JAVA}
+
+test javatrycmd-5.9 {JavaTryCmd: catch NumberFormatException in another proc} {
+    global errorCode
+    catch {unset i ; unset i}
+    proc test_throw_exception { } {
+	java::call java.lang.Short valueOf ""
+    }
+    set catch 0
+    catch {unset e}
+    set ret [catch {
+        java::try {
+            test_throw_exception
+        } catch {NumberFormatException e} {
+            set catch $e
+            set var 8
+        }
+    } err]
+    rename test_throw_exception {}
+    list $ret [java::info class $catch] $err [lindex $errorCode 0]
+} {0 java.lang.NumberFormatException 8 JAVA}
+
+test javatrycmd-5.10 {JavaTryCmd: another exception in catch block} {
+    global errorCode
+    catch {unset i ; unset i}
+    set e [java::null]
+    set catch 0
+    catch {unset e}
+    set ret [catch {
+        java::try {
+            java::call java.lang.Short valueOf "" 10
+        } catch {NumberFormatException e} {
+            set catch 1
+            java::throw [java::new java.io.EOFException]
+        }
+    } err]
+    list $ret $catch $err [java::info class $e] [lindex $errorCode 0]
+} {1 1 java.io.EOFException java.lang.NumberFormatException JAVA}
+
+
+
+
+
+
+
+
+
+
+# test series 6
+
+# the command needs to handle break, continue, and return inside
+# loops and methods that might use the "break outside a loop".
+
+test javatrycmd-6.1 {JavaTryCmd: no exception} {
+    global errorCode
+    catch {unset i ; unset i}
+    set catch 0
+    set ret [catch {
+        java::try {
+            set i hello
+        } catch {TclException e} {
+            set catch 1
+        }
+    } err]
+    list $ret $catch $err $errorCode
+} {0 0 hello NONE}
+
+test javatrycmd-6.2 {JavaTryCmd: do not catch return} {
+    global errorCode
+    catch {unset i ; unset i}
+    set catch 0
+    set ret [catch {
+        java::try {
+            return 5
+        } catch {TclException e} {
+            set catch 1
+            set e
+        }
+    } err]
+    list $ret $catch $err $errorCode
+} {0 0 5 NONE}
+
+test javatrycmd-6.3 {JavaTryCmd: do not catch return in proc} {
+    global errorCode
+    catch {unset i ; unset i}
+    set catch 0
+    proc test_return { } {
+	return 2
+    }
+    set ret [catch {
+        java::try {
+            test_return
+        } catch {TclException e} {
+            set catch 1
+            set e
+        }
+    } err]
+    rename test_return {}
+    list $ret $catch $err $errorCode
+} {0 0 2 NONE}
+
+test javatrycmd-6.4 {JavaTryCmd: catch incorrect break} {
+    global errorCode
+    catch {unset i ; unset i}
+    set catch 0
+    set ret [catch {
+        java::try {
+            break
+        } catch {TclException e} {
+            set catch 1
+            set e
+        }
+    } err]
+    list $ret $catch $err $errorCode
+} {0 1 {} NONE}
+
+test javatrycmd-6.5 {JavaTryCmd: do not catch incorrect break} {
+    global errorCode
+    catch {unset i ; unset i}
+    set catch 0
+    set ret [catch {
+        java::try {
+            break
+        } catch {Exception e} {
+            set catch 1
+        }
+    } err]
+    list $ret $catch $err $errorCode
+} {3 0 {} NONE}
+
+test javatrycmd-6.6 {JavaTryCmd: catch incorrect break in proc} {
+    global errorCode
+    catch {unset i ; unset i}
+    set catch 0
+    proc test_break { } {
+	break
+    }
+    set ret [catch {
+        java::try {
+            test_break
+        } catch {TclException e} {
+            set catch 1
+            set e
+        }
+    } err]
+    rename test_break {}
+    list $ret $catch $err $errorCode
+} {0 1 {invoked "break" outside of a loop} NONE}
+
+test javatrycmd-6.7 {JavaTryCmd: do not catch incorrect break in proc} {
+    global errorCode
+    catch {unset i ; unset i}
+    set catch 0
+    proc test_break { } {
+	break
+    }
+    set ret [catch {
+        java::try {
+            test_break
+        } catch {Exception e} {
+            set catch 1
+        }
+    } err]
+    rename test_break {}
+    list $ret $catch $err $errorCode
+} {1 0 {invoked "break" outside of a loop} NONE}
+
+test javatrycmd-6.8 {JavaTryCmd: catch incorrect continue} {
+    global errorCode
+    catch {unset i ; unset i}
+    set catch 0
+    set ret [catch {
+        java::try {
+            continue
+        } catch {TclException e} {
+            set catch 1
+            set e
+        }
+    } err]
+    list $ret $catch $err $errorCode
+} {0 1 {} NONE}
+
+test javatrycmd-6.9 {JavaTryCmd: do not catch incorrect continue} {
+    global errorCode
+    catch {unset i ; unset i}
+    set catch 0
+    set ret [catch {
+        java::try {
+            continue
+        } catch {Exception e} {
+            set catch 1
+        }
+    } err]
+    list $ret $catch $err $errorCode
+} {4 0 {} NONE}
+
+test javatrycmd-6.10 {JavaTryCmd: catch incorrect continue in proc} {
+    global errorCode
+    catch {unset i ; unset i}
+    set catch 0
+    proc test_continue { } {
+	continue
+    }
+    set ret [catch {
+        java::try {
+            test_continue
+        } catch {TclException e} {
+            set catch 1
+            set e
+        }
+    } err]
+    rename test_continue {}
+    list $ret $catch $err $errorCode
+} {0 1 {invoked "continue" outside of a loop} NONE}
+
+test javatrycmd-6.11 {JavaTryCmd: do not catch incorrect continue in proc} {
+    global errorCode
+    catch {unset i ; unset i}
+    set catch 0
+    proc test_continue { } {
+	continue
+    }
+    set ret [catch {
+        java::try {
+            test_continue
+        } catch {Exception e} {
+            set catch 1
+        }
+    } err]
+    rename test_continue {}
+    list $ret $catch $err $errorCode
+} {1 0 {invoked "continue" outside of a loop} NONE}
+
+
+test javatrycmd-7.1 {JavaTryCmd: same exception object caught} {
+    set e1 [java::new NullPointerException mynull]
+    java::try {
+        java::throw $e1
+    } catch {NullPointerException e2} {
+        string equal $e1 $e2
+    }
+} 1
+
+test javatrycmd-7.2 {throw TclException in a Java method} {
+    set result ""
+    java::try {
+        java::call tests.JavaTest throwTclException [java::getinterp]
+    } catch {TclException te} {
+        set result $te
+    }
+    set result
+} {no nuts in my fudge please!}
+
+test javatrycmd-7.3 {throw RuntimeException in a Java method} {
+    set result 0
+    java::try {
+        [java::getinterp] {setResult tcl.lang.TclObject} [java::null]
+    } catch {NullPointerException e} {
+        set result 1
+    }
+    set result
+} 1
+
+test javatrycmd-7.4 {throw RuntimeException in a Java command impl} {
+    set result 0
+    java::try {
+        [java::getinterp] createCommand "testruntimeexception" \
+            [java::new tests.RuntimeExceptionCmd]
+        testruntimeexception
+    } catch {NullPointerException e} {
+        set result 1
+    } finally {
+        rename testruntimeexception {}
+    }
+} 1
+
+test javatrycmd-7.5 {throw RuntimeException in a catch block} {
+    set result 0
+    java::try {
+        [java::getinterp] createCommand "testruntimeexception" \
+            [java::new tests.RuntimeExceptionCmd]
+
+        java::try {
+            error "Foo"
+        } catch {TclException te} {
+            testruntimeexception
+        } finally {
+            rename testruntimeexception {}
+        }
+    } catch {RuntimeException re} {
+        set result 1
+    }
+    list $result [info commands testruntimeexception]
+} {1 {}}
+
+test javatrycmd-7.6 {throw RuntimeException in a finally block} {
+    set result 0
+    java::try {
+        [java::getinterp] createCommand "testruntimeexception" \
+            [java::new tests.RuntimeExceptionCmd]
+
+        java::try {
+            error "Foo"
+        } finally {
+            testruntimeexception
+        }
+    } catch {RuntimeException re} {
+        set result 1
+    } finally {
+        rename testruntimeexception {}
+    }
+} 1
+
+test javatrycmd-7.7 {don't handle RuntimeException} {
+    set result 0
+    java::try {
+        [java::getinterp] createCommand "testruntimeexception" \
+            [java::new tests.RuntimeExceptionCmd]
+
+        java::try {
+            testruntimeexception
+        } catch {TclRuntimeError tre} {
+            set result 2
+        } finally {
+            rename testruntimeexception {}
+        }
+    } catch {RuntimeException re} {
+        set result 1
+    }
+} 1
+
+
+test javatrycmd-8.1 {return in script} {
+    global errorCode
+    catch {unset i ; unset i}
+    set catch 0
+    set ret [catch {
+        java::try {
+            return 5
+        } catch {TclException e} {
+            set catch 1
+            set e
+        }
+    } err]
+    list $ret $catch $err $errorCode
+} {0 0 5 NONE}
+
+test javatrycmd-8.2 {return in catch block} {
+    global errorCode
+    catch {unset i ; unset i}
+    set catch 0
+    set ret [catch {
+        java::try {
+            error FOO
+        } catch {TclException e} {
+            return 5
+        }
+    } err]
+    list $ret $catch $err $errorCode
+} {0 0 5 NONE}
+
+test javatrycmd-8.3 {return in finally block} {
+    global errorCode
+    catch {unset i ; unset i}
+    set catch 0
+    set ret [catch {
+        java::try {
+            error FOO
+        } catch {TclException e} {
+            return 4
+        } finally {
+            return 5
+        }
+    } err]
+    list $ret $catch $err $errorCode
+} {0 0 4 NONE}
+
+# cleanup
+::tcltest::cleanupTests
+return

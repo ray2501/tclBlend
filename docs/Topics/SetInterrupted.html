@@ -1,0 +1,355 @@
+<HTML>
+<TITLE>
+Set Interrupted API
+</TITLE>
+
+<BODY>
+<HR>
+
+<H3>
+Set Interrupted API
+</H3>
+
+<HR>
+
+<DL>
+
+<DT>
+<H3>
+About:
+</H3>
+</DT>
+
+<DD>
+
+<P>
+Jacl includes a feature that makes it possible
+to interrupt execution of an interpreter. When
+interrupted, a Jacl interp will cleanup each
+frame on the Tcl call stack and dispose of the
+interrupted interpreter. Typically, a developer
+would invoke the <code>Interp.setInterrupted()</code>
+method from a thread other than the one processing events.
+It is also possible to invoke the <code>setInterrupted()</code>
+method directly from Tcl code using the java package.
+The examples that follow show both usages.
+</P>
+
+<P>
+Assume that the following Tcl commands have been evaluated:
+
+<blockquote>
+<pre>
+<code>
+package require java
+
+proc p1 {} {
+    p2
+}
+
+proc p2 {} {
+    p3
+}
+
+proc p3 {} {
+    [java::getinterp] setInterrupted
+}
+</code>
+</pre>
+</blockquote>
+</p>
+
+<p>
+Just before the <code>setInterrupted</code> method is invoked
+in the proc <code>p3</code>, the Tcl stack would look like this:
+
+<blockquote>
+<pre>
+<code>
+Frame: p3
+Frame: p2
+Frame: p1
+Global
+</code>
+</pre>
+</blockquote>
+</p>
+
+<p>
+When invoked, the <code>setInterrupted</code> method will
+set a flag in the <code>Interp</code> object to indicate
+that execution should be interrupted. This flag is then
+checked at the end of the command evaluation operation
+and a <code>TclInterruptedException</code> is raised.
+This <code>TclInterruptedException</code> is a
+Java exception that extends the unchecked
+<code>RuntimeException</code> class.
+
+<pre>
+<code>
+java.lang.RuntimeException
+    -> tcl.lang.TclInterruptedException
+</code>
+</pre>
+</p>
+
+<p>
+When the <code>TclInterruptedException</code> is raised,
+stack frames for the p3, p2, and p1 commands will be cleaned
+up in order. The <code>TclInterruptedException</code>
+should then be caught in the outermost event processing loop.
+This is the main loop that is processing Tcl events using
+<code>Notifier.doOneEvent()</code>. See the
+<a href="EventLoop.html">EventLoop</a> documentation for information
+about basic event loop processing. The EventLoop documentation
+describes a basic event loop, a simplified version might look like:
+</p>
+
+<blockquote>
+<pre>
+<code>
+import tcl.lang.*;
+
+public
+class EventProcessingThread extends Thread {
+    Interp interp;
+
+    public void run() {
+        // Allocate Interp
+    
+        while (true) {
+            interp.getNotifier().doOneEvent(TCL.ALL_EVENTS);
+        }
+    }
+}
+</code>
+</pre>
+</blockquote>
+</p>
+
+<p>
+Unfortunately, the basic event loop does not properly support
+handling of a <code>TclInterruptedException</code>. The basic
+event loop does not work properly when a
+<code>TclInterruptedException</code> is raised in a thread
+that is processing events for multiple interpreters. When
+one interpreter is interrupted, events for other interpreter(s)
+in the thread should continue to be processed. Because the
+basic event loop does not catch a <code>TclInterruptedException</code>,
+the default Java behavior is to terminate the thread. This
+problem can be fixed by placing a try around the event
+processing call and using the <code>Notifier.hasActiveInterps()</code>
+API to detect when all interps in the thread have been disposed of.
+The following example shows an event processing loop that supports
+interruption.
+</p>
+
+<blockquote>
+<pre>
+<code>
+import tcl.lang.*;
+
+public
+class EventProcessingThread extends Thread {
+    Interp interp;
+
+    public void run() {
+        // Allocate Interp
+
+        Notifier notifier = interp.getNotifier();
+
+        while (notifier.hasActiveInterps()) {
+            try {
+                notifier.doOneEvent(TCL.ALL_EVENTS);
+            } catch (TclInterruptedException tie) {
+                tie.disposeInterruptedInterp();
+            }
+        }
+    }
+}
+</code>
+</pre>
+</blockquote>
+
+<p>
+A developer need not write out all the logic described above
+as the <code>Notifier</code> class provides a utility method named
+<code>processTclEvents</code>. This utility method implements the
+while loop functionality seen above, so a developer need only
+write the following:
+</p>
+
+<blockquote>
+<pre>
+<code>
+import tcl.lang.*;
+
+public
+class EventProcessingThread extends Thread {
+    Interp interp;
+
+    public void run() {
+        // Allocate Interp
+
+        Notifier.processTclEvents(interp.getNotifier());
+    }
+}
+</code>
+</pre>
+</blockquote>
+
+</DD>
+
+<DT>
+<H3>
+Interrupting From Another Thread:
+</H3>
+</DT>
+
+<DD>
+
+<p>
+The interpreter interrupt feature is particularly useful
+when implementing services that may need to be terminated
+when a condition is met. For example, one might want to
+evaluate a script but define a timer that will interrupt
+the interpreter if the script takes longer than 60
+seconds to run. The timer could be implemented as
+a separate Java <code>Thread</code> that would go to sleep
+and then invoke the <code>setInterrupted</code> API.
+
+</p>
+
+<p>
+<img src="si1.gif" align="top">
+</p>
+
+<p>
+It is perfectly legal to invoke the <code>setInterrupted</code> API
+from a thread other than the one processing events. Thread safety
+issues are handled inside the <code>setInterrupted</code> method,
+so no explicit synchronization is needed in user code. Also note
+that the <code>setInterrupted</code> method will do nothing and
+return if the interp in question was already deleted or interrupted,
+so the caller need not worry about checking these conditions before
+invoking this method from a timeout thread.
+</P>
+
+</DD>
+
+<DT>
+<H3>
+Catching TclInterruptedException:
+</H3>
+</DT>
+
+<DD>
+
+<p>
+The only place user code should catch a <code>TclInterruptedException</code>
+is after invoking <code>doOneEvent</code> in the main event processing loop.
+A <code>TclInterruptedException</code> can't be caught using Tcl's
+<code>catch</code> command. It is also not possible to catch a
+<code>TclInterruptedException</code> using the <code>java::try</code> command.
+If a <code>TclInterruptedException</code> could be caught via
+<code>java::try</code> then it could be ignored, and that could
+result in unpredictable behavior. Even so, a finally block passed to a
+<code>java::try</code> command will still be executed when a
+<code>TclInterruptedException</code> is raised. The following
+example demonstrates this behavior:
+</p>
+
+<blockquote>
+<code>
+<pre>
+package require java
+
+proc p1 {} {
+    [java::getinterp] setInterrupt
+}
+
+proc p2 {} {
+    java::try {
+        p1
+    } catch {Exception e} {
+        # This block will not be run since it is
+        # not possible to catch a TclInterruptedException
+        # using java::try
+
+        puts "catch run in p2"
+    } finally {
+        # This finally block will be run
+
+        puts "finally run in p2"
+    }
+}
+</pre>
+</code>
+</blockquote>
+
+<p>
+When the <code>p2</code> command is invoked it will invoke <code>p1</code>
+and then the interpreter will be interrupted. When the stack frame for
+the <code>p2</code> command is cleaned up the finally block is evaluated
+and <code>"finally run in p2"</code> is printed to the console. Note
+that the catch block is not run even though <code>java.lang.Exception</code>
+is a superclass of <code>tcl.lang.TclInterruptedException</code>.
+</p>
+
+<p>
+Users should take care to keep the finally block for a <code>java::try</code>
+command as simple as possible and use it only to cleanup resources before
+disposing of the stack frame. The finally block should not invoke commands
+like <code>update</code>, <code>vwait</code>, or other potentially slow operations since this could
+delay interpreter interruption.
+</p>
+
+<p>
+Users should take care not to accidentally catch and ignore a
+<code>TclInterruptedException</code> in Java code. Improper
+exception handling in Java code is a common problem.
+Poorly written code like the following would break the
+interpreter interrupt feature in Jacl.
+</p>
+
+<blockquote>
+<code>
+<pre>
+public
+class BrokenCmd implements Command {
+
+    public void cmdProc(Interp interp, TclObject[] objv)
+	throws TclException
+    {
+        try {
+            interp.eval("cmd");
+        } catch (Exception e) {
+            // Ignore exception
+        }
+    }
+
+}
+</pre>
+</code>
+</blockquote>
+
+<p>
+In most cases, the caller would only want to catch exceptions
+that are a subclass of <code>TclException</code>. Using
+<code>TclException</code> instead of <code>Exception</code>
+is a better coding practice and will not break the
+interrupt feature. The same logic applies to catching
+<code>Throwable</code>, and <code>RuntimeException</code>.
+</p>
+
+</DD>
+
+</DL>
+
+<PRE>
+<A HREF="../license.html">Copyright</A> &#169; 1997-1998 Sun Microsystems, Inc.
+</PRE>
+
+
+</BODY>
+</HTML>

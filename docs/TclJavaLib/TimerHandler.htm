@@ -1,0 +1,80 @@
+<HTML><HEAD><TITLE>TclJava Library Procedures - TimerHandler manual page</TITLE></HEAD><BODY>
+<DL>
+<DD><A HREF="TimerHandler.htm#M2" NAME="L243">CLASS</A>
+<DL><DD>tcl.lang.TimerHandler -- Subclass from this abstract base class to
+create timer event handlers.</DL>
+<DD><A HREF="TimerHandler.htm#M3" NAME="L244">METHODS</A>
+<DL><DD><B>Timerhandler</B>(Notifier <I>notifier</I>, int <I>milliseconds</I>)</DL>
+<DL><DD>synchronized void <B>cancel</B>()</DL>
+<DL><DD>abstract void <B>processTimerEvent</B>()</DL>
+<DD><A HREF="TimerHandler.htm#M4" NAME="L245">ARGUMENTS</A>
+<DL>
+</DL>
+<DD><A HREF="TimerHandler.htm#M5" NAME="L246">DESCRIPTION</A>
+<DL>
+<DD><A HREF="TimerHandler.htm#M6" NAME="L247"><B>TimerHandler</B></A>
+<DD><A HREF="TimerHandler.htm#M7" NAME="L248"><B>cancel</B></A>
+<DD><A HREF="TimerHandler.htm#M8" NAME="L249"><B>processTimerEvent</B></A>
+</DL>
+<DD><A HREF="TimerHandler.htm#M9" NAME="L250">EQUIVALENT C FUNCTIONS</A>
+<DD><A HREF="TimerHandler.htm#M10" NAME="L251">SEE ALSO</A>
+<DD><A HREF="TimerHandler.htm#M11" NAME="L252">KEYWORDS</A>
+</DL><HR>
+<H3><A NAME="M2">CLASS</A></H3>
+tcl.lang.TimerHandler -- Subclass from this abstract base class to
+create timer event handlers.
+<H3><A NAME="M3">METHODS</A></H3>
+<P><B>Timerhandler</B>(Notifier <I>notifier</I>, int <I>milliseconds</I>)
+<P>synchronized void <B>cancel</B>()
+<P>abstract void <B>processTimerEvent</B>()
+<H3><A NAME="M4">ARGUMENTS</A></H3>
+<DL>
+<P><DT>Notifier <B>notifier</B> ()<DD>
+The Notifier in which to register the new TimerHandler.
+<P>
+<P><DT>int <B>milliseconds</B> ()<DD>
+How many milliseconds should be elapsed before the timer is fired.
+<P></DL>
+<H3><A NAME="M5">DESCRIPTION</A></H3>
+The <B>TimerHandler</B> class is used to schedule code to be executed in a
+future time. To write your own timer handler, subclass from
+TimerHandler and override the <B>processTimerEvent</B> method.
+<P>
+The callback to <B>processTimerEvent</B> will be made by the <I>notifier</I>,
+so the <B>TimerHandler</B> class is only useful in programs that
+dispatch events through <I>notifier</I>.<B><A HREF="../TclJavaLib/Notifier.htm">doOneEvent</A></B> or through Tcl
+commands such as <B>vwait</B>. The call to <B>processTimerEvent</B> may
+not be made at the exact time given by <I>milliseconds</I>: it will be
+made at the next opportunity after that time.  For example, if
+<I>notifier</I>.<B><A HREF="../TclJavaLib/Notifier.htm">doOneEvent</A></B> isn't called until long after the time has
+elapsed, or if there are other pending events to process before the
+call to <B>processTimerEvent</B>, then the call to
+<B>processTimerEvent</B> will be delayed.
+
+<P>
+<DL>
+<P><DT><A NAME="M6"><B>TimerHandler</B></A><DD>
+This constructor creates a TimerHandler instance and register it
+inside the given <I>notifier</I>.
+<P><DT><A NAME="M7"><B>cancel</B></A><DD>
+If the <B>processTimerEvent</B> method has not been invoked yet,
+cancels this timer handler. If the <B>processTimerEvent</B> method has
+already been invoked by the <I>notifier</I>, this call has no effect.
+<P><DT><A NAME="M8"><B>processTimerEvent</B></A><DD>
+You can override this method to perform the desired actions when the
+timer is fired. The TimerHandler instance can be created in any
+thread. However, <B>processTimerEvent</B> is always called in the
+primary thread of the <I>notifier</I> that was specified in the
+TimerHandler constructor.
+
+<P></DL>
+<H3><A NAME="M9">EQUIVALENT C FUNCTIONS</A></H3>
+<A href="../cFunctions.html">Tcl_CreateTimerHandler</A>
+<H3><A NAME="M10">SEE ALSO</A></H3>
+<B><A HREF="../TclJavaLib/Notifier.htm">Notifier</A></B>, <B><A HREF="../TclJavaLib/IdleHandler.htm">IdleHandler</A></B>
+<H3><A NAME="M11">KEYWORDS</A></H3>
+<A href="../Keywords/T.htm#timer">timer</A>, <A href="../Keywords/E.htm#event">event</A>, <A href="../Keywords/E.htm#event queue">event queue</A>
+<HR><PRE>
+<A HREF="../license.html">Copyright</A> &#169; 1998 Sun Microsystems, Inc.
+<A HREF="../license.html">Copyright</A> &#169; 1995-1997 Roger E. Critchlow Jr.</PRE>
+</BODY></HTML>

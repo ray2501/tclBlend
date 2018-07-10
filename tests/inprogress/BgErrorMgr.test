@@ -1,0 +1,150 @@
+# BgErrorMgr.test --
+#
+#	Tests the implementation of the BgErrorMgr.java file.
+#
+# Copyright (c) 1997 by Sun Microsystems, Inc.
+#
+# See the file "license.terms" for information on usage and redistribution
+# of this file, and for a DISCLAIMER OF ALL WARRANTIES.
+#
+# SCCS: @(#) BgErrorMgr.test 1.5 98/01/14 16:38:44
+
+# Note: This test file must be sourced from the parent directory
+#       or else the defs file may not be properly loaded.
+
+if {[lsearch [namespace children] ::tcltest] == -1} {
+    package require tcltest
+    namespace import -force ::tcltest::*
+}
+
+setupJavaPackage
+
+proc doOneEvent {flags} {
+    set f 0
+    foreach flag $flags {
+	set f [expr $f | [java::field tcl.lang.TCL $flag]]
+    }
+
+    [[java::getinterp] getNotifier] doOneEvent $f
+}
+
+proc bgerror {msg} {
+    global errorInfo
+    global errorCode
+    global info
+
+    lappend info $msg $errorInfo $errorCode
+}
+
+test BgErrorMgr-1.1 {addBgError()} {
+    set info ""
+    catch {unset errorInfo}
+    catch {unset errorCode}
+    [java::getinterp] backgroundError
+    update
+    set info
+} {{} {} NONE}
+
+test BgErrorMgr-1.2 {addBgError()} {
+    set info ""
+    after idle {error xxx}
+    update
+    set info
+} {xxx {xxx
+    while executing
+"error xxx"
+    ("after" script)} NONE}
+
+test BgErrorMgr-1.3 {addBgError()} {
+    set info ""
+    after idle {error xxx}
+    after idle {error yyy}
+    after idle {error zzz}
+    update
+    set info
+} {xxx {xxx
+    while executing
+"error xxx"
+    ("after" script)} NONE yyy {yyy
+    while executing
+"error yyy"
+    ("after" script)} NONE zzz {zzz
+    while executing
+"error zzz"
+    ("after" script)} NONE}
+
+proc bgerror {msg} {
+    global info
+
+    lappend info $msg "break!"
+    return -code break
+}
+
+test BgErrorMgr-2.1 {BgError.processIdleEvent()} {
+    set info ""
+    after idle {error xxx}
+    after idle {error yyy}
+    after idle {error zzz}
+    update
+    after idle {error aaa}
+    after idle {error bbb}
+    update
+    set info
+} {xxx break! aaa break!}
+
+proc bgerror {msg} {
+    global info
+
+    # Don't copy object into info list, just dup string
+    lappend info [format %s $msg] [jtest refcount $msg]
+}
+
+test BgErrorMgr-2.2 {BgError.processIdleEvent(), refCount} {
+    set info ""
+
+    set x xxx
+    lappend info [jtest refcount $x]
+    after idle {error $x}
+    after idle {error $x}
+    update
+    lappend info [jtest refcount $x]
+} {1 xxx 4 xxx 3 1}
+
+proc bgerror {msg} {
+    global info errorCode errorInfo
+    
+    lappend info $msg $errorCode $errorInfo
+}
+
+test BgErrorMgr-2.3 {BgError.processIdleEvent(), setVar error} {
+    set info ""
+
+    set errorInfo blah
+    set errorCode gorp
+    trace variable errorInfo w no_such_proc
+    trace variable errorCode w no_such_proc
+    [java::getinterp] backgroundError
+    update idletasks
+    trace vdelete errorInfo w no_such_proc
+    trace vdelete errorCode w no_such_proc
+    set info
+} {{can't set "errorInfo": can't set "errorCode": invalid command name "no_such_proc"} NONE {invalid command name "no_such_proc"
+    while executing
+"no_such_proc errorInfo {} w"}}
+
+catch {trace vdelete errorInfo w no_such_proc}
+catch {trace vdelete errorCode w no_such_proc}
+
+catch {
+    unset errorInfo
+}
+catch {
+    unset errorCode
+}
+
+set errorInfo ""
+set errorCode NONE
+
+catch {
+    rename bgerror {}
+}

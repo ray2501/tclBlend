@@ -1,0 +1,88 @@
+<HTML><HEAD><TITLE>TclJava Library Procedures - setAssocData manual page</TITLE></HEAD><BODY>
+<DL>
+<DD><A HREF="setAssocData.htm#M2" NAME="L333">CLASS</A>
+<DL><DD>tcl.lang.Interp -- This manual contains Interp methods that associate
+user-specified data with the Interp.</DL>
+<DD><A HREF="setAssocData.htm#M3" NAME="L334">METHODS</A>
+<DL><DD>void <B>setAssocData</B>(String <I>key</I>, AssocData <I>data</I>)</DL>
+<DL><DD>void <B>getAssocData</B>(String <I>key</I>)</DL>
+<DL><DD>void <B>deleteAssocData</B>(String <I>key</I>)</DL>
+<DD><A HREF="setAssocData.htm#M4" NAME="L335">OTHER METHODS</A>
+<DD><A HREF="setAssocData.htm#M5" NAME="L336">ARGUMENTS</A>
+<DL>
+</DL>
+<DD><A HREF="setAssocData.htm#M6" NAME="L337">DESCRIPTION</A>
+<DL>
+<DD><A HREF="setAssocData.htm#M7" NAME="L338"><B>setAssocData</B></A>
+<DD><A HREF="setAssocData.htm#M8" NAME="L339"><B>getAssocData</B></A>
+<DD><A HREF="setAssocData.htm#M9" NAME="L340"><B>deleteAssocData</B></A>
+</DL>
+<DD><A HREF="setAssocData.htm#M10" NAME="L341">EQUIVALENT C FUNCTIONS</A>
+<DD><A HREF="setAssocData.htm#M11" NAME="L342">SEE ALSO</A>
+<DD><A HREF="setAssocData.htm#M12" NAME="L343">KEYWORDS</A>
+</DL><HR>
+<H3><A NAME="M2">CLASS</A></H3>
+tcl.lang.Interp -- This manual contains Interp methods that associate
+user-specified data with the Interp.
+<H3><A NAME="M3">METHODS</A></H3>
+<P>void <B>setAssocData</B>(String <I>key</I>, AssocData <I>data</I>)
+<P>void <B>getAssocData</B>(String <I>key</I>)
+<P>void <B>deleteAssocData</B>(String <I>key</I>)
+<H3><A NAME="M4">OTHER METHODS</A></H3>
+<B><A HREF="../TclJavaLib/setVar.htm">setVar</A></B>, 
+<B><A HREF="../TclJavaLib/traceVar.htm">traceVar</A></B>, 
+<B><A HREF="../TclJavaLib/createCmd.htm">createCommand</A></B>,
+<B><A HREF="../TclJavaLib/Eval.htm">eval</A></B>, 
+<B><A HREF="../TclJavaLib/setResult.htm">setResult</A></B>,
+<BR>
+<B><A HREF="../TclJavaLib/backgdErr.htm">backgroundError</A></B>,
+<B><A HREF="../TclJavaLib/getNotifier.htm">getNotifier</A></B>, 
+<B><A HREF="../TclJavaLib/dispose.htm">dispose</A></B>, 
+<B><A HREF="../TclJavaLib/pkgRequire.htm">pkgRequire</A></B>
+
+<H3><A NAME="M5">ARGUMENTS</A></H3>
+<DL>
+<P><DT>String <B>key</B> ()<DD>
+A string, typically the name of the extension, by which the <I>data</I>
+can be accessed.
+<P><DT>AssocData <B>data</B> ()<DD>
+The instance of AssocData to associate with <I>key</I>.
+<P></DL>
+<H3><A NAME="M6">DESCRIPTION</A></H3>
+The following methods allow Java extensions to associate their own
+data with a Tcl interpreter.  An association consists of a string key,
+typically the name of the extension, and an instance that implements
+the AssocData interface (See <B><A HREF="../TclJavaLib/AssocData.htm">AssocData</A></B>).
+<P>
+When the interpreter is disposed via the dispose() method, the
+disposeAssocData() methods of all the registered AssocData instances
+are called to perform the necessary clean up.  Note that if an
+association is removed as a result of the setAssocData() or
+deleteAssocData() calls, the disposeAssocData() method of the removed
+AssocData instance is not called.
+<P>
+<DL>
+<P><DT><A NAME="M7"><B>setAssocData</B></A><DD>
+The <B>setAssocData</B> method creates the association between the
+string <I>key</I> and the AssocData instance, <I>data</I>.  If an old
+association of the same <I>key</I> already exists, the old association
+is removed before the new association is created.
+<P><DT><A NAME="M8"><B>getAssocData</B></A><DD>
+The <B>getAssocData</B> method returns the AssocData instance
+associated with <I>key</I>.  If no such AssocData has been registered,
+null is returned.
+<P><DT><A NAME="M9"><B>deleteAssocData</B></A><DD>
+The <B>deleteAssocData</B> method removes the association between the
+string <I>key</I> and the AssocData instance.
+
+<P></DL>
+<H3><A NAME="M10">EQUIVALENT C FUNCTIONS</A></H3>
+<A href="../cFunctions.html">Tcl_SetAssocData</A>, <A href="../cFunctions.html">Tcl_GetAssocData</A>, <A href="../cFunctions.html">Tcl_DeleteAssocData</A>
+<H3><A NAME="M11">SEE ALSO</A></H3>
+<B><A HREF="../TclJavaLib/Interp.htm">Interp</A></B>, <B><A HREF="../TclJavaLib/AssocData.htm">AssocData</A></B>
+<H3><A NAME="M12">KEYWORDS</A></H3>
+<A href="../Keywords/A.htm#association">association</A>, <A href="../Keywords/D.htm#data">data</A>, <A href="../Keywords/D.htm#deletion procedure">deletion procedure</A>, <A href="../Keywords/I.htm#interpreter">interpreter</A>, <A href="../Keywords/K.htm#key">key</A>
+<HR><PRE>
+<A HREF="../license.html">Copyright</A> &#169; 1994-1998 Sun Microsystems, Inc.
+<A HREF="../license.html">Copyright</A> &#169; 1995-1997 Roger E. Critchlow Jr.</PRE>
+</BODY></HTML>

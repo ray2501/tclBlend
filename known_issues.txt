@@ -1,0 +1,28 @@
+(Jacl under Windows)
+Many test cases will fail if Jacl is built or installed into
+a directory that has a space in the name. For example, the
+Mingw directory /tmp may be mapped to:
+C:\Documents and Settings\$USERNAME\Local Settings\Temp.
+Be sure to avoid building or installing into a directory
+that has a space in the name when running Jacl test cases.
+
+(Jacl under Windows)
+JDK 1.5 encoder/decoder support is known to be broken for
+far east encodings like shiftjis.
+
+(Jacl tests under Solaris)
+If you configure with --srcdir, and don't have write permission in
+the source directory, then some of the Jacl tests in tcl/fileName.test
+will fail.  Also, tcl/info.test will fail with a message
+about 'cannot open file: gorp.info'
+
+(AWT modal dialogs)
+Users have run into serious problems with AWT modal dialogs under Jacl
+and Tcl Blend. The problem is caused by the way the AWT blocks calling
+threads for modal dialogs. Both Jacl and Tcl Blend will "freeze"
+if the AWT modal dialog show method is called from inside Tcl. A
+workaround for this problem has been developed and added as an
+unsupported command. The name of this command is unsupported::jdetachcall.
+It works just jike java::call except that it will not block and it
+will work for instance and static methods. This method should only
+be used for blocking AWT like calls!

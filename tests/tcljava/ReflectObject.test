@@ -1,0 +1,258 @@
+# This file tests ReflectObject.test.
+#
+# This file contains a collection of tests for one or more of the Tcl
+# built-in commands.  Sourcing this file into Tcl runs the tests and
+# generates output for errors.  No output means no errors were found.
+#
+# Copyright (c) 1997 by Sun Microsystems, Inc.
+#
+# See the file "license.terms" for information on usage and redistribution
+# of this file, and for a DISCLAIMER OF ALL WARRANTIES.
+#
+# RCS: @(#) $Id: ReflectObject.test,v 1.6 2002/12/23 20:38:11 mdejong Exp $
+
+if {[lsearch [namespace children] ::tcltest] == -1} {
+    package require tcltest
+    namespace import -force ::tcltest::*
+}
+
+setupJavaPackage
+
+set o [java::new tests.JavaTest]
+test ReflectObject-1.1 {cmdProc} {
+    list [catch {$o} msg] $msg
+} "1 {wrong # args: should be \"$o ?-noconvert? signature ?arg arg ...?\"}"
+
+test ReflectObject-1.2 {cmdProc} {
+    list [catch {$o -noconvert} msg] $msg
+} "1 {wrong # args: should be \"$o ?-noconvert? signature ?arg arg ...?\"}"
+
+test ReflectObject-1.3 {cmdProc} {
+    set o [java::new tests.JavaTest]
+    list [catch {[$o -noconvert imethod] toString} msg] $msg
+} {0 6}
+
+test ReflectObject-1.4 {cmdProc} {
+    set o [java::new tests.JavaTest]
+    list [catch {[$o -n imethod] toString} msg] $msg
+} {0 6}
+
+test ReflectObject-1.5 {cmdProc} {
+    set o [java::new tests.JavaTest]
+    list [catch {[$o - imethod] toString} msg] $msg
+} {1 {no accessible method "-" in class tests.JavaTest}}
+
+test ReflectObject-1.6 {cmdProc} {
+    set o [java::new tests.JavaTest]
+    list [catch {$o imethod} msg] $msg
+} {0 6}
+
+test ReflectObject-1.7 {cmdProc} {
+    set x [java::new tests.ConvertTest]
+    string compare [$x nullMethod] [java::null]
+} 0
+
+test ReflectObject-1.8 {cmdProc} {
+    set x [java::new tests.ConvertTest]
+    $x voidMethod
+} ""
+
+test ReflectObject-1.9 {cmdProc} {
+    set x [java::new tests.ConvertTest]
+    $x emptyStringMethod
+} ""
+
+test ReflectObject-1.10 {cmdProc} {
+    set s1 [java::new {java.lang.String java.lang.String} "hello"]
+    set s2 [$s1 -n toString]
+    string compare $s1 $s2 
+} {0}
+
+test ReflectObject-1.11 {cmdProc} {
+    set x [java::new tests.ConvertTest]
+    set boolObj [$x -noconvert trueBooleanObjectMethod]
+    list [java::isnull $boolObj] [$boolObj booleanValue]
+} {0 1}
+
+test ReflectObject-1.12 {cmdProc} {
+    set x [java::new tests.ConvertTest]
+    set boolObj [$x -noconvert falseBooleanObjectMethod]
+    list [java::isnull $boolObj] [$boolObj booleanValue]
+} {0 0}
+
+test ReflectObject-1.13 {cmdProc} {
+    set x [java::new tests.ConvertTest]
+    $x trueBooleanMethod
+} {1}
+
+test ReflectObject-1.14 {cmdProc} {
+    set x [java::new tests.ConvertTest]
+    $x falseBooleanMethod
+} {0}
+
+test ReflectObject-2.1 {isValid flag} {
+    set x [java::new tests.JavaTest]
+    java::call tests.ConvertTest staticTestParam $x
+} 6
+
+test ReflectObject-2.2 {isValid flag} {
+    set x [java::new tests.JavaTest]
+    catch {rename foo ""}
+    rename $x foo
+    java::call tests.ConvertTest staticTestParam $x
+} 6
+
+test ReflectObject-2.3 {isValid flag} {
+    set x [java::new tests.JavaTest]
+    rename $x ""
+    java::call tests.ConvertTest staticTestParam $x
+} 4
+
+test ReflectObject-2.4 {isValid flag} {
+    set x [java::new tests.JavaTest]
+    set k $x
+    unset x
+    java::call tests.ConvertTest staticTestParam $k
+} 6
+
+test ReflectObject-2.5 {isValid flag} {
+    set x [java::new tests.JavaTest]
+    set k $x
+    rename $x ""
+    unset x
+    java::call tests.ConvertTest staticTestParam $k
+} 4
+
+test ReflectObject-2.6 {isValid flag} {
+    set x [java::new tests.JavaTest]
+    java::info class [format %s $x]
+} tests.JavaTest
+
+test ReflectObject-2.7 {isValid flag} {
+    set x [java::new tests.JavaTest]
+    rename $x ""
+    catch {java::field $x -gorp-} msg
+    string match "unknown class or object*" $msg
+} 1
+
+test ReflectObject-3.0 {object type} {
+    catch {unset results}
+    set good [java::new tests.DownReference]
+    lappend results [java::info class $good]
+    lappend results [$good getSecret]
+    set bad [java::call tests.DownReference newInstance]
+    lappend results [java::info class $bad]
+    lappend results [catch {$bad getSecret} err]
+    lappend results $err
+} {tests.DownReference X123 java.lang.Object 1 {no accessible method "getSecret" in class java.lang.Object}}
+
+
+test ReflectObject-3.1 {object compare} {
+    catch {unset results}
+    set c [java::new tests.Compare]
+    set r1 [$c get1]
+    set r2 [$c get2]
+    set r3 [$c get3]
+    lappend results [java::info class $r1]
+    lappend results [java::info class $r2]
+    lappend results [java::info class $r3]
+    lappend results [string compare $r1 $r2]
+    lappend results [string compare $r2 $r3]
+    lappend results [string compare $r1 $r3]
+    lappend results [$c compare $r1 $r2]
+    lappend results [$c compare $r2 $r3]
+} {java.lang.Object java.util.Dictionary java.util.Hashtable -1 -1 -1 1 1}
+
+
+test ReflectObject-3.2 {object compare} {
+    catch {unset results}
+    set c [java::new tests.Compare]
+    set r1 [$c get1]
+    set r2 [$c get2]
+    set r3 [$c get3]
+    lappend results [java::isnull $r1]
+    lappend results [java::isnull $r2]
+    lappend results [java::isnull $r3]
+    $c empty
+    set r4 [$c get1]
+    set r5 [$c get2]
+    set r6 [$c get3]
+    lappend results [java::isnull $r4]
+    lappend results [java::isnull $r5]
+    lappend results [java::isnull $r6]
+    lappend results [$c compare $r1 $r4]
+    lappend results [$c compare $r2 $r5]
+    lappend results [$c compare $r2 $r6]
+} {0 0 0 1 1 1 0 0 0}
+
+set lang_classes {{Boolean true} {Byte 5} {Character c} {Double 1.5} Exception {Float 1.5} {Integer 10} {Long 500} Object {Short 3} String StringBuffer Throwable}
+
+test ReflectObject-3.3 {object equals} {
+    set results [list]
+
+    foreach lang_class $lang_classes {
+	set x [eval java::new $lang_class]
+
+        if {! [$x equals [java::null]] && [$x equals $x]} {
+            lappend results $lang_class
+        }
+    }
+    set results
+} $lang_classes
+
+
+# test series 4, dealing with long (64 bit) values and conversions
+
+set LC tests.LongConvert
+
+set longmax 9223372036854775807
+set longmin -9223372036854775808
+set longval -2398461842900206033
+
+test ReflectObject-4.0 {max long value} {
+  java::field Long MAX_VALUE
+} $longmax
+
+test ReflectObject-4.1 {min long value} {
+  java::field Long MIN_VALUE
+} $longmin
+
+test ReflectObject-4.2 {parse max long value with Long constructor} {
+  [java::new Long $longmax] toString
+} $longmax
+
+test ReflectObject-4.3 {parse min long value with Long constructor} {
+  [java::new Long $longmin] toString
+} $longmin
+
+test ReflectObject-4.4 {parse long value with Long constructor} {
+  [java::new Long $longval] toString
+} $longval
+
+test ReflectObject-4.5 {max long value, passed to long method} {
+  java::call $LC isMax [java::field Long MAX_VALUE]
+} 1
+
+test ReflectObject-4.6 {long value, passed to long method} {
+  java::call $LC {isVal long} $longval
+} 1
+
+test ReflectObject-4.7 {long value, passed to String method} {
+  java::call $LC {isVal String} $longval
+} 1
+
+test ReflectObject-4.8 {pass a sring that can not be converted to a long} {
+  list [catch {java::call $LC isMax 34-*&,34} err] $err
+} {1 {expected integer but got "34-*&,34"}}
+
+test ReflectObject-4.9 {pass a Long to a long method} {
+  java::call $LC {isVal long} [java::new Long $longval]
+} 1
+
+test ReflectObject-4.10 {pass a Long to a long method} {
+  java::call $LC isMax [java::new Long $longmax]
+} 1
+
+# cleanup
+::tcltest::cleanupTests
+return

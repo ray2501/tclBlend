@@ -1,0 +1,200 @@
+<HTML>
+<TITLE>
+Building Jacl under Windows
+</TITLE>
+
+<BODY>
+<HR>
+
+<H3>
+Building Jacl under Windows
+</H3>
+
+<HR>
+
+<DL>
+
+<DT>
+<H3>
+About:
+</H3>
+</DT>
+
+<DD>
+
+<P>
+Jacl users should note that a pre-compiled binary release is available,
+so building from source is not required. Jacl is built under Windows
+using a <code>configure</code> script and the Mingw/Msys package.
+The Mingw/Msys package is a minimal unix style shell environment
+that is used to execute a <code>configure</code> script under Windows.
+</P>
+
+<P>
+First, download the Mingw/Msys zip file
+<A HREF="http://sourceforge.net/project/showfiles.php?group_id=10894">here</A>
+and extract into <code>C:/</code> or some other location on your machine.
+See the included <code>README.TXT</code> file for more info about how to start the msys shell.
+</P>
+
+<P>
+The following assumes that the user has started the msys shell and
+has created a temp directory <code>/build/jacl</code>, that
+<A HREF="http://sourceforge.net/project/showfiles.php?group_id=13005">
+Jacl (1.4.0)
+</A>
+has been downloaded and saved in this directory, that
+Jacl will be installed into <code>/opt/jacl</code>, and
+that the JDK install is located in <code>C:/jdk14</code>
+which is referred to as <code>/c/jdk14</code> when passed
+to the configure script.
+
+<blockquote>
+<pre>
+<code>
+mkdir /build
+mkdir /build/jacl
+cd /build/jacl
+(Save archive in C:/msys/build/jacl)
+
+unzip jacl140.zip
+mkdir build
+cd build
+../jacl1.4.0/configure --prefix=/opt/jacl --with-jdk=/c/jdk14
+</code>
+</pre>
+</blockquote>
+</p>
+
+<p>
+After the configure script finishes, run the following commands
+to build and install Jacl.
+
+<blockquote>
+<pre>
+<code>
+make
+make install
+</code>
+</pre>
+</blockquote>
+</p>
+
+<p>
+One can also build and run the optional regression
+tests with the following command. Be aware that
+running the regression tests can take a long time.
+
+<blockquote>
+<pre>
+<code>
+make test
+</code>
+</pre>
+</blockquote>
+</p>
+
+<p>
+
+Running the <code>make install</code> target will install two startup scripts.
+The first is called <code>jaclsh</code> and is used to launch Jacl from a
+msys shell. The second is called <code>jaclsh.bat</code> and is used to
+launch Jacl from a Windows <code>cmd</code> prompt or from the Windows Explorer.
+</p>
+
+
+<blockquote>
+<pre>
+<code>
+(From the msys shell)
+/opt/jacl/bin/jaclsh
+% package require java
+1.4.0
+% exit
+
+(From Windows Explorer, double click on jaclsh.bat in C:/msys/opt/jacl/bin)
+% package require java
+1.4.0
+% exit
+</code>
+</pre>
+</blockquote>
+</p>
+
+<H4>TJC Compiler</H4>
+
+<p>
+The TJC compiler is included in Jacl 1.4.0 and later releases.
+The TJC compiler is used to compile Tcl code into Java bytecode
+which is then executed directly in the JVM. Since the TJC compiler
+is implemented in Tcl, TJC can be used to compile itself. This
+is known as a 2-stage compile and makes the TJC compiler execute about 10
+times faster. For this reason, it is suggested that users build
+TJC via a 2-stage compile as follows. Be aware that this process
+is very slow, it can take 20 minutes or more on a fast system.
+Also note that Jacl must have been built and installed before
+the following commands are run.
+
+<blockquote>
+<pre>
+<code>
+make tjc2
+make install
+</code>
+</pre>
+</blockquote>
+</p>
+
+
+<H4>Installed Files</H4>
+
+<p>
+<ul>
+
+<li>
+<code>jaclsh</code> : Msys startup script for Jacl
+</li>
+
+<li>
+<code>jaclsh.bat</code> : <code>cmd.exe</code> startup script for Jacl
+</li>
+
+<li>
+<code>tjc</code> : Msys startup script for TJC compiler
+</li>
+
+<li>
+<code>tjc.bat</code> : <code>cmd.exe</code> startup script for TJC compiler
+</li>
+
+<br>
+
+<li>
+<code>tcljava.jar</code> : Files common to both Jacl and Tcl Blend
+</li>
+
+<li>
+<code>jacl.jar</code> : Files specific to Jacl
+</li>
+
+<li>
+<code>itcl.jar</code> : Itcl for Jacl
+</li>
+
+<li>
+<code>janino.jar</code> : Janino Java compiler
+</li>
+
+<li>
+<code>tjc.jar</code> : TJC compiler
+</li>
+
+</ul>
+</p>
+
+</DD>
+
+</DL>
+
+</BODY>
+</HTML>

@@ -1,0 +1,36 @@
+# tcljavaConfig.sh --
+# 
+# This shell script (for sh) is generated automatically by
+# tcljava's configure script.  It will create shell variables
+# for most of the configuration options discovered by the
+# configure script. This script is intended to be included by
+# the configure scripts for extensions that rely on tcljava
+#
+# The information in this file is specific to a single platform.
+#
+
+TCLJAVA_PREFIX=@prefix@
+TCLJAVA_EXEC_PREFIX=@exec_prefix@
+
+TCLJAVA=@TCLJAVA@
+TCLJAVA_VERSION=@TCLJAVA_VERSION@
+TCLJAVA_NODOT_VERSION=@TCLJAVA_NODOT_VERSION@
+
+TCLJAVA_BUILD_DIR=@BUILD_DIR@
+
+JAVA=@JAVA@
+JAVA_G=@JAVA_G@
+JAVAC=@JAVAC@
+JAR=@JAR@
+JDB=@JDB@
+
+JAVA_FLAGS=@JAVA_FLAGS@
+JAVA_G_FLAGS=@JAVA_G_FLAGS@
+JAVAC_FLAGS=@JAVAC_FLAGS@
+JAVAC_D_FLAG=@JAVAC_D_FLAG@
+JAVAC_H_FLAG=@JAVAC_H_FLAG@
+JAR_EXTRACT_FLAGS=@JAR_EXTRACT_FLAGS@
+JAR_COMPRESS_FLAGS=@JAR_COMPRESS_FLAGS@
+JAR_NOCOMPRESS_FLAGS=@JAR_NOCOMPRESS_FLAGS@
+
+JAVA_CLASSPATH=@JAVA_CLASSPATH@

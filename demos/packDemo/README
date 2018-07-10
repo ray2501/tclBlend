@@ -1,0 +1,30 @@
+README
+RCS: @(#) $Id: README,v 1.1 1999/05/08 05:08:04 dejong Exp $
+
+Abstract
+--------
+
+      This demo shows how the java::* command can be used to create
+      a layout manager for java widgets that acts just like the pack
+      command from tk.
+
+Running The Demo
+----------------
+     To see the demo in action start out by typing "make demos" in the
+     directory you compiled in. This will create a demos subdirectory
+     in the directory you compiled in. At this point you will want to
+     start up a java enabled shell and source the packDemo.tcl file. The
+     easiest way to do this is to type "make shell" and then cd to the
+     demos/packDemo directory that was created inside the directory
+     you compiled in.
+
+     Now source the packDemo.tcl file. After doing that you should see
+     some java widgets packed into a window. Read the packDemo.tcl file
+     to see how easy it was to pack java widgets using tcl commands.
+     You can compare this code to the code in wishDemo.tcl which does
+     the exact same thing using tk buttons and the tk pack command
+     (go ahead source them both, its fun!). You can also see how the
+     pack layout manager can be used directly from java by looking at
+     the packDemo.java file. You can run the packDemo.java example by
+     typing "java packDemo" at the command line.
+

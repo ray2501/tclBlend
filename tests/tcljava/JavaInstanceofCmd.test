@@ -1,0 +1,61 @@
+# JavaInstanceofCmd.test --
+#
+#	Tests the JavaInstanceofCmd class.
+#
+# Copyright (c) 1997 by Sun Microsystems, Inc.
+#
+# See the file "license.terms" for information on usage and redistribution
+# of this file, and for a DISCLAIMER OF ALL WARRANTIES.
+#
+# RCS: @(#) $Id: JavaInstanceofCmd.test,v 1.2 2000/12/22 09:47:15 mdejong Exp $
+
+if {[lsearch [namespace children] ::tcltest] == -1} {
+    package require tcltest
+    namespace import -force ::tcltest::*
+}
+
+setupJavaPackage
+
+test JavaInstanceofCmd-1.1 {cmdProc} {
+    list [catch {java::instanceof} msg] $msg
+} {1 {wrong # args: should be "java::instanceof object class"}}
+test JavaInstanceofCmd-1.2 {cmdProc} {
+    list [catch {java::instanceof foo} msg] $msg
+} {1 {wrong # args: should be "java::instanceof object class"}}
+test JavaInstanceofCmd-1.3 {cmdProc} {
+    list [catch {java::instanceof foo bar blah} msg] $msg
+} {1 {wrong # args: should be "java::instanceof object class"}}
+
+test JavaInstanceofCmd-1.4 {cmdProc} {
+    list [catch {java::instanceof kk foo} msg] $msg
+} {1 {unknown java object "kk"}}
+
+test JavaInstanceofCmd-1.5 {cmdProc} {
+    set o [java::new Object]
+    list [catch {java::instanceof $o foo} msg] $msg
+} {1 {unknown class "foo"}}
+
+test JavaInstanceofCmd-1.6 {cmdProc} {
+    list [catch {java::instanceof [java::null] Object} msg] $msg
+} {0 0}
+test JavaInstanceofCmd-1.7 {cmdProc} {
+    list [catch {java::instanceof [java::null] java.lang.Object} msg] $msg
+} {0 0}
+
+test JavaInstanceofCmd-1.8 {cmdProc} {
+    list [catch {java::instanceof [java::new Object] String} msg] $msg
+} {0 0}
+test JavaInstanceofCmd-1.9 {cmdProc} {
+    list [catch {
+	java::instanceof [java::new {String String} "kk"] String
+    } msg] $msg
+} {0 1}
+test JavaInstanceofCmd-1.10 {cmdProc} {
+    list [catch {
+	java::instanceof [java::new {String String} "kk"] Object
+    } msg] $msg
+} {0 1}
+
+# cleanup
+::tcltest::cleanupTests
+return

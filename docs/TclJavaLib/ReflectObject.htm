@@ -1,0 +1,135 @@
+<HTML><HEAD><TITLE>TclJava Library Procedures - ReflectObject manual page</TITLE></HEAD><BODY>
+<DL>
+<DD><A HREF="ReflectObject.htm#M2" NAME="L117">CLASS</A>
+<DL><DD>tcl.lang.ReflectObject -- This class is used to reference Java objects.</DL>
+<DD><A HREF="ReflectObject.htm#M3" NAME="L118">IMPLEMENTS</A>
+<DL><DD>tcl.lang.InternalRep
+</DL>
+<DD><A HREF="ReflectObject.htm#M4" NAME="L119">METHODS</A>
+<DL><DD>static TclObject <B>newInstance</B>(Interp <I>interp</I>, Class <I>class</I>, Object <I>javaObj</I>)
+</DL>
+<DL><DD>static Object <B>get</B>(Interp <I>interp</I>, TclObject <I>tobj</I>)
+</DL>
+<DL><DD>static Class <B>getClass</B>(Interp <I>interp</I>, TclObject <I>tobj</I>)
+</DL>
+<DD><A HREF="ReflectObject.htm#M5" NAME="L120">ARGUMENTS</A>
+<DL>
+</DL>
+<DD><A HREF="ReflectObject.htm#M6" NAME="L121">DESCRIPTION</A>
+<DL>
+<DD><A HREF="ReflectObject.htm#M7" NAME="L122"><B>newInstance</B></A>
+<DD><A HREF="ReflectObject.htm#M8" NAME="L123"><B>get</B></A>
+<DD><A HREF="ReflectObject.htm#M11" NAME="L126"><B>getClass</B></A>
+</DL>
+<DD><A HREF="ReflectObject.htm#M9" NAME="L124">SEE ALSO</A>
+<DD><A HREF="ReflectObject.htm#M10" NAME="L125">KEYWORDS</A>
+</DL><HR>
+<H3><A NAME="M2">CLASS</A></H3>
+tcl.lang.ReflectObject -- This class is used to reference Java objects.
+<H3><A NAME="M3">IMPLEMENTS</A></H3>
+tcl.lang.InternalRep
+
+<H3><A NAME="M4">METHODS</A></H3>
+<P>static TclObject <B>newInstance</B>(Interp <I>interp</I>, Class <I>class</I>, Object <I>javaObj</I>)
+<P>static Object <B>get</B>(Interp <I>interp</I>, TclObject <I>tobj</I>)
+<P>static Class <B>getClass</B>(Interp <I>interp</I>, TclObject <I>tobj</I>)
+<H3><A NAME="M5">ARGUMENTS</A></H3>
+<DL>
+<P><DT>Interp <B>interp</B><DD>
+If <I>tobj</I> is not a valid TclObject, an error message is left in
+the interpreter's result object unless <I>interp</I> is null.
+<P><DT>Object <B>javaObj</B><DD>
+Java Object to wrap into a TclObject.
+<P><DT>Class <B>class</B><DD>
+Class that the <I>javaObj</I> will be reflected as.
+<P><DT>TclObject <B>tobj</B><DD>
+TclObject from which to extract the Java Object or Class.
+<P></DL>
+<H3><A NAME="M6">DESCRIPTION</A></H3>
+This class is used to create and access arbitrary Java objects using
+the Java Reflection API.  It wraps a Java object (i.e., an instance of
+a Java class) in a handle and exposes the handle to Tcl scripts.
+The object is registered inside the interpreter and is given a string
+name. Tcl scripts can manipulate this object as long as the the
+reference count of the object is greater than zero.
+<P>
+<DL>
+<P><DT><A NAME="M7"><B>newInstance</B></A><DD>
+The <B>newInstance</B> method creates an object handle to <I>javaObj</I>.  The
+object handle can later be used to access javaObj via the java::*
+commands.  This method is normally used to pass Java object to Tcl
+scripts.  For example, a command procedure can return an object handle
+to Tcl scripts by executing the following:
+
+<code>
+<pre>
+Object obj_to_return = new Object();
+interp.setResult(
+    ReflectObject.newInstance(interp, Object.class, obj_to_return));
+</pre>
+</code>
+
+The object handle returned by this method is only valid in the given
+interpreter, <I>interp</I>.
+
+<P>
+
+It is <B>CRITICAL</B> that the <I>class</I> argument to <b>newInstance</b>
+be of the correct type. For example, an instance of a <B>String</B> object
+can be referenced as a <B>String</B> or as an <B>Object</B> but it can not
+be referenced as say an <B>Integer</B>. It is also <B>CRITICAL</B> that
+an object not be referenced as it's most derived type when it should really
+be referenced as a parent type. Here is an example of a common mistake:
+
+<code>
+<pre>
+// assume that getHashtable() is defined like this:
+// public Hashtable getHashtable() { return new DerivedFromHashtable(); }
+
+Hashtable h = getHashtable();
+interp.setResult(
+    ReflectObject.newInstance(interp, <b>h.getClass</b>(), h));
+</pre>
+</code>
+
+<P>
+
+This object should be referenced as a <b>Hashtable</b> not a
+<b>DerivedFromHashtable</b>. If you incorrectly reference this
+object as it's most derived type the reflection system will
+not work as expected and you could introduce serious security
+bugs into your program. The correct way to implement the
+previous example is like this:
+
+<code>
+<pre>
+// assume that getHashtable() is defined like this:
+// public Hashtable getHashtable() { return new DerivedFromHashtable(); }
+
+Hashtable h = getHashtable();
+interp.setResult(
+    ReflectObject.newInstance(interp, <b>Hashtable.class</b>, h));
+</pre>
+</code>
+
+<P>
+
+<DT><A NAME="M8"><B>get</B></A><DD>
+The <B>get</B> method returns the Java Object stored inside <I>tobj</I>.
+The <I>tobj</I> argument must contain a valid Java object handle, otherwise
+an error is reported.
+
+<P><DT><A NAME="M11"><B>getClass</B></A><DD>
+The <B>getClass</B> method returns the Java Class of the Java Object
+stored inside <I>tobj</I>. The <I>tobj</I> argument must contain a
+valid Java object handle, otherwise an error is reported.
+
+<P></DL>
+<H3><A NAME="M9">SEE ALSO</A></H3>
+<B><A HREF="../TclJavaLib/InternalRep.htm">InternalRep</A></B>, <B><A HREF="../TclJavaCmd/java.htm">java</A></B>, <B><A HREF="../TclJavaLib/TclObject.htm">TclObject</A></B>, <B><A HREF="../TclJavaLib/TclList.htm">TclList</A></B>, <B><A HREF="../TclJavaLib/TclString.htm">TclString</A></B>, <B><A HREF="../TclJavaLib/TclInteger.htm">TclInteger</A></B>, <B><A HREF="../TclJavaLib/TclBoolean.htm">TclBoolean</A></B>, <B><A HREF="../TclJavaLib/TclDouble.htm">TclDouble</A></B>
+<H3><A NAME="M10">KEYWORDS</A></H3>
+<A href="../Keywords/R.htm#reflect object">reflect object</A>, <A href="../Keywords/I.htm#internal representation">internal representation</A>, <A href="../Keywords/O.htm#object">object</A>, <A href="../Keywords/O.htm#object type">object type</A>
+<HR><PRE>
+<A HREF="../license.html">Copyright</A> &#169; 1996-1998 Sun Microsystems, Inc.
+<A HREF="../license.html">Copyright</A> &#169; 1995-1997 Roger E. Critchlow Jr.</PRE>
+</BODY></HTML>

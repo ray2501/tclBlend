@@ -1,0 +1,69 @@
+<HTML><HEAD><TITLE>TclJava Library Procedures - dispose manual page</TITLE></HEAD><BODY>
+<DL>
+<DD><A HREF="dispose.htm#M2" NAME="L298">CLASS</A>
+<DL><DD>tcl.lang.Interp -- This manual entry contains methods to create and
+dispose of Interps.</DL>
+<DD><A HREF="dispose.htm#M3" NAME="L299">CONSTRUCTORS</A>
+<DD><A HREF="dispose.htm#M4" NAME="L300">METHODS</A>
+<DL><DD>void <B>dispose</B>()</DL>
+<DD><A HREF="dispose.htm#M5" NAME="L301">OTHER METHODS</A>
+<DD><A HREF="dispose.htm#M6" NAME="L302">DESCRIPTION</A>
+<DL>
+<DD><A HREF="dispose.htm#M7" NAME="L303"><B>Interp</B></A>
+<DD><A HREF="dispose.htm#M8" NAME="L304"><B>dispose</B></A>
+</DL>
+<DD><A HREF="dispose.htm#M9" NAME="L305">EQUIVALENT C FUNCTIONS</A>
+<DD><A HREF="dispose.htm#M10" NAME="L306">SEE ALSO</A>
+<DD><A HREF="dispose.htm#M11" NAME="L307">KEYWORDS</A>
+</DL><HR>
+<H3><A NAME="M2">CLASS</A></H3>
+tcl.lang.Interp -- This manual entry contains methods to create and
+dispose of Interps.
+<H3><A NAME="M3">CONSTRUCTORS</A></H3>
+<P>
+<B><A HREF="../TclJavaLib/Interp.htm">Interp</A></B>()
+
+<H3><A NAME="M4">METHODS</A></H3>
+<P>void <B>dispose</B>()
+<H3><A NAME="M5">OTHER METHODS</A></H3>
+<B><A HREF="../TclJavaLib/setVar.htm">setVar</A></B>, 
+<B><A HREF="../TclJavaLib/traceVar.htm">traceVar</A></B>, 
+<B><A HREF="../TclJavaLib/createCmd.htm">createCommand</A></B>,
+<B><A HREF="../TclJavaLib/Eval.htm">eval</A></B>, 
+<B><A HREF="../TclJavaLib/setResult.htm">setResult</A></B>,
+<BR>
+<B><A HREF="../TclJavaLib/backgdErr.htm">backgroundError</A></B>,
+<B><A HREF="../TclJavaLib/getNotifier.htm">getNotifier</A></B>, 
+<B><A HREF="../TclJavaLib/setAssocData.htm">setAssocData</A></B>, 
+<B><A HREF="../TclJavaLib/pkgRequire.htm">pkgRequire</A></B>
+<H3><A NAME="M6">DESCRIPTION</A></H3>
+<DL>
+<P><DT><A NAME="M7"><B>Interp</B></A><DD>
+The <B><A HREF="../TclJavaLib/Interp.htm">Interp</A></B> constructor takes no arguments and creates and
+initializes an instance of the <B><A HREF="../TclJavaLib/Interp.htm">Interp</A></B> class.  Built-in Tcl
+commands are created, and global variables are initialized.
+<P><DT><A NAME="M8"><B>dispose</B></A><DD>
+The <B>dispose</B> method frees all resources used by the interpreter.
+Because references to the interpreter may be stored in global
+hashtables, the Java garbage collector cannot be relied upon to
+automatically free resources used by the interpreter.  This method
+must be called when an interpreter is no longer in use.
+The <B>dispose</B> method can safely be called multiple times.
+However, after the <B>dispose</B> method is invoked, the interpreter is
+no longer in a useable state and none of its other methods should be
+called. The dispose method must be called from the thread the Interp
+was created in.
+
+<P></DL>
+<H3><A NAME="M9">EQUIVALENT C FUNCTIONS</A></H3>
+<A href="../cFunctions.html">Tcl_CreateInterp</A>, <A href="../cFunctions.html">Tcl_DeleteInterp</A>
+<H3><A NAME="M10">SEE ALSO</A></H3>
+<B><A HREF="../TclJavaLib/Interp.htm">Interp</A></B>, <B><A HREF="../TclJavaLib/Eval.htm">Eval</A></B>, <B><A HREF="../TclJavaLib/setAssocData.htm">setAssocData</A></B>
+<H3><A NAME="M11">KEYWORDS</A></H3>
+<A href="../Keywords/B.htm#built in commands">built in commands</A>, <A href="../Keywords/D.htm#dispose">dispose</A>, <A href="../Keywords/F.htm#free">free</A>, <A href="../Keywords/G.htm#garbage collection">garbage collection</A>, <A href="../Keywords/G.htm#global
+varaibles">global
+varaibles</A>, <A href="../Keywords/I.htm#initialize">initialize</A>, <A href="../Keywords/I.htm#interpreter">interpreter</A>, <A href="../Keywords/R.htm#reference">reference</A>
+<HR><PRE>
+<A HREF="../license.html">Copyright</A> &#169; 1994-1998 Sun Microsystems, Inc.
+<A HREF="../license.html">Copyright</A> &#169; 1995-1997 Roger E. Critchlow Jr.</PRE>
+</BODY></HTML>

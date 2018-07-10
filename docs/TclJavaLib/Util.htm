@@ -1,0 +1,74 @@
+<HTML><HEAD><TITLE>TclJava Library Procedures - Util manual page</TITLE></HEAD><BODY>
+<DL>
+<DD><A HREF="Util.htm#M2" NAME="L253">CLASS</A>
+<DL><DD>tcl.lang.Util -- This class contains static utility routines.</DL>
+<DD><A HREF="Util.htm#M3" NAME="L254">METHODS</A>
+<DL><DD>static boolean <B>stringMatch</B>(String <I>string</I>, String <I>pattern</I>)</DL>
+<DD><A HREF="Util.htm#M4" NAME="L255">ARGUMENTS</A>
+<DL>
+</DL>
+<DD><A HREF="Util.htm#M5" NAME="L256">DESCRIPTION</A>
+<DL>
+<DD><A HREF="Util.htm#M6" NAME="L257"><B>stringMatch</B></A>
+<DL>
+<DD><A HREF="Util.htm#M7" NAME="L258"><B>*</B></A>
+<DD><A HREF="Util.htm#M8" NAME="L259"><B>?</B></A>
+<DD><A HREF="Util.htm#M9" NAME="L260"><B>[</B><I>chars</I><B>]</B></A>
+<DD><A HREF="Util.htm#M10" NAME="L261"><B>&#92;</B><I>x</I></A>
+</DL>
+</DL>
+<DD><A HREF="Util.htm#M11" NAME="L262">EQUIVALENT C FUNCTIONS</A>
+<DD><A HREF="Util.htm#M12" NAME="L263">SEE ALSO</A>
+<DD><A HREF="Util.htm#M13" NAME="L264">KEYWORDS</A>
+</DL><HR>
+<H3><A NAME="M2">CLASS</A></H3>
+tcl.lang.Util -- This class contains static utility routines.
+<H3><A NAME="M3">METHODS</A></H3>
+<P>static boolean <B>stringMatch</B>(String <I>string</I>, String <I>pattern</I>)
+<H3><A NAME="M4">ARGUMENTS</A></H3>
+<DL>
+<P><DT>String <B>string</B> ()<DD>
+String to check for a match with <I>pattern</I>.
+<P><DT>String <B>pattern</B> ()<DD>
+Pattern to match <I>string</I> against.
+<P></DL>
+<H3><A NAME="M5">DESCRIPTION</A></H3>
+This class contains utility routines that do not naturally fit into
+other classes in the tcl.lang package.  Currently, only one method is
+public.  However, more are likely to be offered in the future.
+<P>
+<DL>
+<P><DT><A NAME="M6"><B>stringMatch</B></A><DD>
+The <B>stringMatch</B> method returns a boolean depending on whether
+<I>string</I> matches with the <I>pattern</I> according to Tcl's &quot;glob&quot;
+rules.  For the two strings to match, their contents must be identical
+except that the following special sequences may appear in
+<I>pattern</I>:
+<P>
+<DL>
+<P><DT><A NAME="M7"><B>*</B></A><DD>
+Matches any sequence of characters in <I>string</I>,
+including a null string.
+<P><DT><A NAME="M8"><B>?</B></A><DD>
+Matches any single character in <I>string</I>.
+<P><DT><A NAME="M9"><B>[</B><I>chars</I><B>]</B></A><DD>
+Matches any character in the set given by <I>chars</I>.  If a sequence
+of the form
+<I>x</I><B>-</B><I>y</I> appears in <I>chars</I>, then any character
+between <I>x</I> and <I>y</I>, inclusive, will match.
+<P><DT><A NAME="M10"><B>&#92;</B><I>x</I></A><DD>
+Matches the single character <I>x</I>.  This provides a way of
+avoiding the special interpretation of the characters
+<B>*?[]&#92;</B> in <I>pattern</I>.
+<P></DL>
+<P></DL>
+<H3><A NAME="M11">EQUIVALENT C FUNCTIONS</A></H3>
+<A href="../cFunctions.html">Tcl_StringMatch</A>
+<H3><A NAME="M12">SEE ALSO</A></H3>
+<B>string</B>, <B>glob</B>, <B>regexp</B>
+<H3><A NAME="M13">KEYWORDS</A></H3>
+<A href="../Keywords/G.htm#glob">glob</A>, <A href="../Keywords/R.htm#regexp">regexp</A>, <A href="../Keywords/S.htm#string">string</A>, <A href="../Keywords/S.htm#string match">string match</A>, <A href="../Keywords/U.htm#utility">utility</A>
+<HR><PRE>
+<A HREF="../license.html">Copyright</A> &#169; 1996-1998 Sun Microsystems, Inc.
+<A HREF="../license.html">Copyright</A> &#169; 1995-1997 Roger E. Critchlow Jr.</PRE>
+</BODY></HTML>

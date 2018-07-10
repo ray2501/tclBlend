@@ -1,0 +1,66 @@
+<HTML><HEAD><TITLE>TclJava Library Procedures - Command manual page</TITLE></HEAD><BODY>
+<H3><A NAME="M2">INTERFACE</A></H3>
+tcl.lang.Command -- The interface for defining new Tcl commands.
+<H3><A NAME="M3">METHODS</A></H3>
+<P>abstract void <B>cmdProc</B>(Interp <I>interp</I>, TclObject <I>argv[]</I>)
+<H3><A NAME="M4">ARGUMENTS</A></H3>
+<DL>
+<P><DT>Interp <B>interp</B> ()<DD>
+The interpreter in which the command is executed.
+<P><DT>TclObject <B>argv[]</B> ()<DD>
+The array of argument objects passed to the command.
+<P></DL>
+<H3><A NAME="M5">DESCRIPTION</A></H3>
+To write a new Tcl command in Java, you write a class that implement
+the <B>Command</B> interface and its <B>cmdProc</B> method. Then,
+register the command using the <I>interp</I>.<B><A HREF="../TclJavaLib/createCmd.htm">createCommand</A></B> method.
+<P>
+<B>cmdProc</B> is invoked to process a Tcl command for
+<I>interp</I>. The <I>argv</I> array contains the arguments passed to
+the command: <I>argv</I>[0] is the name of the command and the rest of
+the array contains the rest of the arguments.
+<P>
+If the command execution completes normally, this method should pass
+the result object back to the interpreter by calling
+<I>interp</I>.<B><A HREF="../TclJavaLib/setResult.htm">setResult</A></B> and then return normally. If an error
+occurs during the command execution, <B>cmdProc</B> should throw a
+<B><A HREF="../TclJavaLib/TclException.htm">TclException</A></B> with appropriate completion code and error messages
+(see the manual entry of <B><A HREF="../TclJavaLib/TclException.htm">TclException</A></B> for details.)
+<P>
+If your command requires clean-up when it's removed from the
+interpreter, use the <B><A HREF="../TclJavaLib/CommandWithDispose.htm">CommandWithDispose</A></B> interface instead of the
+<B>Command</B> interface. See the <B><A HREF="../TclJavaLib/CommandWithDispose.htm">CommandWithDispose</A></B> manual entry
+for details.
+
+
+<H3><A NAME="M6">EXAMPLE</A></H3>
+Here is an example of a Tcl command that adds two integers and returns
+the result.
+<PRE>import tcl.lang;
+
+class AddCmd implements Command {
+    public cmdProc(Interp interp, TclObject argv[])
+            throws TclException {
+        if (argv.length != 3) {
+            throw new TclNumArgsException(interp, 1, argv,
+                &quot;num1 num2&quot;);
+        }
+
+        int num1 = TclInteger.get(interp, argv[1]);
+        int num2 = TclInteger.get(interp, argv[2]);
+
+        TclObject result =
+            TclInteger.newInstance(num1 + num2);
+        interp.setResult(result);
+    }
+}</PRE>
+<H3><A NAME="M7">EQUIVALENT C FUNCTIONS</A></H3>
+<A href="../cFunctions.html">Tcl_CommandProc</A>
+<H3><A NAME="M8">SEE ALSO</A></H3>
+<B><A HREF="../TclJavaLib/Interp.htm">Interp</A></B>, <B><A HREF="../TclJavaLib/TclException.htm">TclException</A></B>, <B><A HREF="../TclJavaLib/TclInteger.htm">TclInteger</A></B>, <B><A HREF="../TclJavaLib/TclNumArgsException.htm">TclNumArgsException</A></B>, <B><A HREF="../TclJavaLib/TclObject.htm">TclObject</A></B>, <B><A HREF="../TclJavaLib/CommandWithDispose.htm">CommandWithDispose</A></B>
+<H3><A NAME="M9">KEYWORDS</A></H3>
+<A href="../Keywords/C.htm#command">command</A>, <A href="../Keywords/C.htm#create">create</A>, <A href="../Keywords/I.htm#interpreter">interpreter</A>, <A href="../Keywords/E.htm#exception">exception</A>
+<HR><PRE>
+<A HREF="../license.html">Copyright</A> &#169; 1998 Sun Microsystems, Inc.
+<A HREF="../license.html">Copyright</A> &#169; 1995-1997 Roger E. Critchlow Jr.</PRE>
+</BODY></HTML>

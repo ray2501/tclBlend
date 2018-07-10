@@ -1,0 +1,131 @@
+<HTML><HEAD><TITLE>TclJava Library Procedures - Interp manual page</TITLE></HEAD><BODY>
+<DL>
+<DD><A HREF="Interp.htm#M2" NAME="L70">CLASS</A>
+<DL><DD>tcl.lang.Interp -- The Interp class represents the TclJava interpreter.</DL>
+<DD><A HREF="Interp.htm#M3" NAME="L71">METHODS</A>
+<DL>
+<DD><A HREF="Interp.htm#M4" NAME="L72"><B>CREATION/DISPOSAL</B>:  Interp, dispose</A>
+<DD><A HREF="Interp.htm#M5" NAME="L73"><B>VARIABLES</B>:  setVar, getVar, unsetVar</A>
+<DD><A HREF="Interp.htm#M6" NAME="L74"><B>TRACES</B>:  traceVar, untraceVar</A>
+<DD><A HREF="Interp.htm#M7" NAME="L75"><B>COMMANDS</B>:  createCommand, deleteCommand, getCommand</A>
+<DD><A HREF="Interp.htm#M8" NAME="L76"><B>EVALUATION</B>:  eval, evalFile, commandComplete</A>
+<DD><A HREF="Interp.htm#M9" NAME="L77"><B>RESULT PROCESSING</B>:  setResult, getResult, resetResult</A>
+<DD><A HREF="Interp.htm#M10" NAME="L78"><B>ERROR HANDLING</B>:  backgroundError, addErrorInfo, setErrorCode</A>
+<DD><A HREF="Interp.htm#M11" NAME="L79"><B>EVENT HANDLING</B>:  getNotifier</A>
+<DD><A HREF="Interp.htm#M12" NAME="L80"><B>ASSOC-DATA</B>:  setAssocData, getAssocData, deleteAssocData</A>
+<DD><A HREF="Interp.htm#M13" NAME="L81"><B>PACKAGE</B>:  pkgRequire pkgProvide</A>
+</DL>
+<DD><A HREF="Interp.htm#M14" NAME="L82">DESCRIPTION</A>
+<DL>
+<DD><A HREF="Interp.htm#M15" NAME="L83"><B>dispose</B></A>
+<DD><A HREF="Interp.htm#M16" NAME="L84"><B>setVar</B>, <B>getVar</B>, <B>unsetVar</B></A>
+<DD><A HREF="Interp.htm#M17" NAME="L85"><B>traceVar</B>, <B>untraceVar</B></A>
+<DD><A HREF="Interp.htm#M18" NAME="L86"><B>createCommand</B>, <B>deleteCommand</B>, <B>getCommand</B></A>
+<DD><A HREF="Interp.htm#M19" NAME="L87"><B>eval</B>, <B>evalFile</B>, <B>commandComplete</B></A>
+<DD><A HREF="Interp.htm#M20" NAME="L88"><B>setResult</B>, <B>getResult</B>, <B>resetResult</B></A>
+<DD><A HREF="Interp.htm#M21" NAME="L89"><B>backgroundError</B>, <B>addErrorInfo</B>, <B>setErrorCode</B></A>
+<DD><A HREF="Interp.htm#M22" NAME="L90"><B>getNotifier</B></A>
+<DD><A HREF="Interp.htm#M23" NAME="L91"><B>setAssocData</B>, <B>getAssocData</B>, <B>deleteAssocData</B></A>
+<DD><A HREF="Interp.htm#M24" NAME="L92"><B>pkgRequire</B>, <B>pkgProvide</B></A>
+</DL>
+<DD><A HREF="Interp.htm#M25" NAME="L93">EXAMPLE</A>
+<DD><A HREF="Interp.htm#M26" NAME="L94">SEE ALSO</A>
+<DD><A HREF="Interp.htm#M27" NAME="L95">KEYWORDS</A>
+</DL><HR>
+<H3><A NAME="M2">CLASS</A></H3>
+tcl.lang.Interp -- The Interp class represents the TclJava interpreter.
+<H3><A NAME="M3">METHODS</A></H3>
+<P>
+<DL>
+<P><DT><A NAME="M4"><B>CREATION/DISPOSAL</B>:  Interp, dispose</A><DD>
+See <B><A HREF="../TclJavaLib/dispose.htm">dispose</A></B>
+<P><DT><A NAME="M5"><B>VARIABLES</B>:  setVar, getVar, unsetVar</A><DD>
+See <B><A HREF="../TclJavaLib/setVar.htm">setVar</A></B>
+<P><DT><A NAME="M6"><B>TRACES</B>:  traceVar, untraceVar</A><DD>
+See <B><A HREF="../TclJavaLib/traceVar.htm">traceVar</A></B>
+<P><DT><A NAME="M7"><B>COMMANDS</B>:  createCommand, deleteCommand, getCommand</A><DD>
+See <B><A HREF="../TclJavaLib/createCmd.htm">createCommand</A></B>
+<P><DT><A NAME="M8"><B>EVALUATION</B>:  eval, evalFile, commandComplete</A><DD>
+See <B><A HREF="../TclJavaLib/Eval.htm">eval</A></B>
+<P><DT><A NAME="M9"><B>RESULT PROCESSING</B>:  setResult, getResult, resetResult</A><DD>
+See <B><A HREF="../TclJavaLib/setResult.htm">setResult</A></B>
+<P><DT><A NAME="M10"><B>ERROR HANDLING</B>:  backgroundError, addErrorInfo, setErrorCode</A><DD>
+See <B><A HREF="../TclJavaLib/backgdErr.htm">backgroundError</A></B>
+<P><DT><A NAME="M11"><B>EVENT HANDLING</B>:  getNotifier</A><DD>
+See <B><A HREF="../TclJavaLib/getNotifier.htm">getNotifier</A></B>
+<P><DT><A NAME="M12"><B>ASSOC-DATA</B>:  setAssocData, getAssocData, deleteAssocData</A><DD>
+See <B><A HREF="../TclJavaLib/setAssocData.htm">setAssocData</A></B>
+<P><DT><A NAME="M13"><B>PACKAGE</B>:  pkgRequire pkgProvide</A><DD>
+See <B><A HREF="../TclJavaLib/pkgRequire.htm">pkgRequire</A></B>
+
+<P></DL>
+<H3><A NAME="M14">DESCRIPTION</A></H3>
+The Interp class represents the TclJava enhanced interpreter interpreter.
+<P>
+The Interp class contains many varying public methods that control the
+interpreter. It includes constructor and disposal methods as well
+as methods that control the value of variables and commands.  It
+also includes an interface to evaluation of Tcl commands, including
+result processing, error handling, and event notification.
+<P>
+This manual entry categorizes the methods of the Interp class by thier
+functionality.  For more details on specific methods, check the
+documentation for their respective categories.
+<P>
+<DL>
+<P><DT><A NAME="M15"><B>dispose</B></A><DD>
+The constructor and <B><A HREF="../TclJavaLib/dispose.htm">dispose</A></B> method offer creation and disposal
+of instances of the <B><A HREF="../TclJavaLib/Interp.htm">Interp</A></B> class.  See the <B><A HREF="../TclJavaLib/dispose.htm">dispose</A></B> manual
+entry for more details.
+<P><DT><A NAME="M16"><B>setVar</B>, <B>getVar</B>, <B>unsetVar</B></A><DD>
+These methods manipulate the variables inside the interpreter.  See
+the <B><A HREF="../TclJavaLib/setVar.htm">setVar</A></B> manual entry for more details.
+<P><DT><A NAME="M17"><B>traceVar</B>, <B>untraceVar</B></A><DD>
+These methods offer an interface to monitor accesses to the variables
+inside the interpreter.  See
+the <B><A HREF="../TclJavaLib/traceVar.htm">traceVar</A></B> manual entry for more details.
+<P><DT><A NAME="M18"><B>createCommand</B>, <B>deleteCommand</B>, <B>getCommand</B></A><DD>
+These methods create, query, modify and delete Tcl commands
+from the interpreter.  See
+the <B><A HREF="../TclJavaLib/createCmd.htm">createCommand</A></B> manual entry for more details.
+<P><DT><A NAME="M19"><B>eval</B>, <B>evalFile</B>, <B>commandComplete</B></A><DD>
+These methods are the interface for Tcl commands to be evaluated in
+the interpreter and to check completeness of commands before
+evaluating them.  See
+the <B><A HREF="../TclJavaLib/Eval.htm">Eval</A></B> manual entry for more details.
+<P><DT><A NAME="M20"><B>setResult</B>, <B>getResult</B>, <B>resetResult</B></A><DD>
+These methods read and modify the interpreter's result object.  See
+the <B><A HREF="../TclJavaLib/setResult.htm">setResult</A></B> manual entry for more details.
+<P><DT><A NAME="M21"><B>backgroundError</B>, <B>addErrorInfo</B>, <B>setErrorCode</B></A><DD>
+These methods manipulate the error info pertaining to Tcl commands
+evaluated in the interpreter.  See the <B><A HREF="../TclJavaLib/backgdErr.htm">backgroundError</A></B> manual
+entry for more details.
+<P><DT><A NAME="M22"><B>getNotifier</B></A><DD>
+This method retrieves the notifier associated with the interpreter.
+See the <B><A HREF="../TclJavaLib/getNotifier.htm">getNotifier</A></B> manual entry for more details.
+<P><DT><A NAME="M23"><B>setAssocData</B>, <B>getAssocData</B>, <B>deleteAssocData</B></A><DD>
+These methods offer an interface to create and delete named
+association between user-specified data and the interpreter.  See
+the <B><A HREF="../TclJavaLib/setAssocData.htm">setAssocData</A></B> manual entry for more details.
+<P><DT><A NAME="M24"><B>pkgRequire</B>, <B>pkgProvide</B></A><DD>
+These methods are for package version control.  See
+the <B><A HREF="../TclJavaLib/pkgRequire.htm">pkgRequire</A></B> manual entry for more details.
+
+<P></DL>
+<H3><A NAME="M25">EXAMPLE</A></H3>
+<DL><P><DD>
+The following is an example of how an instance of the Interp object
+may be used:
+<PRE>Interp interp;
+interp = new Interp();
+interp.eval(&quot;puts {Hello, world}&quot;);
+interp.dispose();</PRE>
+</DL>
+<H3><A NAME="M26">SEE ALSO</A></H3>
+<B><A HREF="../TclJavaLib/dispose.htm">dispose</A></B>, <B><A HREF="../TclJavaLib/setVar.htm">setVar</A></B>, <B><A HREF="../TclJavaLib/traceVar.htm">traceVar</A></B>, <B><A HREF="../TclJavaLib/createCmd.htm">createCommand</A></B>, <B><A HREF="../TclJavaLib/setResult.htm">setResult</A></B>, <B><A HREF="../TclJavaLib/Eval.htm">eval</A></B>, <B><A HREF="../TclJavaLib/backgdErr.htm">backgroundError</A></B>, <B><A HREF="../TclJavaLib/getNotifier.htm">getNotifier</A></B>, <B><A HREF="../TclJavaLib/setAssocData.htm">setAssocData</A></B>, <B><A HREF="../TclJavaLib/pkgRequire.htm">pkgRequire</A></B>
+<H3><A NAME="M27">KEYWORDS</A></H3>
+<A href="../Keywords/A.htm#assoc-data">assoc-data</A>, <A href="../Keywords/C.htm#command">command</A>, <A href="../Keywords/C.htm#create">create</A>, <A href="../Keywords/D.htm#dispose">dispose</A>, <A href="../Keywords/E.htm#eval">eval</A>, <A href="../Keywords/E.htm#error">error</A>, <A href="../Keywords/E.htm#event">event</A>, <A href="../Keywords/I.htm#interpreter">interpreter</A>, <A href="../Keywords/R.htm#result">result</A>, <A href="../Keywords/T.htm#trace">trace</A>, <A href="../Keywords/V.htm#variable">variable</A>
+<HR><PRE>
+<A HREF="../license.html">Copyright</A> &#169; 1994-1998 Sun Microsystems, Inc.
+<A HREF="../license.html">Copyright</A> &#169; 1995-1997 Roger E. Critchlow Jr.</PRE>
+</BODY></HTML>

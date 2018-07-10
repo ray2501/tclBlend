@@ -1,0 +1,31 @@
+<HTML><HEAD><TITLE>TclJava Library Procedures - runtimeError manual page</TITLE></HEAD><BODY>
+<H3><A NAME="M2">CLASS</A></H3>
+tcl.lang.TclRuntimeError -- This class is used to report an unrecoverable errors.
+<H3><A NAME="M3">CONSTRUCTORS</A></H3>
+<P>
+<B>TclRuntimeError</B>(String <I>errMsg</I>)
+
+<H3><A NAME="M4">ARGUMENTS</A></H3>
+<DL>
+<P><DT>String <B>errMsg</B> ()<DD>
+Error message to print out.
+<P></DL>
+<H3><A NAME="M5">DESCRIPTION</A></H3>
+<DL>
+<P><DT><A NAME="M6"><B>TclRuntimeError</B></A><DD>
+TclRuntimeError is used to report an unrecoverable error inside any
+Java code that implements the Tcl interpreter or extensions. When a
+TclRuntimeError is thrown, it stops Tcl execution immediately and
+prints out the error message, <I>errMsg</I>.
+
+<P></DL>
+<H3><A NAME="M7">EQUIVALENT C FUNCTIONS</A></H3>
+<A href="../cFunctions.html">panic</A>
+<H3><A NAME="M8">SEE ALSO</A></H3>
+<B><A HREF="../TclJavaLib/Interp.htm">Interp</A></B>, <B><A HREF="../TclJavaLib/TclException.htm">TclException</A></B>
+<H3><A NAME="M9">KEYWORDS</A></H3>
+<A href="../Keywords/E.htm#error">error</A>, <A href="../Keywords/E.htm#exception">exception</A>, <A href="../Keywords/I.htm#interpreter">interpreter</A>, <A href="../Keywords/P.htm#panic">panic</A>, <A href="../Keywords/R.htm#return">return</A>, <A href="../Keywords/R.htm#result">result</A>
+<HR><PRE>
+<A HREF="../license.html">Copyright</A> &#169; 1996-1998 Sun Microsystems, Inc.
+<A HREF="../license.html">Copyright</A> &#169; 1995-1997 Roger E. Critchlow Jr.</PRE>
+</BODY></HTML>

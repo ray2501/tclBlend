@@ -1,0 +1,201 @@
+<HTML><HEAD><TITLE>TclJava Library Procedures - Notifier manual page</TITLE></HEAD><BODY>
+<DL>
+<DD><A HREF="Notifier.htm#M2" NAME="L96">CLASS</A>
+<DL><DD>tcl.lang.Notifier -- The event queue and notifier API.</DL>
+<DD><A HREF="Notifier.htm#M3" NAME="L97">METHODS</A>
+<DL><DD>synchronized void <B>deleteEvents</B>(EventDeleter <I>deleter</I>)</DL>
+<DL><DD>synchronized int <B>doOneEvent</B>(int <I>flags</I>)</DL>
+<DL><DD>static synchronized Notifier <B>getNotifierForThread</B>(Thread <I>thread</I>)</DL>
+<DL><DD>synchronized void <B>preserve</B>()</DL>
+<DL><DD>synchronized void <B>queueEvent</B>(TclEvent <I>event</I>, int <I>pos</I>)</DL>
+<DL><DD>synchronized void <B>release</B>()</DL>
+<DD><A HREF="Notifier.htm#M4" NAME="L98">ARGUMENTS</A>
+<DL>
+</DL>
+<DD><A HREF="Notifier.htm#M5" NAME="L99">DESCRIPTION</A>
+<DL>
+<DD><A HREF="Notifier.htm#M6" NAME="L100"><B>getNotifierForThread</B></A>
+<DD><A HREF="Notifier.htm#M7" NAME="L101"><B>preserve</B>, <B>release</B></A>
+<DD><A HREF="Notifier.htm#M8" NAME="L102"><B>queueEvent</B></A>
+<DL>
+<DD><A HREF="Notifier.htm#M9" NAME="L103"><B>TCL.QUEUE_TAIL</B></A>
+<DD><A HREF="Notifier.htm#M10" NAME="L104"><B>TCL.QUEUE_HEAD</B></A>
+<DD><A HREF="Notifier.htm#M11" NAME="L105"><B>TCL.QUEUE_MARK</B></A>
+</DL>
+<DD><A HREF="Notifier.htm#M12" NAME="L106"><B>deleteEvents</B></A>
+<DD><A HREF="Notifier.htm#M13" NAME="L107"><B>doOneEvent</B></A>
+<DL>
+<DD><A HREF="Notifier.htm#M14" NAME="L108"><B>TCL.WINDOW_EVENTS</B></A>
+<DD><A HREF="Notifier.htm#M15" NAME="L109"><B>TCL.FILE_EVENTS</B></A>
+<DD><A HREF="Notifier.htm#M16" NAME="L110"><B>TCL.TIMER_EVENTS</B></A>
+<DD><A HREF="Notifier.htm#M17" NAME="L111"><B>TCL.IDLE_EVENTS</B></A>
+<DD><A HREF="Notifier.htm#M18" NAME="L112"><B>TCL.ALL_EVENTS</B></A>
+<DD><A HREF="Notifier.htm#M19" NAME="L113"><B>TCL.DONT_WAIT</B></A>
+</DL>
+</DL>
+<DD><A HREF="Notifier.htm#M20" NAME="L114">EQUIVALENT C FUNCTIONS</A>
+<DD><A HREF="Notifier.htm#M21" NAME="L115">SEE ALSO</A>
+<DD><A HREF="Notifier.htm#M22" NAME="L116">KEYWORDS</A>
+</DL><HR>
+<H3><A NAME="M2">CLASS</A></H3>
+tcl.lang.Notifier -- The event queue and notifier API.
+<H3><A NAME="M3">METHODS</A></H3>
+<P>synchronized void <B>deleteEvents</B>(EventDeleter <I>deleter</I>)
+<P>synchronized int <B>doOneEvent</B>(int <I>flags</I>)
+<P>static synchronized Notifier <B>getNotifierForThread</B>(Thread <I>thread</I>)
+<P>synchronized void <B>preserve</B>()
+<P>synchronized void <B>queueEvent</B>(TclEvent <I>event</I>, int <I>pos</I>)
+<P>synchronized void <B>release</B>()
+<H3><A NAME="M4">ARGUMENTS</A></H3>
+<DL>
+<P><DT>Thread <B>thread</B> ()<DD>
+The thread in which the Notifier should run.
+<P><DT>EventDeleter <B>deleter</B> ()<DD>
+The EventDeleter determines which event in the event queue should be
+deleted.
+<P><DT>TclEvent <B>event</B> ()<DD>
+The event to put into the event queue.
+<P><DT>int <B>pos</B> ()<DD>
+The position at which the event should be queued.
+<P><DT>int <B>flags</B> ()<DD>
+What types of events to service.
+<P></DL>
+<H3><A NAME="M5">DESCRIPTION</A></H3>
+The <B>Notifier</B> is the lowest-level part of the TclJava event
+system. It is used by higher-level event sources such as file,
+JavaBean and timer events. The Notifier manages an event queue that
+holds <B><A HREF="../TclJavaLib/TclEvent.htm">TclEvent</A></B> objects.
+
+The TclJava <B>Notifier</B> is designed to run in a multi-threaded
+environment. Each <B>Notifier</B> instance is associated with a
+<B>primary thread</B>. Any thread can queue (or dequeue) events using
+the <B>queueEvent</B> (or <B>deleteEvents</B>) call. However, only the
+primary thread may process events in the queue using the
+<B>doOneEvent</B> call. Attempts to call <B>doOneEvent</B> from a
+non-primary thread will cause a <B><A HREF="../TclJavaLib/runtimeError.htm">TclRuntimeError</A></B>.
+
+This class doesn't have a public constructor and cannot be directly
+instantiated. You can get to it only through
+<B>Notifier.getNotifierForThread</B> or the <B><A HREF="../TclJavaLib/getNotifier.htm">getNotifier</A></B> method of
+the <B><A HREF="../TclJavaLib/Interp.htm">Interp</A></B> class.
+
+<P>
+<DL>
+<P><DT><A NAME="M6"><B>getNotifierForThread</B></A><DD>
+This static method returns the <B>Notifier</B> instance whose primary
+thread is the given thread. If such an instance does not yet exist, it
+is created automatically.
+<P><DT><A NAME="M7"><B>preserve</B>, <B>release</B></A><DD>
+These two methods maintain a reference count to manage the lifetime of
+a Notifier and its corresponding event queue. When a Notifier is
+created inside the <B>getNotifierForThread</B> method, its reference
+count is zero. A call to preserve increments the reference count by
+one; a call to <B>release</B> decrements the reference count by
+one. When the reference count goes from one to zero, the Notifier is
+disposed -- its event queue is deleted and any left-over events in the
+queue will not be processed.
+<P>
+If a Java module intends to use a Notifier returned by
+<B>getNotifierForThread</B> over one or more method calls, it should
+call <B>preserve</B> immediately after <B>getNotifierForThread</B>
+returns. The module should call <B>relase</B> when it no longer needs
+access to the notifier.
+<P>
+NOTE: the notifier returned by <I>interp</I>.<B><A HREF="../TclJavaLib/getNotifier.htm">getNotifier</A></B> will remain
+valid as long as the Interpreter is valid. Hence, if a module always
+access a notifier via calls to <I>interp</I>.<B><A HREF="../TclJavaLib/getNotifier.htm">getNotifier</A></B>, it needs not
+use the notifier's <B>preserve</B> and <B>release</B> methods.
+<P><DT><A NAME="M8"><B>queueEvent</B></A><DD>
+This method puts the <I>event</I> into the event queue at the position
+specified by the <I>pos</I> argument. The <I>pos</I> argument may be one
+of the following:
+<P>
+<DL>
+<P><DT><A NAME="M9"><B>TCL.QUEUE_TAIL</B></A><DD>
+Add the event at the back of the queue, so that all other pending
+events will be serviced first.  This is almost always the right place
+for new events.
+<P><DT><A NAME="M10"><B>TCL.QUEUE_HEAD</B></A><DD>
+Add the event at the front of the queue, so that it will be serviced
+before all other queued events. 
+<P><DT><A NAME="M11"><B>TCL.QUEUE_MARK</B></A><DD>
+Add the event at the front of the queue, unless there are other events
+at the front whose position is <B>TCL.QUEUE_MARK</B>; if so, add the
+new event just after all other <B>TCL.QUEUE_MARK</B> events.  This
+value of position is used to insert an ordered sequence of events at
+the front of the queue, such as a series of Enter and Leave events
+synthesized during a grab or ungrab operation in Tk.
+<P></DL>
+<P><DT><A NAME="M12"><B>deleteEvents</B></A><DD>
+This method provides a way to selectively delete events in the event
+queue. It calls <I>deleter</I>.<B><A HREF="../TclJavaLib/EventDeleter.htm">deleteEvent</A></B> for each event in the
+queue and deletes those for which <I>deleter</I>.<B><A HREF="../TclJavaLib/EventDeleter.htm">deleteEvent</A></B>
+returns 1. Events for which the <I>deleter</I> returns 0 are left in the
+queue.
+<P><DT><A NAME="M13"><B>doOneEvent</B></A><DD>
+This method is called in the context of the Notifier's primary thread
+to dispatch events in the event queue. If events are found in the
+event queue, the <B><A HREF="../TclJavaLib/TclEvent.htm">processEvent</A></B> method of the first available
+event is called. If no event are in the queue, <B>doOneEvent</B> checks
+if there are idle handlers. If there are any, it invokes all of them
+and returns. Finally, if no events or idle callbacks have been found,
+then <B>doOneEvent</B> sleeps until an event occurs, calles
+<B><A HREF="../TclJavaLib/TclEvent.htm">processEvent</A></B> the of the event and returns.
+<P>
+If the <I>flags</I> argument to <B>doOneEvent</B> is non-zero, it
+restricts the kinds of events that will be processed by
+<B>doOneEvent</B>. Flags may be an OR-ed combination of any of the
+following bits:
+<P>
+<DL>
+<P><DT><A NAME="M14"><B>TCL.WINDOW_EVENTS</B></A><DD>
+Process window system events.
+<P><DT><A NAME="M15"><B>TCL.FILE_EVENTS</B></A><DD>
+Process file events.
+<P><DT><A NAME="M16"><B>TCL.TIMER_EVENTS</B></A><DD>
+Process timer events.
+<P><DT><A NAME="M17"><B>TCL.IDLE_EVENTS</B></A><DD>
+Process idle callbacks.
+<P><DT><A NAME="M18"><B>TCL.ALL_EVENTS</B></A><DD>
+Process all kinds of events: equivalent to OR-ing together all of the
+above flags or specifying none of them.
+<P><DT><A NAME="M19"><B>TCL.DONT_WAIT</B></A><DD>
+Don't sleep: process only events that are ready at the time of the
+call.
+<P></DL>
+<DL><P><DD>
+<P>
+If any of the flags <B>TCL.WINDOW_EVENTS</B>, <B>TCL.FILE_EVENTS</B>,
+<B>TCL.TIMER_EVENTS</B>, or <B>TCL.IDLE_EVENTS</B> is set, then the only
+events that will be considered are those for which flags are set.
+Setting none of these flags is equivalent to the value
+<B>TCL.ALL_EVENTS</B>, which causes all event types to be processed.
+If an application has additional event sources then additional flag
+values may also be valid, depending on those event sources.
+<P>
+The <B>TCL.DONT_WAIT</B> flag causes <B>doOneEvent</B> not to put the
+process to sleep: it will check for events but if none are found then
+it returns immediately with a return value of 0 to indicate that no
+work was done. <B>doOneEvent</B> will also return 0 without doing
+anything if the only alternative is to block forever (this can happen,
+for example, if flags is <B>TCL.IDLE_EVENTS</B> and there are no idle
+callbacks pending, or if no event handlers or timer handlers exist).
+<P>
+<B>doOneEvent</B> may be invoked recursively. For example, it is
+possible to invoke <B>doOneEvent</B> recursively from an event handler
+called by <B>doOneEvent</B>. This sort of operation is useful in some
+modal situations, such as when a notification dialog has been popped
+up and an application wishes to wait for the user to click a button in
+the dialog before doing anything else.
+</DL>
+<P></DL>
+<H3><A NAME="M20">EQUIVALENT C FUNCTIONS</A></H3>
+<A href="../cFunctions.html">Tcl_QueueEvent</A>, <A href="../cFunctions.html">Tcl_DeleteEvents</A>, <A href="../cFunctions.html">Tcl_DoOneEvent</A>
+<H3><A NAME="M21">SEE ALSO</A></H3>
+<B><A HREF="../TclJavaLib/TclEvent.htm">TclEvent</A></B>, <B><A HREF="../TclJavaLib/TimerHandler.htm">TimerHandler</A></B>, <B><A HREF="../TclJavaLib/IdleHandler.htm">IdleHandler</A></B>, <B><A HREF="../TclJavaLib/EventDeleter.htm">EventDeleter</A></B>, <B><A HREF="../TclJavaLib/Interp.htm">Interp</A></B>
+<H3><A NAME="M22">KEYWORDS</A></H3>
+<A href="../Keywords/E.htm#event">event</A>, <A href="../Keywords/N.htm#notifier">notifier</A>, <A href="../Keywords/E.htm#event queue">event queue</A>, <A href="../Keywords/E.htm#event sources">event sources</A>, <A href="../Keywords/F.htm#file events">file events</A>, <A href="../Keywords/T.htm#timer">timer</A>, <A href="../Keywords/I.htm#idle">idle</A>
+<HR><PRE>
+<A HREF="../license.html">Copyright</A> &#169; 1998 Sun Microsystems, Inc.
+<A HREF="../license.html">Copyright</A> &#169; 1995-1997 Roger E. Critchlow Jr.</PRE>
+</BODY></HTML>

@@ -1,0 +1,126 @@
+Tcl Blend
+
+1. Introduction
+---------------
+
+Tcl Blend provides two new capabilities to Tcl. First, Tcl Blend
+provides Java classes that expose key pieces of the interfaces that
+are available to extension writers who currently use C. Using these
+classes, extension writers can create new commands for the Tcl
+interpreter. In addition, Tcl Blend provides commands that allow
+script writers to directly manipulate Java objects without having
+to write any Java code. The reflection classes in Java make it
+possible to invoke methods and access fields on arbitrary Java
+objects. Tcl Blend takes advantage of these capabilities to provide
+a dynamic interface to Java.
+
+Tcl Blend 1.4 is considered stable (only bug fixes will be applied
+going forward) and is considered ready for evaluation in production
+environments.
+
+2. Documentation
+----------------
+
+The Tcl/Java project website includes a getting started page that
+provides a good intro to interacting with Java from Tcl. The website
+can be viewed locally by opening docs/website/index.html in a web
+browser, or online at the following URL:
+
+http://tcljava.sourceforge.net
+
+The "New Features" page describes features and functionality
+added to a specific Tcl/Java release.
+
+docs/Topics/WhatsNew.html
+
+One can also find demos included in this release that provide
+examples of how to integrate Tcl and Java. The manual page
+at docs/website/manual.html provides a useful API reference.
+
+3. Requirements
+---------------
+
+Tcl Blend requires JDK 1.4 or newer and has been tested on a
+Win95, WinNT, Solaris, IRIX, and Linux systems. It should
+also work on other systems that have a correctly implemented
+Java VM. Tcl Blend has been tested on JDK 1.5. See the
+known_issues.txt file for a list of known problems.
+
+Some Solaris systems require the Native Threads Pack, and 
+several patches in addition to the JDK. The
+package, necessary patches, and installation instructions can 
+be found at http://java.sun.com/j2se/1.4/index.html.
+
+Tcl 8.4.13 is the most recent Tcl release tested with Tcl Blend.
+Older Tcl releases are not supported. The Thread extension
+version 2.6.3 or greater is also required.
+
+4. Build/Installation
+---------------
+
+A unified build system that works under both Unix and Windows
+is used to build Tcl Blend. Build instructions are located here:
+
+docs/Topics/BuildTclBlendUnix.html
+
+or
+
+docs/Topics/BuildTclBlendWin.html
+
+5. License Agreement
+---------------------
+
+See the file "license.terms" for information on usage and 
+redistribution of this file, and for a DISCLAIMER OF ALL WARRANTIES.
+
+6. Getting Help
+----------------
+
+Users of Tcl Blend or Jacl should subscribe and post questions
+to the tcljava-user mailing list at SourceForge. This mailing
+list provides a forum to ask questions or post scripts that are
+causing you trouble. Basically, any Jacl or Tcl Blend related
+question is on topic for this mailing list.
+
+http://lists.sourceforge.net/lists/listinfo/tcljava-user
+
+There is also a mailing list for Jacl and Tcl Blend developers.
+If you have a specific question about some implementation feature,
+have a patch for Jacl or Tcl Blend, or are interested in implementing
+some feature, then you should post a note to the developers
+mailing list.
+
+http://lists.sourceforge.net/lists/listinfo/tcljava-dev
+
+Note that you will have to subscribe to the mailing lists before
+posting to them. Some people think this subscription requirement
+is somehow "unfriendly", but without it the mailing list would
+be full of spam. It only takes a moment to subscribe and you
+can unsubscribe at any time. Posts from users that are not subscribed
+to the mailing list will be automatically rejected.
+
+In addition to the mailing lists, you can ask about Jacl or Tcl Blend
+or on the Tcl newsgroup. The network news group "comp.lang.tcl"
+intended for the exchange of information about Tcl, Tk, and
+related applications. It can also be useful to do a google groups
+search on comp.lang.tcl for Jacl or Tcl Blend related questions.
+
+When reporting bugs, please provide a short Tcl script that we can use
+to reproduce the bug.  Make sure that the script runs with bare-bones
+Tcl and doesn't depend on any extensions or other programs,
+particularly those that exist only at your site.  Also, please include
+these additional pieces of information with the script:
+    (a) How do we use the script to make the problem happen (e.g.
+	what things do we click on, in what order)?
+    (b) What happens when you do these things (presumably this is
+        undesirable)?
+    (c) What did you expect to happen?
+    (d) What platform are you running on (Machine, OS, etc.)?
+    (e) What releases of Tcl products are you using?
+
+7. Development History
+----------------------
+
+Tcl Blend 1.0 was released by the now defunct SunScript group at
+Sun Labs. Newer versions of Tcl Blend have been developed by Mo DeJong.
+

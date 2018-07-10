@@ -1,0 +1,87 @@
+<HTML><HEAD><TITLE>TclJava Library Procedures - createCmd manual page</TITLE></HEAD><BODY>
+<DL>
+<DD><A HREF="createCmd.htm#M2" NAME="L287">CLASS</A>
+<DL><DD>tcl.lang.Interp -- This manual entry contains Interp methods that implement
+new Tcl commands in Java.</DL>
+<DD><A HREF="createCmd.htm#M3" NAME="L288">METHODS</A>
+<DL><DD>void <B>createCommand</B>(String <I>cmdName</I>, Command <I>cmd</I>)</DL>
+<DL><DD>int <B>deleteCommand</B>(String <I>cmdName</I>)</DL>
+<DL><DD>Command <B>getCommand</B>(String <I>cmdName</I>)</DL>
+<DD><A HREF="createCmd.htm#M4" NAME="L289">OTHER METHODS</A>
+<DD><A HREF="createCmd.htm#M5" NAME="L290">ARGUMENTS</A>
+<DL>
+</DL>
+<DD><A HREF="createCmd.htm#M6" NAME="L291">DESCRIPTION</A>
+<DL>
+<DD><A HREF="createCmd.htm#M7" NAME="L292"><B>createCommand</B></A>
+<DD><A HREF="createCmd.htm#M8" NAME="L293"><B>deleteCommand</B></A>
+<DD><A HREF="createCmd.htm#M9" NAME="L294"><B>getCommand</B></A>
+</DL>
+<DD><A HREF="createCmd.htm#M10" NAME="L295">EQUIVALENT C FUNCTIONS</A>
+<DD><A HREF="createCmd.htm#M11" NAME="L296">SEE ALSO</A>
+<DD><A HREF="createCmd.htm#M12" NAME="L297">KEYWORDS</A>
+</DL><HR>
+<H3><A NAME="M2">CLASS</A></H3>
+tcl.lang.Interp -- This manual entry contains Interp methods that implement
+new Tcl commands in Java.
+<H3><A NAME="M3">METHODS</A></H3>
+<P>void <B>createCommand</B>(String <I>cmdName</I>, Command <I>cmd</I>)
+<P>int <B>deleteCommand</B>(String <I>cmdName</I>)
+<P>Command <B>getCommand</B>(String <I>cmdName</I>)
+<H3><A NAME="M4">OTHER METHODS</A></H3>
+<B><A HREF="../TclJavaLib/setVar.htm">setVar</A></B>, 
+<B><A HREF="../TclJavaLib/traceVar.htm">traceVar</A></B>, 
+<B><A HREF="../TclJavaLib/Eval.htm">eval</A></B>, 
+<B><A HREF="../TclJavaLib/setResult.htm">setResult</A></B>, 
+<B><A HREF="../TclJavaLib/backgdErr.htm">backgroundError</A></B>,
+<BR>
+<B><A HREF="../TclJavaLib/getNotifier.htm">getNotifier</A></B>, 
+<B><A HREF="../TclJavaLib/setAssocData.htm">setAssocData</A></B>, 
+<B><A HREF="../TclJavaLib/dispose.htm">dispose</A></B>, 
+<B><A HREF="../TclJavaLib/pkgRequire.htm">pkgRequire</A></B>
+
+<H3><A NAME="M5">ARGUMENTS</A></H3>
+<DL>
+<P><DT>String <B>cmdName</B> ()<DD>
+Name of command to create, delete, or get.
+<P><DT>Command <B>cmd</B> ()<DD>
+Value of command to create.
+<P></DL>
+<H3><A NAME="M6">DESCRIPTION</A></H3>
+The procedures described here are utilities for creating, querying,
+modifying, and deleting Tcl commands.
+<P>
+<DL>
+<P><DT><A NAME="M7"><B>createCommand</B></A><DD>
+The <B>createCommand</B> method defines a new command in the interp and
+associates it with the object <I>cmd</I> such that whenever
+<I>cmdName</I> is invoked as a Tcl command (via a call to Interp's
+<B><A HREF="../TclJavaLib/Eval.htm">eval</A></B> method) the Tcl interpreter will call <I>cmd</I>.cmdProc to
+process the command.  If an old Command object with <I>cmdName</I>
+already exists in the interpreter, the old Command object will be
+deleted. If the old Command object implements the CommandWithDispose
+interface, its disposeCmd() method will be called. See
+CommandWithDispose below.
+
+<P><DT><A NAME="M8"><B>deleteCommand</B></A><DD>
+The <B>deleteCommand</B> method deletes the command with the name
+<I>cmdName</I> from the interpreter.  If the command exists, it is
+deleted and this method returns 0.  If the command does not exist,
+this method returns -1.  If the <I>cmd</I> object implements the
+CommandWithDispose interface, its disposeCmd() method will
+be called after the command is deleted.
+<P><DT><A NAME="M9"><B>getCommand</B></A><DD>
+The <B>getCommand</B> method returns the Command object that represents the
+command with the name <I>cmdName</I>.
+
+<P></DL>
+<H3><A NAME="M10">EQUIVALENT C FUNCTIONS</A></H3>
+<A href="../cFunctions.html">Tcl_CreateCommand</A>, <A href="../cFunctions.html">Tcl_DeleteCommand</A>, <A href="../cFunctions.html">Tcl_GetCommandInfo</A>
+<H3><A NAME="M11">SEE ALSO</A></H3>
+<B><A HREF="../TclJavaLib/Interp.htm">Interp</A></B>, <B><A HREF="../TclJavaLib/CommandWithDispose.htm">CommandWithDispose</A></B>, <B><A HREF="../TclJavaLib/Eval.htm">Eval</A></B>, <B><A HREF="../TclJavaLib/Command.htm">Command</A></B>
+<H3><A NAME="M12">KEYWORDS</A></H3>
+<A href="../Keywords/B.htm#bind">bind</A>, <A href="../Keywords/C.htm#command">command</A>, <A href="../Keywords/C.htm#create">create</A>, <A href="../Keywords/D.htm#delete">delete</A>, <A href="../Keywords/I.htm#interpreter">interpreter</A>
+<HR><PRE>
+<A HREF="../license.html">Copyright</A> &#169; 1994-1998 Sun Microsystems, Inc.
+<A HREF="../license.html">Copyright</A> &#169; 1995-1997 Roger E. Critchlow Jr.</PRE>
+</BODY></HTML>

@@ -1,0 +1,168 @@
+<HTML>
+<TITLE>
+Building Jacl under UNIX/Linux
+</TITLE>
+
+<BODY>
+<HR>
+
+<H3>
+Building Jacl under UNIX/Linux
+</H3>
+
+<HR>
+
+<DL>
+
+<DT>
+<H3>
+About:
+</H3>
+</DT>
+
+<DD>
+
+<P>
+Jacl users should note that a pre-compiled binary release is available,
+so building from source is not required. Jacl is built using a
+<code>configure</code> script and has been tested on a variety
+of UNIX/Linux systems.
+</P>
+
+<P>
+First, download the Jacl archive file and uncompress it into a
+directory. The following assumes that the user has created
+a temp directory <code>/tmp/jacl</code>, that the archive
+file has been downloaded and saved in this directory, that
+Jacl will be installed into <code>/opt/jacl</code>, and
+that the JDK install is located in <code>/opt/jdk14</code>.
+
+<blockquote>
+<pre>
+<code>
+cd /tmp/jacl
+tar -xzvf jacl1.4.0.tar.gz
+mkdir build
+cd build
+../jacl1.4.0/configure --prefix=/opt/jacl --with-jdk=/opt/jdk14</pre>
+</code>
+</pre>
+</blockquote>
+</p>
+
+<p>
+After the configure script finishes, run the following commands
+to build and install Jacl.
+
+<blockquote>
+<pre>
+<code>
+make
+make install
+</code>
+</pre>
+</blockquote>
+</p>
+
+<p>
+One can also build and run the optional regression
+tests with the following command. Be aware that
+running the regression tests can take a long time.
+
+<blockquote>
+<pre>
+<code>
+make test
+</code>
+</pre>
+</blockquote>
+</p>
+
+<p>
+Running <code>make install</code> will install a startup script that
+should be used run Jacl. This script is named <code>jaclsh</code>,
+it would be installed into <code>/opt/jacl/bin/jaclsh</code> by
+the example above.
+</p>
+
+
+<blockquote>
+<pre>
+<code>
+/opt/jacl/bin/jaclsh
+% package require java
+1.4.0
+% exit
+</code>
+</pre>
+</blockquote>
+</p>
+
+<H4>TJC Compiler</H4>
+
+<p>
+The TJC compiler is included in Jacl 1.4.0 and later releases.
+The TJC compiler is used to compile Tcl code into Java bytecode
+which is then executed directly in the JVM. Since the TJC compiler
+is implemented in Tcl, TJC can be used to compile itself. This
+is known as a 2-stage compile and makes the TJC compiler execute
+about 10 times faster. For this reason, it is suggested that users build
+TJC via a 2-stage compile as follows. Be aware that this process
+is very slow, it can take 20 minutes or more on a fast system.
+Also note that Jacl must have been built and installed before
+the following commands are run.
+
+<blockquote>
+<pre>
+<code>
+make tjc2
+make install
+</code>
+</pre>
+</blockquote>
+</p>
+
+<H4>Installed Files</H4>
+
+<p>
+<ul>
+
+<li>
+<code>jaclsh</code> : Startup script for Jacl
+</li>
+
+<li>
+<code>tjc</code> : Startup script for TJC compiler
+</li>
+
+<br>
+
+<li>
+<code>tcljava.jar</code> : Files common to both Jacl and Tcl Blend
+</li>
+
+<li>
+<code>jacl.jar</code> : Files specific to Jacl
+</li>
+
+<li>
+<code>itcl.jar</code> : Itcl for Jacl
+</li>
+
+<li>
+<code>janino.jar</code> : Janino Java compiler
+</li>
+
+<li>
+<code>tjc.jar</code> : TJC compiler
+</li>
+
+</ul>
+</p>
+
+</DD>
+
+</DL>
+
+</BODY>
+</HTML>

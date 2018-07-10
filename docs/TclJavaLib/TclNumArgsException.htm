@@ -1,0 +1,64 @@
+<HTML><HEAD><TITLE>TclJava Library Procedures - TclNumArgsException manual page</TITLE></HEAD><BODY>
+<DL>
+<DD><A HREF="TclNumArgsException.htm#M2" NAME="L208">EXCEPTION</A>
+<DL><DD>tcl.lang.TclNumArgsException -- This class signals Tcl errors
+regarding wrong number of arguments.</DL>
+<DD><A HREF="TclNumArgsException.htm#M3" NAME="L209">EXTENDS</A>
+<DL><DD>tcl.lang.TclException
+</DL>
+<DD><A HREF="TclNumArgsException.htm#M4" NAME="L210">CONSTRUCTORS</A>
+<DD><A HREF="TclNumArgsException.htm#M5" NAME="L211">ARGUMENTS</A>
+<DL>
+</DL>
+<DD><A HREF="TclNumArgsException.htm#M6" NAME="L212">DESCRIPTION</A>
+<DL>
+<DD><A HREF="TclNumArgsException.htm#M7" NAME="L213"><B>TclNumArgsException</B></A>
+</DL>
+<DD><A HREF="TclNumArgsException.htm#M8" NAME="L214">SEE ALSO</A>
+<DD><A HREF="TclNumArgsException.htm#M9" NAME="L215">KEYWORDS</A>
+</DL><HR>
+<H3><A NAME="M2">EXCEPTION</A></H3>
+tcl.lang.TclNumArgsException -- This class signals Tcl errors
+regarding wrong number of arguments.
+<H3><A NAME="M3">EXTENDS</A></H3>
+tcl.lang.TclException
+
+<H3><A NAME="M4">CONSTRUCTORS</A></H3>
+<P>
+<B>TclNumArgsException</B>(Interp <I>interp</I>, int <I>argc</I>, TclObject <I>argv[]</I>, String <I>msg</I>)
+
+<H3><A NAME="M5">ARGUMENTS</A></H3>
+<DL>
+<P><DT>Interp <B>interp</B> ()<DD>
+Internal representation to be stored in newly created TclObject.
+<P><DT>int <B>argc</B> ()<DD>
+The number of initial elements of <I>argv</I> that are appropriate arguments.
+<P><DT>TclObject <B>argv[]</B> ()<DD>
+The array of arguments that perportedly has the wrong number of elements.
+<P><DT>String <B>msg</B> ()<DD>
+Error message to append to the <I>argc</I> initial elements of <I>argv</I>.
+<P></DL>
+<H3><A NAME="M6">DESCRIPTION</A></H3>
+TclNumArgsException is a convenient subclass of TclException for
+command procedures to indicate that they have received the wrong
+number of arguments.
+<P>
+<DL>
+<P><DT><A NAME="M7"><B>TclNumArgsException</B></A><DD>
+The <B>TclNumArgsException</B> constructor creates a TclException with
+the completion code TCL.ERROR.  If the <I>interp</I> is non-null, an
+error message is created by appending <I>msg</I> to the first
+<I>argc</I> elements of <I>argv</I>.  If <I>msg</I> is null, the error
+message created is simply the first <I>argc</I> elements of <I>argv</I>.
+The value of the <I>interp</I>'s result object is set to the newly
+created error message.
+
+<P></DL>
+<H3><A NAME="M8">SEE ALSO</A></H3>
+<B><A HREF="../TclJavaLib/TclException.htm">TclException</A></B>, <B><A HREF="../TclJavaLib/runtimeError.htm">TclRuntimeError</A></B>, <B><A HREF="../TclJavaLib/Interp.htm">Interp</A></B>
+<H3><A NAME="M9">KEYWORDS</A></H3>
+<A href="../Keywords/A.htm#arguments">arguments</A>, <A href="../Keywords/E.htm#error">error</A>, <A href="../Keywords/E.htm#error checking">error checking</A>, <A href="../Keywords/E.htm#exception">exception</A>, <A href="../Keywords/R.htm#return">return</A>, <A href="../Keywords/R.htm#result">result</A>
+<HR><PRE>
+<A HREF="../license.html">Copyright</A> &#169; 1996-1998 Sun Microsystems, Inc.
+<A HREF="../license.html">Copyright</A> &#169; 1995-1997 Roger E. Critchlow Jr.</PRE>
+</BODY></HTML>

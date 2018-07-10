@@ -1,0 +1,391 @@
+# This file tests the interp functions that work the same way
+# in both Jacl and Tcl Blend.
+#
+# This file contains a collection of tests for one or more of the Tcl
+# built-in commands.  Sourcing this file into Tcl runs the tests and
+# generates output for errors.  No output means no errors were found.
+#
+# Copyright (c) 1997 by Sun Microsystems, Inc.
+#
+# See the file "license.terms" for information on usage and redistribution
+# of this file, and for a DISCLAIMER OF ALL WARRANTIES.
+#
+# RCS: @(#) $Id: tcljavaInterp.test,v 1.9 2006/09/11 20:45:30 mdejong Exp $
+
+if {[lsearch [namespace children] ::tcltest] == -1} {
+    package require tcltest
+    namespace import -force ::tcltest::*
+}
+
+setupJavaPackage
+
+set testConfig(jaclOnly) [expr {$tcljava(tcljava) == "jacl"}]
+
+proc test_lengths { args } {
+   global test_lengths
+   if {[llength $args] == 0} {return $test_lengths}
+   foreach arg $args {
+       lappend test_lengths [string length $arg]
+   }
+}
+
+set fd [open tl.tcl w]
+fconfigure $fd -translation binary -encoding binary
+puts $fd "test_lengths a b \\\r\nc d"
+close $fd
+
+
+test tcljavaInterp-1.0 {Tcl IO layer filters CRLF to LF on read} {
+    catch {unset test_lengths}
+    source tl.tcl
+    test_lengths
+} {1 1 1 1}
+
+test tcljavaInterp-1.1 {Tcl IO layer filters CRLF to LF on read} {jaclOnly} {
+    catch {unset test_lengths}
+    if {[testgetplatform] == "windows"} {
+        set url "file:/[file join [pwd] tl.tcl]"
+    } else {
+        set url "file://[file join [pwd] tl.tcl]"
+    }
+    source -url $url
+    test_lengths
+} {1 1 1 1}
+
+test tcljavaInterp-1.2 {convert CRLF to LF in convertStringCRLF} {jaclOnly} {
+    catch {unset test_lengths}
+    set res [[java::getinterp] convertStringCRLF "test_lengths a b \\\r\nc d"]
+    eval $res
+    test_lengths
+} {1 1 1 1}
+
+test tcljavaInterp-1.3 {source tl.tcl as resource from tl.jar} {
+    catch {unset test_lengths}
+    # Note: tl.jar appears on the system CLASSAPTH, so resource
+    # loading is done via the system class loader here.
+    if {$tcljava(tcljava) == "jacl"} {
+        source resource:/tl/tl.tcl
+    } else {
+        # Tcl Blend does not support "source resource:/..."
+        [java::getinterp] evalResource /tl/tl.tcl
+    }
+    test_lengths
+} {1 1 1 1}
+
+test tcljavaInterp-1.4 {load class defined on TCL_CLASSPATH, this makes use
+        the TclClassLoader to search for classes at runtime} {
+    # testext.jar must not appear on the CLASSPATH, it should
+    # NOT be loaded by the system class loader.
+    set env(TCL_CLASSPATH) [file join [pwd] testext.jar]
+    set cl [java::field testext.Dummy class]
+    set cloader [$cl getClassLoader]
+    set result [java::instanceof $cloader tcl.lang.TclClassLoader]
+    unset env(TCL_CLASSPATH) cl cloader
+    set result
+} {1}
+
+test tcljavaInterp-1.5 {load command defined in a class file that appears
+        on the TCL_CLASSPATH. This test checks that the Extension
+        class makes use of the interp.classLoader to load a class} {
+    # testext.jar must not appear on the CLASSPATH, it should not
+    # be loaded by the system class loader.
+    set env(TCL_CLASSPATH) [file join [pwd] testext.jar]
+    java::call tcl.lang.Extension loadOnDemand \
+        [java::getinterp] \
+        "testext_cmd" \
+        "testext.Cmd"
+    if {[catch {testext_cmd} err]} {
+        set result [list $err]
+
+        # Error auto-loading, check to see if the
+        # TclClass loader actually know about this
+        # class and the Extension class is failing
+        # to use this info.
+        if {[catch {
+            set cl [java::field testext.Cmd class]
+        } err]} {
+            lappend result CLASS_NOT_FOUND
+        } else {
+            # No error, so class is known
+            lappend result CLASS_FOUND
+        }
+    } else {
+        set result $err
+        # It worked, just double check that the interp
+        # classloader is the loader for the class
+        set icl [[java::getinterp] getClassLoader]
+        set ocl [[java::field testext.Cmd class] getClassLoader]
+        if {$icl != $ocl} {
+            lappend result "LOADER_MISMATCH"
+        }
+        unset icl ocl
+    }
+    unset env(TCL_CLASSPATH)
+    set result
+} {OK}
+
+test tcljavaInterp-1.6 {load resource via TclClassLoader} {
+    # Load resource from testext.jar on env(TCL_CLASSPATH)
+    # testext.jar must not appear on the CLASSPATH, it should not
+    # be loaded by the system class loader.
+    set env(TCL_CLASSPATH) [file join [pwd] testext.jar]
+
+    if {$tcljava(tcljava) == "jacl"} {
+        source resource:/testext/cmd.tcl
+    } else {
+        # Tcl Blend does not support "source resource:/..."
+        [java::getinterp] evalResource /testext/cmd.tcl
+    }
+
+    testext_resource_cmd
+} {OK}
+
+test tcljavaInterp-1.7 {load context class via TclClassLoader} {
+    # Create a test thread and install a thread context
+    # loader. The interp class will make use of the context
+    # loader as the TclClassLoader parent, so classes
+    # available to the context loader can be seen.
+
+    [java::getinterp] createCommand test_interp_thread_context_class \
+        [java::new tests.TestInterpThreadContextClassCmd]
+
+    test_interp_thread_context_class    
+} {OK}
+
+test javaInterp-1.8 {Use Interp.evalFile() API to source a Tcl file} {
+    catch {unset test_lengths}
+    [java::getinterp] evalFile tl.tcl
+    test_lengths
+} {1 1 1 1}
+
+test javaInterp-1.9 {Use Interp.evalFile() API to source a Tcl file} {
+    # Invoke Interp.evalFile() on a file that contains
+    # no commands (it does not set the interp result).
+    # This triggers a bug in the eval(TclObject) API
+    # when the TclObject ref count was failing to be
+    # incremented before the eval operation. This
+    # code would assert if the bug was detected, TCL_MEM_DEBUG
+    # needs to be enabled to detect this problem.
+    close [open empty.tcl w]
+    [java::getinterp] evalFile empty.tcl
+} {}
+
+test tcljavaInterp-1.10 {TCL_CLASSPATH not set} {
+    # loading class will fail since TCL_CLASSPATH is not set
+    set i1 [interp create]
+    set results [$i1 eval {
+        package require java
+        if {[info exists env(TCL_CLASSPATH)]} {
+            unset env(TCL_CLASSPATH)
+        }
+        list [catch {java::field testext.Dummy class} err] $err
+    }]
+    interp delete $i1
+    set results
+} {1 {unknown class or object "testext.Dummy"}}
+
+test tcljavaInterp-1.11 {TCL_CLASSPATH not set} {
+    # loading class will fail since TCL_CLASSPATH is set to ""
+    set i1 [interp create]
+    set results [$i1 eval {
+        package require java
+        set env(TCL_CLASSPATH) ""
+        list [catch {java::field testext.Dummy class} err] $err
+    }]
+    interp delete $i1
+    set results
+} {1 {unknown class or object "testext.Dummy"}}
+
+test tcljavaInterp-1.12 {TCL_CLASSPATH not set} {
+    # loading should work since jar is on TCL_CLASSPATH
+    set i1 [interp create]
+    set results [$i1 eval {
+        package require java
+        set env(TCL_CLASSPATH) [file join [pwd] testext.jar]
+        list [catch {java::field testext.Dummy class} err] $err
+    }]
+    interp delete $i1
+    set results
+} {0 java0x1}
+
+test tcljavaInterp-1.13 {TCL_CLASSPATH not set} {
+    # TCL_CLASSPATH initially not set, so loading
+    # fails. Then set it and load again to make
+    # sure that the search path is updated.
+    set i1 [interp create]
+    set results [$i1 eval {
+        set results [list]
+
+        package require java
+
+        set env(TCL_CLASSPATH) /whatever
+
+        lappend results [catch {java::field testext.Dummy class} err] $err
+
+        set env(TCL_CLASSPATH) [file join [pwd] testext.jar]
+
+        lappend results [catch {java::field testext.Dummy class} err] $err
+
+        set results
+    }]
+    interp delete $i1
+    set results
+} {1 {unknown class or object "testext.Dummy"} 0 java0x1}
+
+test tcljavaInterp-1.14 {TCL_CLASSPATH not set} {
+    # TCL_CLASSPATH initially not set, so loading
+    # fails. Then set it and load again to make
+    # sure that the search path is updated.
+    set i1 [interp create]
+    set results [$i1 eval {
+        set results [list]
+
+        package require java
+
+        set env(TCL_CLASSPATH) ""
+
+        lappend results [catch {java::field testext.Dummy class} err] $err
+
+        set env(TCL_CLASSPATH) [file join [pwd] testext.jar]
+
+        lappend results [catch {java::field testext.Dummy class} err] $err
+
+        set results
+    }]
+    interp delete $i1
+    set results
+} {1 {unknown class or object "testext.Dummy"} 0 java0x1}
+
+
+# Size of TclList differs in Jacl and Tcl Blend
+
+if {$tcljava(tcljava) == "jacl"} {
+    set memsizes \
+{TclObject 40 bytes
+TclString 16 bytes
+TclInteger 8 bytes
+TclDouble 16 bytes
+TclList 96 bytes}
+} else {
+    set memsizes \
+{TclObject 40 bytes
+TclString 16 bytes
+TclInteger 8 bytes
+TclDouble 16 bytes
+TclList 24 bytes}
+}
+
+test javaInterp-2.0 {TclObject memory sizes} {
+    testtclobjectmemory
+} $memsizes
+
+
+test javaInterp-3.1 {Exception Propagation} {
+    java::call tests.TestExceptionPending pending1
+} 1
+
+test javaInterp-3.2 {Exception Propagation} {
+    java::call tests.TestExceptionPending pending2 [java::getinterp]
+} 1
+
+test javaInterp-3.3 {Exception Propagation} {
+    java::call tests.TestExceptionPending pending3 [java::getinterp]
+} 1
+
+test javaInterp-3.4 {Exception Propagation} {
+    java::call tests.TestExceptionPending pending4 [java::getinterp]
+} 1
+
+test javaInterp-3.5 {Exception Propagation} {
+    java::call tests.TestExceptionPending pending5 [java::getinterp]
+} 1
+
+test javaInterp-4.0 {pending Exception} {
+    set script {
+        catch {jtest tclexception}
+    }
+    list [catch {eval $script} err] $err
+} {0 1}
+
+test javaInterp-4.1 {pending Exception} {
+    set script {
+        catch {jtest tclexception}
+        error "msg2"
+    }
+    list [catch {eval $script} err] $err
+} {1 msg2}
+
+test javaInterp-4.2 {pending Exception} {
+    set script {
+        catch {java::throw [java::new NullPointerException msg1]}
+        error "msg2"
+    }
+    list [catch {eval $script} err] $err
+} {1 msg2}
+
+test javaInterp-4.3 {pending Exception} {
+    set script {
+        catch {jtest npe}
+        error "msg2"
+    }
+    set caught 0
+    java::try {
+        eval $script
+    } catch {NullPointerException ex} {
+        set caught 1
+    }
+    set caught
+} {1}
+
+test javaInterp-4.4 {pending Exception} {
+    set script {
+        catch {jtest npe}
+        error "msg2"
+    }
+    set caught 0
+    java::try {
+        [java::getinterp] eval $script
+    } catch {NullPointerException ex} {
+        set caught 1
+    }
+    set caught
+} {1}
+
+test javaInterp-4.5 {pending Exception} {
+    set results [list]
+
+    lappend results [catch {
+        jtest tclexception
+    } err] $err
+
+    set errorInfo {}
+    lappend results [[java::getinterp] eval {set i 0}]
+    lappend results $errorInfo
+
+    set results
+} {1 msg {} {}}
+
+test javaInterp-5.0 {pending Exception} {
+    set errorInfo {}
+    after 0 "jtest tclexception"
+    after 10 "set done 1"
+    vwait done
+    set errorInfo
+} {msg
+    while executing
+"jtest tclexception"
+    ("after" script)}
+
+
+# cleanup
+
+rename test_interp_thread_context_class {}
+rename test_lengths {}
+catch {unset test_lengths}
+
+catch {unset url}
+file delete -force tl.tcl
+
+::tcltest::cleanupTests
+return
+

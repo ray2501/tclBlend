@@ -1,0 +1,842 @@
+# This file tests JavaNewCmd.java.
+#
+# This file contains a collection of tests for one or more of the Tcl
+# built-in commands.  Sourcing this file into Tcl runs the tests and
+# generates output for errors.  No output means no errors were found.
+#
+# Copyright (c) 1997 by Sun Microsystems, Inc.
+#
+# See the file "license.terms" for information on usage and redistribution
+# of this file, and for a DISCLAIMER OF ALL WARRANTIES.
+#
+# RCS: @(#) $Id: JavaNewCmd.test,v 1.9 2006/06/30 00:30:52 mdejong Exp $
+
+if {[lsearch [namespace children] ::tcltest] == -1} {
+    package require tcltest
+    namespace import -force ::tcltest::*
+}
+
+setupJavaPackage
+
+#
+# JavaNewCmd.cmdProc
+#
+
+test javaNewCmd-1.1 {JavaNewCmd.cmdProc} {
+    list [catch {java::new} msg] $msg
+} {1 {wrong # args: should be "java::new signature ?arg arg ...?"}}
+
+test javaNewCmd-1.2 {JavaNewCmd.cmdProc} {
+    list [catch {java::new {int[]}} msg] $msg
+} {1 {wrong # args: should be "java::new int[] sizeList ?valueList?"}}
+
+test javaNewCmd-1.3 {JavaNewCmd.cmdProc} {
+    list [catch {java::new {blah[]} \{\{\}} msg] $msg
+} {1 {unknown class "blah"}}
+
+test javaNewCmd-1.4 {JavaNewCmd.cmdProc} {
+    list [catch {java::new {blah[[]} \{\{\}} msg] $msg
+} {1 {unknown class "blah["}}
+
+test javaNewCmd-1.5 {JavaNewCmd.cmdProc} {
+    list [catch {java::new {int[]} \{\{\}} msg] $msg
+} {1 {unmatched open brace in list}}
+
+test javaNewCmd-1.6 {JavaNewCmd.cmdProc} {
+    set x [java::new {int[]} {} {0 1 2 3 4}]
+    list [$x get 0] [$x get 4]
+} {0 4}
+
+test javaNewCmd-1.7 {JavaNewCmd.cmdProc} {
+    set x [java::new {int[]} {} {0 1 2 3 4}]
+    list [$x get 0] [$x get 4]
+} {0 4}
+
+test javaNewCmd-1.8 {cmdProc} {
+    list [catch {java::new {}} msg] $msg
+} {1 {bad signature ""}}
+
+test javaNewCmd-1.9 {cmdProc} {
+    [java::new tests.JavaTest] imethod
+} 6
+
+test javaNewCmd-1.10 {cmdProc} {
+    list [catch {java::new {int[]} {1 2 3} {1 2 3}} msg] $msg
+} {1 {size list "1 2 3" doesn't match array dimension (1)}}
+test javaNewCmd-1.12 {cmdProc} {
+    list [catch {java::new {int[][]} {1 2 3} {1 2 3}} msg] $msg
+} {1 {size list "1 2 3" doesn't match array dimension (2)}}
+test javaNewCmd-1.12 {cmdProc} {
+    set a [java::new {int[][]} {2} {{11 22 33} {21 32 43}}]
+    $a getrange {0 0}
+} {11 22 33}
+
+#
+# ArraySig.looksLikeArraySig
+#
+
+test javaNewCmd-2.1 {ArraySig.looksLikeArraySig} {
+    set info ""
+    set m imethod
+    set x [java::new {tests.JavaTest String} foo]
+    $x $m
+    set info [jtest type $m]
+    list $info [catch {java::new $m} msg] $msg
+} {tcl.lang.TclList 1 {unknown class "imethod"}}
+
+test javaNewCmd-2.2 {ArraySig.looksLikeArraySig} {
+    set info ""
+    set m {int[]}
+    set x [java::new $m 10]
+    set info [jtest type $m]
+    list $info [catch {java::new $m yyy} msg] $msg
+} {tcl.lang.ArraySig 1 {expected integer but got "yyy"}}
+
+test javaNewCmd-2.3 {ArraySig.looksLikeArraySig} {
+    list [catch {java::new \{} msg] $msg
+} {1 {unmatched open brace in list}}
+
+test javaNewCmd-2.4 {ArraySig.looksLikeArraySig} {
+    list [catch {java::new {blah blah blah}} msg] $msg
+} {1 {unknown class "blah"}}
+
+#
+# ArraySig.get
+#
+
+test javaNewCmd-3.1 {ArraySig.get} {
+    set m {int[]}
+    set x [java::new $m 10]
+    set robj [jtest getobject $m]
+    set internalRep [java::call tcl.lang.ArraySig get [java::getinterp] $robj]
+    set internalRep [java::cast tcl.lang.InternalRep $internalRep]
+    string compare [$robj getInternalRep] $internalRep
+} {0}
+
+test javaNewCmd-3.2 {ArraySig.get} {
+    set m {int[]}
+    set robj [jtest getobject $m]
+    set internalRep [java::call tcl.lang.ArraySig get [java::getinterp] $robj]
+    [java::field $internalRep arrayType] getName
+} {[I}
+
+test javaNewCmd-3.3 {ArraySig.get} {
+    set m {xyz}
+    set robj [jtest getobject $m]
+    list [catch {
+	java::call tcl.lang.ArraySig get [java::getinterp] $robj
+    } msg] $msg
+} {1 {bad array signature "xyz"}}
+
+test javaNewCmd-3.4 {ArraySig.get} {
+    set m "\{"
+    set robj [jtest getobject $m]
+    list [catch {
+	java::call tcl.lang.ArraySig get [java::getinterp] $robj
+    } msg] $msg
+} {1 {unmatched open brace in list}}
+
+test javaNewCmd-3.5 {ArraySig.get} {
+    set m {int[] a}
+    set robj [jtest getobject $m]
+    list [catch {
+	java::call tcl.lang.ArraySig get [java::getinterp] $robj
+    } msg] $msg
+} {1 {bad array signature "int[] a"}}
+
+test javaNewCmd-3.6 {ArraySig.get} {
+    set m {blah}
+    set robj [jtest getobject $m]
+    list [catch {
+	java::call tcl.lang.ArraySig get [java::getinterp] $robj
+    } msg] $msg
+} {1 {bad array signature "blah"}}
+
+test javaNewCmd-3.7 {ArraySig.get} {
+    set m {blah[]}
+    set robj [jtest getobject $m]
+    list [catch {
+	java::call tcl.lang.ArraySig get [java::getinterp] $robj
+    } msg] $msg
+} {1 {unknown class "blah"}}
+
+#
+# Black-box tests
+#
+
+test javaNewCmd-4.1 {java::new} {
+    [java::new {tests.JavaTest String} foo] imethod
+} 6
+test javaNewCmd-4.2 {java::new} {
+    [java::new {tests.JavaTest String int} foo 3] imethod
+} 6
+test javaNewCmd-4.3 {java::new} {
+    [java::new {tests.JavaTest String int} foo 3] imethod
+} 6
+test javaNewCmd-4.4 {java::new: exception in constructor} {
+    list [catch {java::new {tests.JavaTest boolean} true} msg] $msg
+} {1 java.lang.NullPointerException}
+
+test javaNewCmd-5.1 {array case} {
+    list [catch {
+	set handle [java::new {int[]}]
+    } msg] $msg
+} {1 {wrong # args: should be "java::new int[] sizeList ?valueList?"}}
+test javaNewCmd-5.2 {array case} {
+    list [catch {
+	set handle [java::new {int[]} 5 {6 7 8 9 10} junk]
+    } msg] $msg
+} {1 {wrong # args: should be "java::new int[] sizeList ?valueList?"}}
+
+test javaNewCmd-5.3 {array case, no valueList} {
+    list [catch {
+	set handle [java::new {Integer[]} 5]
+	list [java::info cl $handle] [java::info ba $handle] \
+	    [java::info di $handle] [$handle length]
+    } msg] $msg
+} {0 {{java.lang.Integer[]} java.lang.Integer 1 5}}
+test javaNewCmd-5.4 {array case, no valueList} {
+    list [catch {
+	set handle [java::new {Integer[][][]} {2 4 6}]
+	list [java::info cl $handle] [java::info ba $handle] \
+	    [java::info di $handle] [$handle length]
+    } msg] $msg
+} {0 {{java.lang.Integer[][][]} java.lang.Integer 3 2}}
+test javaNewCmd-5.5 {array case, no valueList} {
+    list [catch {
+	set handle [java::new {tests.javainfo.InfoTestClass[]} 4]
+	list [java::info cl $handle] [java::info ba $handle] \
+	    [java::info di $handle] [$handle length]
+    } msg] $msg
+} {0 {{tests.javainfo.InfoTestClass[]} tests.javainfo.InfoTestClass 1 4}}
+test javaNewCmd-5.6 {array case, no valueList} {
+    list [catch {
+	set handle [java::new {tests.javainfo.InfoTestClass[][][][]} {2 5 3 3}]
+	list [java::info cl $handle] [java::info ba $handle] \
+	    [java::info di $handle] [$handle length]
+    } msg] $msg
+} {0 {{tests.javainfo.InfoTestClass[][][][]} tests.javainfo.InfoTestClass 4 2}}
+test javaNewCmd-5.7 {array case, no valueList} {
+    list [catch {
+	set handle [java::new {int[]} 5]
+	list [java::info cl $handle] [java::info ba $handle] \
+	    [java::info di $handle] [$handle length]
+    } msg] $msg
+} {0 {{int[]} int 1 5}}
+test javaNewCmd-5.8 {array case, no valueList} {
+    list [catch {
+	set handle [java::new {int[][]} {3 3}]
+	list [java::info cl $handle] [java::info ba $handle] \
+	    [java::info di $handle] [$handle length]
+    } msg] $msg
+} {0 {{int[][]} int 2 3}}
+test javaNewCmd-5.9 {array case, no valueList} {
+    list [catch {
+	set handle [java::new {int[][][]} 5]
+    } msg] $msg
+} {1 {cannot initialize a 3 dimensional array with zero size in dimension 1}}
+test javaNewCmd-5.10 {array case, no valueList} {
+    list [catch {
+	set handle [java::new {int[][]} {4 6}]
+	list [java::info cl $handle] [java::info ba $handle] \
+	    [java::info di $handle] [$handle length] \
+	    [[$handle get 0] length]
+    } msg] $msg
+} {0 {{int[][]} int 2 4 6}}
+
+test javaNewCmd-5.11 {array case, empty sizeList} {
+    list [catch {
+	set handle [java::new {int[]} {}]
+	list [java::info cl $handle] [java::info ba $handle] \
+	    [java::info di $handle] [$handle length]
+    } msg] $msg
+} {0 {{int[]} int 1 0}}
+test javaNewCmd-5.12 {array case, empty sizeList} {
+    list [catch {
+	set handle [java::new {int[]} {} {2 3 4 5}]
+	list [java::info cl $handle] [java::info ba $handle] \
+	    [java::info di $handle] [$handle length] [$handle getrange]
+    } msg] $msg
+} {0 {{int[]} int 1 4 {2 3 4 5}}}
+test javaNewCmd-5.13 {array case, empty sizeList} {
+    list [catch {
+	set handle [java::new {int[][][]} {} {{{1 2} {3 4}} {{5 6} {7 8}}}]
+	list [java::info cl $handle] [java::info ba $handle] \
+	    [java::info di $handle] [$handle length] [$handle getrange {0 1 0}]
+    } msg] $msg
+} {0 {{int[][][]} int 3 2 {3 4}}}
+
+test javaNewCmd-5.14 {array case, test classname} {
+    list [catch {
+	set handle [java::new {junk[][][]} {}]
+    } msg] $msg
+} {1 {unknown class "junk"}}
+test javaNewCmd-5.15 {array case, test classname} {
+    list [catch {
+	set handle [java::new {[int} {}]
+    } msg] $msg
+} {1 {unknown class "[int"}}
+test javaNewCmd-5.16 {array case, test classname} {
+    list [catch {
+	set handle [java::new {[int[][][]} {}]
+    } msg] $msg
+} {1 {unknown class "[int"}}
+test javaNewCmd-5.17 {array case, test classname} {
+    list [catch {
+	set handle [java::new {[I} {}]
+	list [java::info cl $handle] [java::info ba $handle] \
+	    [java::info di $handle] [$handle length]
+    } msg] $msg
+} {0 {{int[]} int 1 0}}
+
+
+test javaNewCmd-6.0 {static inner class} {
+    # Allocate static inner class given the fully
+    # qualified name of the inner class.
+    list [catch {
+	set handle [java::new tests.InnerTest.InnerClass1]
+	java::info class $handle
+    } msg] $msg
+} {0 tests.InnerTest.InnerClass1}
+
+test javaNewCmd-6.1 {static inner class} {
+    # Old method of passing fully qualified name containing a '$'
+    # is still supported even though it does not work very well.
+    list [catch {
+	set handle [java::new {tests.InnerTest$InnerClass1}]
+	java::info class $handle
+    } msg] $msg
+} {0 tests.InnerTest.InnerClass1}
+
+test javaNewCmd-6.2 {cast static inner class to inner Interface} {
+    # Allocate a static inner class, then cast it to a
+    # static interface. This checks loading of both
+    # types via the fully qualified name.
+    list [catch {
+	set handle [java::new tests.InnerTest.InnerClass2]
+	set i [java::cast tests.InnerTest.InnerInterface1 $handle]
+        list [java::info class $handle] [java::info class $i]
+    } msg] $msg
+} {0 {tests.InnerTest.InnerClass2 tests.InnerTest.InnerInterface1}}
+
+# Remove javaNewCmd-6.3 since JDK 1.5 compiler always raises an
+# error when compiling an inner class with a name that is the
+# same as a toplevel class. The runtime logic will always
+# choose the toplevel class in this case.
+
+test javaNewCmd-6.4 {static inner class} {
+    # Get handle to static inner class.
+    list [catch {
+	set c [java::field tests.InnerTest.InnerClass1 class]
+        $c toString
+    } msg] $msg
+} {0 {class tests.InnerTest$InnerClass1}}
+
+test javaNewCmd-6.5 {static array of inner class} {
+    # Get handle to array of static inner class.
+    list [catch {
+	set c [java::new {tests.InnerTest.InnerClass1[]} {0}]
+        java::info class $c
+    } msg] $msg
+} {0 {tests.InnerTest.InnerClass1[]}}
+
+test javaNewCmd-6.6 {cast to inner interface} {
+    # Get handle to static inner interface
+    list [catch {
+        set c [java::field java.util.Map.Entry class]
+        $c toString
+    } msg] $msg
+} {0 {interface java.util.Map$Entry}}
+
+test javaNewCmd-6.7 {multiple inner classes} {
+    # Get inner class inside inner class.
+    list [catch {
+        set o [java::call tests.InnerTest getInnerClass4]
+        java::info class $o
+    } msg] $msg
+} {0 tests.InnerTest.InnerClass3.InnerClass4}
+
+test javaNewCmd-6.8 {multiple inner classes} {
+    # Use java::new to allocate inner class inside inner class.
+    # This checks that loading of inner classes works with
+    # multiple level of inner class names.
+    list [catch {
+        set o [java::new tests.InnerTest.InnerClass3.InnerClass4]
+        java::info class $o
+    } msg] $msg
+} {0 tests.InnerTest.InnerClass3.InnerClass4}
+
+test javaNewCmd-6.9 {multiple inner classes} {
+    # Invoke Java methods that make use of imported
+    # inner classes.
+    list \
+        [java::info class [java::call tests.InnerImport newA]] \
+        [java::info class [java::call tests.InnerImport newB]] \
+        [java::info class [java::call tests.InnerImport newC]] \
+        [java::info class [java::call tests.InnerImport newD]] \
+        [java::info class [java::call tests.InnerImport newE]]
+} [list \
+    tests.InnerTest.InnerClass3 \
+    tests.InnerTest.InnerClass3 \
+    tests.InnerTest.InnerClass3.InnerClass4 \
+    tests.InnerTest.InnerClass3.InnerClass4 \
+    tests.InnerTest.InnerClass3.InnerClass4 \
+  ]
+
+test javaNewCmd-6.10 {class in java.lang package} {
+    # Ref to class in java.lang
+    list \
+        [java::info class \
+            [java::cast java.lang.Character.Subset [java::null]]] \
+        [java::info class \
+            [java::cast Character.Subset [java::null]]] \
+} {java.lang.Character.Subset java.lang.Character.Subset}
+
+
+# Test series 7 checks that primitive wrapper type
+# constructors like Boolean, Integer, and others
+# will make use of the overloaded constructor method
+# that accepts a primitive type. A Tcl primitive
+# should be converted to a Java primitive in
+# these constructor invocations. The previous
+# implementation would choose the overloaded
+# constructor method that accepted a String,
+# and Java string parsing rules did not match
+# the Tcl semantics.
+
+# The int parsing tests check the implementation
+# of JavaInvoke.parseJavaInt(). This Java int parsing
+# utility deals with int values defined by
+# the Java range Integer.MIN_VALUE to Integer.MAX_VALUE.
+# Tcl's integer parsing routines don't deal with
+# signed 32bit integers correctly and can't be fixed
+# without breaking backwards compatibility. Java
+# long values are handled separately. Tests that
+# make use of datatypes smaller than an int will
+# parse as an integer and then check the valid range.
+
+test javaNewCmd-7.0 {parse Java type from String} {
+    list \
+        [[java::new Boolean true] toString] \
+        [[java::new Boolean false] toString] \
+        [[java::new Boolean 0x1] toString] \
+        [[java::new Boolean 0] toString] \
+        [[java::new Boolean 01] toString] \
+        [[java::new Boolean -0] toString] \
+        [[java::new java.lang.Boolean 0x1] toString]
+} {true false true false true false true}
+
+test javaNewCmd-7.1 {parse Java type from String} {
+    list \
+        [[java::new Integer -1] toString] \
+        [[java::new Integer 0] toString] \
+        [[java::new Integer 01] toString] \
+        [[java::new Integer 0x1] toString] \
+        [[java::new Integer " 0x1"] toString] \
+        [[java::new Integer "0x2 "] toString] \
+        [[java::new Integer " 01 "] toString] \
+        [[java::new Integer " 1 "] toString] \
+        [[java::new Integer "-0xAbCDeF"] toString]
+} {-1 0 1 1 1 2 1 1 -11259375}
+
+test javaNewCmd-7.2 {parse Java type from String} {
+    # Invalid int
+    list \
+        [catch {java::new Integer ""} err] $err \
+        [catch {java::new Integer " "} err] $err \
+        [catch {java::new Integer "-"} err] $err \
+        [catch {java::new Integer " -"} err] $err \
+        [catch {java::new Integer "- "} err] $err \
+        [catch {java::new Integer " - "} err] $err \
+        [catch {java::new Integer "0x"} err] $err \
+        [catch {java::new Integer " 0X "} err] $err \
+        [catch {java::new Integer "--1"} err] $err \
+        [catch {java::new Integer "-0xABCDEFG"} err] $err \
+        [catch {java::new Integer "A"} err] $err \
+        [catch {java::new Integer "-A"} err] $err \
+        [catch {java::new Integer "09"} err] $err \
+} [list \
+    1 {expected integer but got ""} \
+    1 {expected integer but got " "} \
+    1 {expected integer but got "-"} \
+    1 {expected integer but got " -"} \
+    1 {expected integer but got "- "} \
+    1 {expected integer but got " - "} \
+    1 {expected integer but got "0x"} \
+    1 {expected integer but got " 0X "} \
+    1 {expected integer but got "--1"} \
+    1 {expected integer but got "-0xABCDEFG"} \
+    1 {expected integer but got "A"} \
+    1 {expected integer but got "-A"} \
+    1 {expected integer but got "09"} \
+]
+
+test javaNewCmd-7.3 {parse Java type from String} {
+    # int bounds
+    list \
+        [[java::new Integer -2147483648] toString] \
+        [[java::new Integer -0x80000000] toString] \
+        [catch {java::new Integer -2147483649} err] $err \
+        [catch {java::new Integer -0x80000001} err] $err \
+        [[java::new Integer 2147483647] toString] \
+        [[java::new Integer 0x7FFFFFFF] toString] \
+        [catch {java::new Integer 2147483648} err] $err \
+        [catch {java::new Integer 0x80000000} err] $err
+} [list \
+    -2147483648 \
+    -2147483648 \
+    1 {integer value too large to represent in a int} \
+    1 {integer value too large to represent in a int} \
+    2147483647 \
+    2147483647 \
+    1 {integer value too large to represent in a int} \
+    1 {integer value too large to represent in a int} \
+]
+
+test javaNewCmd-7.4 {parse Java type from String} {
+    list \
+        [[java::new Byte -1] toString] \
+        [[java::new Byte 0] toString] \
+        [[java::new Byte 1] toString] \
+        [[java::new Byte 0x1] toString] \
+        [[java::new Byte 01] toString] \
+} {-1 0 1 1 1}
+
+test javaNewCmd-7.5 {parse Java type from String} {
+    # byte bounds, subset of int bounds
+    list \
+        [catch {java::new Byte 2147483648} err] $err \
+        [[java::new Byte -128] toString] \
+        [catch {java::new Byte -129} err] $err \
+        [[java::new Byte 127] toString] \
+        [catch {java::new Byte 128} err] $err
+
+} [list \
+    1 {integer value too large to represent in a int} \
+    -128 \
+    1 {integer value too large to represent in a byte} \
+    127 \
+    1 {integer value too large to represent in a byte} \
+]
+
+test javaNewCmd-7.6 {parse Java type from String} {
+    list \
+        [[java::new Short -1] toString] \
+        [[java::new Short 0] toString] \
+        [[java::new Short 1] toString] \
+        [[java::new Short 0x1] toString] \
+        [[java::new Short 01] toString] \
+} {-1 0 1 1 1}
+
+test javaNewCmd-7.7 {parse Java type from String} {
+    # short bounds, subset of int bounds
+    list \
+        [catch {java::new Short 2147483648} err] $err \
+        [[java::new Short -32768] toString] \
+        [catch {java::new Short -32769} err] $err \
+        [[java::new Short 32767] toString] \
+        [catch {java::new Short 32768} err] $err
+} [list \
+    1 {integer value too large to represent in a int} \
+    -32768 \
+    1 {integer value too large to represent in a short} \
+    32767 \
+    1 {integer value too large to represent in a short} \
+]
+
+test javaNewCmd-7.8 {parse Java type from String} {
+    list \
+        [[java::new Character a] toString] \
+        [[java::new Character b] toString] \
+        [[java::new Character \u0063] toString] \
+        [[java::new Character D] toString] \
+        [[java::new Character E] toString] \
+        [catch {java::new Character FG} err] $err
+} {a b c D E 1 {expected character but got "FG"}}
+
+# Java long values are supported like int Java
+# values, but they are parsed with Long.parseLong().
+# Jacl can't handle 64 bit integers.
+
+test javaNewCmd-7.9 {parse Java type from String} {
+    list \
+        [[java::new Long -1] toString] \
+        [[java::new Long 0] toString] \
+        [[java::new Long 01] toString] \
+        [[java::new Long 0x1] toString] \
+        [[java::new Long " 0x1"] toString] \
+        [[java::new Long "0x2 "] toString] \
+        [[java::new Long " 01 "] toString] \
+        [[java::new Long " 1 "] toString] \
+        [[java::new Long "-0xAbCDeF"] toString]
+} {-1 0 1 1 1 2 1 1 -11259375}
+
+test javaNewCmd-7.10 {parse Java type from String} {
+    # Invalid long
+    list \
+        [catch {java::new Long ""} err] $err \
+        [catch {java::new Long " "} err] $err \
+        [catch {java::new Long "-"} err] $err \
+        [catch {java::new Long " -"} err] $err \
+        [catch {java::new Long "- "} err] $err \
+        [catch {java::new Long " - "} err] $err \
+        [catch {java::new Long "0x"} err] $err \
+        [catch {java::new Long " 0X "} err] $err \
+        [catch {java::new Long "--1"} err] $err \
+        [catch {java::new Long "-0xABCDEFG"} err] $err \
+        [catch {java::new Long "A"} err] $err \
+        [catch {java::new Long "-A"} err] $err \
+        [catch {java::new Long "09"} err] $err \
+} [list \
+    1 {expected integer but got ""} \
+    1 {expected integer but got " "} \
+    1 {expected integer but got "-"} \
+    1 {expected integer but got " -"} \
+    1 {expected integer but got "- "} \
+    1 {expected integer but got " - "} \
+    1 {expected integer but got "0x"} \
+    1 {expected integer but got " 0X "} \
+    1 {expected integer but got "--1"} \
+    1 {expected integer but got "-0xABCDEFG"} \
+    1 {expected integer but got "A"} \
+    1 {expected integer but got "-A"} \
+    1 {expected integer but got "09"} \
+]
+
+test javaNewCmd-7.11 {parse Java type from String} {
+    # long bounds
+    list \
+        [[java::new Long -9223372036854775808] toString] \
+        [[java::new Long -0x8000000000000000] toString] \
+        [catch {java::new Long -9223372036854775809} err] $err \
+        [catch {java::new Long -0x8000000000000001} err] $err \
+        [[java::new Long 9223372036854775807] toString] \
+        [[java::new Long 0x7FFFFFFFFFFFFFFF] toString] \
+        [catch {java::new Long 9223372036854775808} err] $err \
+        [catch {java::new Long 0x8000000000000000} err] $err
+} [list \
+    -9223372036854775808 \
+    -9223372036854775808 \
+    1 {integer value too large to represent in a long} \
+    1 {integer value too large to represent in a long} \
+    9223372036854775807 \
+    9223372036854775807 \
+    1 {integer value too large to represent in a long} \
+    1 {integer value too large to represent in a long} \
+]
+
+# float bounds.
+
+# Note that conversion of floating point numbers to
+# strings in Tcl is problematic because of the
+# default tcl_precision setting. See TIP 132 for info.
+#
+# http://www.tcl.tk/cgi-bin/tct/tip/132.html
+
+# Float.MIN_VALUE
+set min  [java::field Float MIN_VALUE]
+set smin 1.401298464324817e-046
+# Float.MAX_VALUE
+set max  [java::field Float MAX_VALUE]
+set bmax 3.4028234663852886e+039
+set pmin 1.4E-45
+set pmax 3.4028235E38
+
+# Running expr operation changes the internal rep
+# from TclDouble to a native double type and that
+# seems to lose some precision and cause the test
+# method to fail. Not sure how to approach this!
+
+test javaNewCmd-7.12 {parse Java type from String} {
+    list \
+        [[java::new Float 0.0] toString] \
+        [[java::new Float -0.0] toString] \
+        [[java::new Float Infinity] toString] \
+        [[java::new Float -Infinity] toString] \
+        [[java::new Float NaN] toString] \
+        [[java::new Float 10e-4] toString] \
+        [[java::new Float 10e8] toString] \
+        [[java::new Float $min] toString] \
+        [catch {java::new Float $smin} err] $err \
+        [[java::new Float $max] toString] \
+        [catch {java::new Float $bmax} err] $err
+} [list \
+    0.0 \
+    -0.0 \
+    Infinity \
+    -Infinity \
+    NaN \
+    0.0010 \
+    1.0E9 \
+    $pmin \
+    1 {double value too large to represent in a float} \
+    $pmax \
+    1 {double value too large to represent in a float} \
+]
+
+test javaNewCmd-7.13 {float stored in TclDouble} {
+    # Float.MIN_VALUE stored in a TclDouble
+    # internal rep. Note that the Float.toString()
+    # method rounds to an invalid float when
+    # printing as a String.
+
+    set results [list]
+    set min [java::field Float MIN_VALUE]
+    lappend results [format %s $min]
+    set F [java::new Float $min]
+    lappend results [format %s [$F toString]]
+    lappend results [format %s [$F floatValue]]
+    set results
+} {1.40129846432e-045 1.4E-45 1.40129846432e-045}
+
+test javaNewCmd-7.14 {float stored in TclDouble} {
+    # Printing a double in Java via
+    # StringBuffer.append(double) vs
+    # Util.printDouble(). This shows
+    # that Tcl is not printing all the
+    # needed bits in the floating point
+    # representation when the default
+    # tcl_precision of 12 is used.
+
+    set sb [java::new StringBuffer]
+    set min [java::field Float MIN_VALUE]
+    $sb {append double} $min
+    list \
+        [$sb toString] \
+        [format %s $min]
+} [list \
+1.401298464324817E-45 \
+1.40129846432e-045 \
+]
+
+test javaNewCmd-7.15 {float stored in TclDouble} {tip132} {
+    # Printing the double value of Float.MIN_VALUE
+    # and then attempting to reparse from the
+    # string fails because of the default
+    # tcl_precision value of 12. This loss of
+    # precision is broken and needs to be fixed
+    # by implementing Tcl TIP 132 from Tcl 8.5.
+    # Applications need to work around this
+    # problem by setting tcl_precision to 17.
+
+    set results [list]
+    set min [java::field Float MIN_VALUE]
+    set min [format %s $min]
+    lappend results [format %s $min]
+    if {[catch {java::new Float $min} err]} {
+        lappend results ERROR $err
+    } else {
+        set F $err
+        lappend results [format %s [$F toString]]
+        lappend results [format %s [$F floatValue]]
+    }
+    set results
+} {1.40129846432e-045 1.4E-45 1.40129846432e-045}
+
+test javaNewCmd-7.16 {float stored in TclDouble} {
+    # Parsing Float.MIN_VALUE as a String.
+    # This test is the same as the one above
+    # except that tcl_precision is upped to 16
+    # here so that the tests pass. This precision
+    # should really be 17 but that keeps
+    # the tests from passing under both Jacl and
+    # Tcl Blend because of differences in floating
+    # point handling in Jacl and sprintf().
+    set save_tcl_precision $tcl_precision
+    set tcl_precision 16
+
+    set results [list]
+    set min [java::field Float MIN_VALUE]
+    set min [format %s $min] ; # toss out TclDouble internal rep!
+    lappend results [format %s $min]
+    set F [java::new Float $min]
+    lappend results [format %s [$F toString]]
+    lappend results [format %s [$F floatValue]]
+
+    set tcl_precision $save_tcl_precision
+    set results
+} {1.401298464324817e-045 1.4E-45 1.401298464324817e-045}
+
+test javaNewCmd-7.17 {parse Java type from String} {
+    # Float.MIN_VALUE stored in a TclDouble is
+    # then converted to a string rep and
+    # reparsed from the string by the expr.
+    # This test works in both Jacl and TclBlend
+    # because tcl_precision is change to 16.
+
+    set save_tcl_precision $tcl_precision
+    set tcl_precision 16
+
+    set results [list]
+    set min [java::field Float MIN_VALUE]
+    lappend results [format %s $min]
+
+    # In Tcl Blend, an expr will reparse the
+    # double from the string rep. The
+    # tcl_precision problem is triggered by
+    # the fact that the Tcl core can't make
+    # direct use of the double inside the
+    # Java object and it needs to convert
+    # to a Tcl double primitive from the string.
+    set min [expr {$min}]
+    lappend results [format %s $min]
+
+    # Create a Float object to test to see if the
+    # floating point is still equal to Float.MIN_VALUE.
+
+    if {[catch {java::new Float $min} err]} {
+        lappend results ERROR
+        lappend results $err
+    } else {
+        # No error
+        lappend results [format %s [$F toString]]
+        lappend results [format %s [$F floatValue]]
+    }
+
+    set tcl_precision $save_tcl_precision
+    set results
+} [list \
+    1.401298464324817e-045 \
+    1.401298464324817e-045 \
+    1.4E-45 \
+    1.401298464324817e-045 \
+    ]
+
+
+# double bounds
+set min [java::field Double MIN_VALUE]
+set max [java::field Double MAX_VALUE]
+# FIXME: Tcl rolls small double values over to zero
+set smin "5.0e-350"
+set bmax "2.0e350"
+set pmin 4.9E-324
+set pmax 1.7976931348623157E308
+
+test javaNewCmd-7.14 {parse Java type from String} {
+    list \
+        [[java::new Double 0.0] toString] \
+        [[java::new Double -0.0] toString] \
+        [[java::new Double Infinity] toString] \
+        [[java::new Double -Infinity] toString] \
+        [[java::new Double NaN] toString] \
+        [[java::new Double 10e-4] toString] \
+        [[java::new Double 10e8] toString] \
+        [[java::new Double $min] toString] \
+        [[java::new Double $max] toString]
+} [list \
+    0.0 \
+    -0.0 \
+    Infinity \
+    -Infinity \
+    NaN \
+    0.0010 \
+    1.0E9 \
+    $pmin \
+    $pmax \
+]
+
+
+# cleanup
+::tcltest::cleanupTests
+return
+

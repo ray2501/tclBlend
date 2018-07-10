@@ -1,0 +1,121 @@
+# javaCall.test --
+#
+#	This file tests the java::call command.
+#
+# This file contains a collection of tests for one or more of the Tcl
+# built-in commands.  Sourcing this file into Tcl runs the tests and
+# generates output for errors.  No output means no errors were found.
+#
+# Copyright (c) 1997 by Sun Microsystems, Inc.
+#
+# See the file "license.terms" for information on usage and redistribution
+# of this file, and for a DISCLAIMER OF ALL WARRANTIES.
+#
+# RCS: @(#) $Id: JavaCallCmd.test,v 1.7 2006/06/19 02:54:27 mdejong Exp $
+
+if {[lsearch [namespace children] ::tcltest] == -1} {
+    package require tcltest
+    namespace import -force ::tcltest::*
+}
+
+setupJavaPackage
+
+test javaCall-1.1 {errors} {
+    list [catch {java::call} msg] $msg
+} {1 {wrong # args: should be "java::call ?-noconvert? class signature ?arg arg ...?"}}
+test javaCall-1.2 {errors} {
+    list [catch {java::call foo} msg] $msg
+} {1 {wrong # args: should be "java::call ?-noconvert? class signature ?arg arg ...?"}}
+test javaCall-1.3 {errors} {
+    list [catch {java::call -noconvert} msg] $msg
+} {1 {wrong # args: should be "java::call ?-noconvert? class signature ?arg arg ...?"}}
+test javaCall-1.4 {errors} {
+    list [catch {java::call -noconvert foo} msg] $msg
+} {1 {wrong # args: should be "java::call ?-noconvert? class signature ?arg arg ...?"}}
+test javaCall-1.5 {errors} {
+    list [catch {java::call -n foo} msg] $msg
+} {1 {wrong # args: should be "java::call ?-noconvert? class signature ?arg arg ...?"}}
+test javaCall-1.6 {errors} {
+    list [catch {java::call - foo} msg] $msg
+} {1 {unknown class "-"}}
+test javaCall-1.7 {errors} {
+    list [catch {java::call foo bar} msg] $msg
+} {1 {unknown class "foo"}}
+test javaCall-1.8 {errors} {
+    list [catch {java::call tests.JavaTest \{} msg] $msg
+} {1 {unmatched open brace in list}}
+test javaCall-1.9 {errors} {
+    list [catch {java::call tests.JavaTest {}} msg] $msg
+} {1 {bad signature ""}}
+
+test javaCall-2.1 {static methods} {
+    java::call tests.JavaTest smethod
+} static
+test javaCall-2.2 {static methods} {
+    [java::call -noconvert tests.JavaTest smethod] toString
+} static
+test javaCall-2.3 {static methods} {
+    [java::call -n tests.JavaTest smethod] toString
+} static
+
+test javaCall-3.1 {instance methods} {
+    list [catch {java::call tests.JavaTest imethod} msg] $msg
+} {1 {no accessible static method "imethod" in class tests.JavaTest}}
+
+test javaCall-4.1 {arrays} {
+    list [catch {
+	set x [java::call tests.invoke.ArrayTestClass blue 5]
+	set y [java::call tests.invoke.ArrayTestClass blue $x 6]
+   } msg] $msg
+} {0 {blue diamonds, String[][]}}
+test javaCall-4.2 {arrays} {
+    list [catch {
+	set x [java::call tests.invoke.ArrayTestClass pink 5]
+	set y [java::call tests.invoke.ArrayTestClass pink $x 6]
+   } msg] $msg
+} {0 {pink hearts, int[][]}}
+test javaCall-4.3 {arrays} {
+    list [catch {
+	set x [java::call tests.invoke.ArrayTestClass green 5]
+	set y [java::call tests.invoke.ArrayTestClass green $x 6]
+   } msg] $msg
+} {0 {green clovers, java.lang.Integer[][]}}
+
+test javaCall-5.1 {void return} {
+    java::call tests.JavaTest voidsmethod
+} ""
+
+test javaCall-6.1 {null return} {
+    java::call -noconvert tests.JavaTest nullsmethod
+} [java::null]
+
+test javaCall-6.2 {null return} {
+    java::call tests.JavaTest nullsmethod
+} ""
+
+test javaCall-7.1 {throw TclException in a Java method} {
+    # Should not wrap a TclException in a ReflectException!
+    set errorCode NONE
+    list [catch {java::call tests.JavaTest \
+        throwTclException [java::getinterp]} err] $err $errorCode
+} {1 {no nuts in my fudge please!} NONE}
+
+test javaCall-7.2 {Interp.setResult(null)} {
+    java::call tests.JavaTest testSetResultNPE [java::getinterp]
+} {OK}
+
+test javaCall-7.3 {Interp.setResult(null)} {
+    java::call tests.JavaTest testResetResultNPE [java::getinterp]
+} {OK}
+
+
+test javaCall-8.0 {load class from a jar on the TCL_CLASSPATH} {
+    set env(TCL_CLASSPATH) [file join $env(BUILD_DIR) btests hello hello.jar]
+    set result [java::call hello.SayHello hello]
+    unset env(TCL_CLASSPATH)
+    set result
+} {hello}
+
+# cleanup
+::tcltest::cleanupTests
+return

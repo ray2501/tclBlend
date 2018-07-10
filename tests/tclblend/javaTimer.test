@@ -1,0 +1,63 @@
+# This file tests the functions in javaTimer.c.
+#
+# This file contains a collection of tests for one or more of the Tcl
+# built-in commands.  Sourcing this file into Tcl runs the tests and
+# generates output for errors.  No output means no errors were found.
+#
+# Copyright (c) 1998 by Sun Microsystems, Inc.
+#
+# See the file "license.terms" for information on usage and redistribution
+# of this file, and for a DISCLAIMER OF ALL WARRANTIES.
+#
+# RCS: @(#) $Id: javaTimer.test,v 1.3 2002/12/18 07:07:19 mdejong Exp $
+
+if {[lsearch [namespace children] ::tcltest] == -1} {
+    package require tcltest
+    namespace import -force ::tcltest::*
+}
+
+setupJavaPackage
+
+set notifier [java::call tcl.lang.Notifier getNotifierForThread \
+		  [java::call Thread currentThread]]
+
+test javaTimer-1.1 {Java_tcl_lang_TimerHandler_createTimerHandler} {
+    set t [java::new tests.TimerHandlerTest $notifier 100]
+    set result [java::field $t value]
+    after 200 {set x done}
+    vwait x
+    lappend result $x [java::field $t value]
+} {0 done 1}
+
+test javaTimer-2.1 {Java_tcl_lang_TimerHandler_deleteTimerHandler} {
+    set t [java::new tests.TimerHandlerTest $notifier 100]
+    set result [java::field $t value]
+    $t cancel
+    after 200 {set x done}
+    vwait x
+    lappend result $x [java::field $t value]
+} {0 done 0}
+test javaTimer-2.2 {Java_tcl_lang_TimerHandler_deleteTimerHandler} {
+    set t [java::new tests.TimerHandlerTest $notifier 100]
+    set result [java::field $t value]
+    $t cancel
+    after 200 {set x done}
+    vwait x
+    $t cancel
+    lappend result $x [java::field $t value]
+} {0 done 0}
+
+# The next test could fail if run on a heavily loaded system.
+
+test javaTimer-3.1 {JavaTimerProc} {
+    set t [java::new tests.TimerHandlerTest $notifier 100]
+    set result [java::field $t value]
+    java::field $t err true
+    lappend result [catch {$notifier doOneEvent 0} msg] $msg \
+	[java::field $t value]
+} {0 1 {java.lang.NullPointerException: TimerHandlerTest} 1}
+
+# cleanup
+unset notifier
+::tcltest::cleanupTests
+return

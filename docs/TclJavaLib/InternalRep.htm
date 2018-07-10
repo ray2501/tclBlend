@@ -1,0 +1,35 @@
+<HTML><HEAD><TITLE>TclJava Library Procedures - InternalRep manual page</TITLE></HEAD><BODY>
+<H3><A NAME="M2">CLASS</A></H3>
+tcl.lang.InternalRep -- An interface for any internal representations
+that can be stored in a TclObject.
+<H3><A NAME="M3">METHODS</A></H3>
+<P>void <B>dispose</B>()
+<P>InternalRep <B>duplicate</B>()
+<P>String <B>toString</B>()
+<H3><A NAME="M4">DESCRIPTION</A></H3>
+The <B>InternalRep</B> interface defines the signatures that must be
+supported by any class that is going to be an internal representation
+in Tcl. The following methods must be implemented:
+<P>
+<DL>
+<P><DT><A NAME="M5"><B>dispose</B></A><DD>
+The <B>dispose</B> method is called when an InternalRep is no longer
+used by Tcl. It should free all the resources used by this InternalRep
+instance.
+<P><DT><A NAME="M6"><B>duplicate</B></A><DD>
+The <B>duplicate</B> method is called when an exact copy of the
+InternalRep is needed during a copy-on-write operation.
+<P><DT><A NAME="M7"><B>toString</B></A><DD>
+The <B>toString</B> method is called when a string representation is
+needed for a TclObject.
+<P></DL>
+<H3><A NAME="M8">EQUIVALENT C FUNCTIONS</A></H3>
+<A href="../cFunctions.html">Tcl_ObjType.freeProc</A>, <A href="../cFunctions.html">Tcl_ObjType.dupIntRepProc</A>, <A href="../cFunctions.html">Tcl_ObjType.updateStringProc</A>
+<H3><A NAME="M9">SEE ALSO</A></H3>
+<B><A HREF="../TclJavaLib/TclObject.htm">TclObject</A></B>, <B><A HREF="../TclJavaLib/TclList.htm">TclList</A></B>, <B><A HREF="../TclJavaLib/TclIndex.htm">TclIndex</A></B>, <B><A HREF="../TclJavaLib/TclDouble.htm">TclDouble</A></B>, <B><A HREF="../TclJavaLib/TclString.htm">TclString</A></B>, <B><A HREF="../TclJavaLib/TclInteger.htm">TclInteger</A></B>, <B><A HREF="../TclJavaLib/TclBoolean.htm">TclBoolean</A></B>, <B><A HREF="../TclJavaLib/ReflectObject.htm">ReflectObject</A></B>
+<H3><A NAME="M10">KEYWORDS</A></H3>
+<A href="../Keywords/I.htm#internal representation">internal representation</A>, <A href="../Keywords/O.htm#object">object</A>, <A href="../Keywords/O.htm#object type">object type</A>
+<HR><PRE>
+<A HREF="../license.html">Copyright</A> &#169; 1996-1998 Sun Microsystems, Inc.
+<A HREF="../license.html">Copyright</A> &#169; 1995-1997 Roger E. Critchlow Jr.</PRE>
+</BODY></HTML>

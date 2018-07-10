@@ -1,0 +1,56 @@
+README
+RCS: @(#) $Id: README,v 1.2 1999/05/08 23:21:23 dejong Exp $
+
+
+Abstract
+--------
+
+     This demo shows how to write commands that glue together
+     existing Java applications.
+
+Why Bother?
+-----------
+
+     In time, many applications require more functionality than 
+     was originally provided.  If a feature has already been 
+     implemented in a different application, you can use scripting 
+     to glue the existing feature to your new application.  
+
+     Suppose FileDialogApp and ListboxApp are existing Java applications.
+     FileDialogCmd and ListboxCmd provide an interface between Tcl
+     and the existing applications.  JarCmd is another example of how to 
+     write new Tcl commands in Java (see simplepkg for an very simple
+     example of how this is done.)  The GlueExtension class is the
+     device that dynamically loads all of the new Tcl commands into
+     the Interpreter.
+
+Running The Demo
+----------------
+     To see the demo in action start out by typing "make demos" in the
+     directory you compiled in. This will create a demos subdirectory
+     in the directory you compiled in. At this point you will want to
+     start up a java enabled shell and source the glue.tcl file. The
+     easiest way to do this is to type "make shell" and then cd to the
+     demos/gluepkg directory that was created inside the directory
+     you compiled in. At this point you can just type "source glue.tcl"
+     at the Tcl prompt.
+
+     When you source the glue.tcl script, a file dialog menu will pop
+     up, select a valid jar file and press OK.  This window will
+     disappear and another window will be displayed.  The new window
+     contains a listing of all of the files in the selected jar file.
+     By selecting one or more of the files and pressing OK, the
+     selected files will be extracted from the jar file and displayed
+     to stdout.
+
+Source Files
+------------
+
+   * FileDialogCmd
+   * ListboxCmd
+   * JarCmd
+   * FileDialogApp
+   * ListboxApp
+   * GlueExtension
+
+

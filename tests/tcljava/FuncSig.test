@@ -1,0 +1,303 @@
+# This file tests FuncSig.test.
+#
+# Copyright (c) 1997 by Sun Microsystems, Inc.
+#
+# See the file "license.terms" for information on usage and redistribution
+# of this file, and for a DISCLAIMER OF ALL WARRANTIES.
+#
+# RCS: @(#) $Id: FuncSig.test,v 1.14 2006/06/30 00:30:52 mdejong Exp $
+
+if {[lsearch [namespace children] ::tcltest] == -1} {
+    package require tcltest
+    namespace import -force ::tcltest::*
+}
+
+setupJavaPackage
+
+#
+# get
+#
+
+# The next two tests used to return tcl.lang.FuncSig but
+# the function signature caching was disabled.
+
+test FuncSig-1.1 {get} {
+    set m Object
+    java::new $m
+    jtest type $m
+} tcl.lang.TclList
+
+test FuncSig-1.2 {get} {
+    set m toString
+    [java::new Object] $m
+    jtest type $m
+} tcl.lang.TclList
+
+# This test has been disabled because it tests for
+# a cached internal rep for a method argument. This
+# feature has been disabled in the source.
+#test FuncSig-1.3 {get, overloaded methods} {
+#    set m imethod
+#    [java::new tests.JavaTest] $m
+#    set k1 [[jtest getobject $m] getInternalRep]
+#
+#    [java::new tests.JavaTest] $m 123
+#    set k2 [[jtest getobject $m] getInternalRep]
+#
+#    expr {$k1 == $k2}
+#} 0
+
+test FuncSig-1.4 {get, cache correctness} {
+    set c tests.JavaTest
+    java::new $c
+    java::new $c a 1
+    catch {java::new $c}
+} {0}
+
+test FuncSig-1.5 {get, errors} {
+    list [catch {java::call Object "\{"} msg] $msg
+} {1 {unmatched open brace in list}}
+
+test FuncSig-1.6 {get, errors} {
+    list [catch {java::call Object ""} msg] $msg
+} {1 {bad signature ""}}
+
+test FuncSig-1.7 {get, errors} {
+    set sig "foo"
+    list [catch {
+	java::call tcl.lang.FuncSig get [java::getinterp] [java::null] \
+            [jtest getobject $sig] [java::new {tcl.lang.TclObject[]} 2] \
+            0 2 true
+    } msg] $msg
+} {1 {unknown class "foo"}}
+
+test FuncSig-1.8 {get, errors} {
+    list [catch {java::call Object "\{"} msg] $msg
+} {1 {unmatched open brace in list}}
+
+test FuncSig-1.9 {get, constructor full signature} {
+    list [catch {java::new {tests.JavaTest int int}} msg] $msg    
+} {1 {no accessible constructor "tests.JavaTest int int"}}
+
+test FuncSig-1.10 {get} {
+    list [catch {java::new {java.lang.Integer}} msg] $msg    
+} {1 {can't find accessible constructor with 0 argument(s) for class "java.lang.Integer"}}
+
+test FuncSig-1.11 {get} {
+    list [catch {java::new {tests.JavaTest String}} msg] $msg    
+} {1 {wrong # args for calling constructor "tests.JavaTest String"}}
+
+test FuncSig-1.12 {get} {
+    [java::new {Integer int} 1234] toString
+} 1234
+
+test FuncSig-1.13 {get, method full signature} {
+    list [catch {
+	[java::new {tests.JavaTest}] {imethod int int}
+    } msg] $msg    
+} {1 {no accessible method "imethod int int" in class tests.JavaTest}}
+
+test FuncSig-1.14 {get, method full signature} {
+    list [catch {
+	[java::new String] charAt
+    } msg] $msg    
+} {1 {can't find accessible method "charAt" with 0 argument(s) for class "java.lang.String"}}
+
+test FuncSig-1.15 {get, constructor short signature} {
+    catch {
+	java::new Integer 1
+    }
+} {0}
+
+test FuncSig-1.16 {get, constructor short signature} {
+    list [catch {
+	java::new Integer 1 2
+    } msg] $msg    
+} {1 {can't find accessible constructor with 2 argument(s) for class "java.lang.Integer"}}
+
+test FuncSig-1.17 {get, constructor short signature} {
+    list [catch {
+	java::new Integer 1 2 3
+    } msg] $msg    
+} {1 {can't find accessible constructor with 3 argument(s) for class "java.lang.Integer"}}
+
+test FuncSig-1.18 {get, constructor short signature} {
+    list [catch {
+	java::new Integer 1 2 3 4
+    } msg] $msg    
+} {1 {can't find accessible constructor with 4 argument(s) for class "java.lang.Integer"}}
+
+test FuncSig-1.19 {get, constructor short signature} {
+    list [catch {
+	java::new Integer 1 2 3 4 5
+    } msg] $msg    
+} {1 {can't find accessible constructor with 5 argument(s) for class "java.lang.Integer"}}
+
+test FuncSig-1.20 {get, method short signature} {
+    java::info class [java::new tests.JavaTest foo 123]
+} {tests.JavaTest}
+
+test FuncSig-1.21 {get, method short signature} {
+    list [catch {
+	[java::new String] indexOf 1 2 3 4
+    } msg] $msg    
+} {1 {can't find accessible method "indexOf" with 4 argument(s) for class "java.lang.String"}}
+
+test FuncSig-1.22 {get, method short signature} {
+    list [catch {
+	[java::new String] indexOf foo
+    } msg] $msg    
+} {0 -1}
+
+test FuncSig-1.23 {get, method short signature} {
+    [java::new tests.JavaTest] imethod
+} 6
+
+test FuncSig-1.24 {get, method short signature} {
+    [java::new tests.JavaTest] imethod 12345
+} 12346
+
+test FuncSig-1.25 {can't call static method via instance} {
+    list [catch {[java::new tests.JavaTest] smethod} err] $err
+} {1 {no accessible method "smethod" in class tests.JavaTest}}
+
+test FuncSig-1.26 {constructor does not exist} {
+    list [catch {java::new tcl.lang.TclDouble A} err] $err
+} {1 {can't find accessible constructor with 1 argument(s) for class "tcl.lang.TclDouble"}}
+
+
+test FuncSig-2.1 {getAccessible*Methods, caching} {
+    set c [java::field Object class]
+    set m1 [java::call tcl.lang.FuncSig getAccessibleInstanceMethods $c]
+    set m2 [java::call tcl.lang.FuncSig getAccessibleInstanceMethods $c]
+    set m3 [java::call tcl.lang.FuncSig getAccessibleStaticMethods $c]
+    set m4 [java::call tcl.lang.FuncSig getAccessibleStaticMethods $c]
+    list [string compare $m1 $m2] [string compare $m3 $m4]
+} {0 0}
+
+set FuncSig2_2 {equals getClass hashCode notify notifyAll toString wait wait wait}
+
+test FuncSig-2.2 {getAccessibleInstanceMethods} {
+    set c [java::field Object class]
+    set m [java::call tcl.lang.FuncSig getAccessibleInstanceMethods $c]
+
+    set list ""
+    for {set i 0} {$i < [$m length]} {incr i} {
+	lappend list [[$m get $i] getName]
+    }
+
+    set list
+} $FuncSig2_2
+
+set FuncSig2_3 {equals getClass getStringA hashCode notify notifyAll toString wait wait wait}
+
+test FuncSig-2.3 {getAccessibleInstanceMethods} {
+    set c [java::field tests.invoke.IntA class]
+    set m [java::call tcl.lang.FuncSig getAccessibleInstanceMethods $c]
+
+    set list ""
+    for {set i 0} {$i < [$m length]} {incr i} {
+	lappend list [[$m get $i] getName]
+    }
+
+    set list
+} $FuncSig2_3
+
+# Signature differs in JDK 1.4 and 1.5
+
+set FuncSig2_4 {copyValueOf copyValueOf valueOf valueOf valueOf valueOf valueOf valueOf valueOf valueOf valueOf}
+
+if {[info exists tcljava(java.version)] && \
+        [string match "1.5*" $tcljava(java.version)]} {
+    set FuncSig2_4 {copyValueOf copyValueOf format format valueOf valueOf valueOf valueOf valueOf valueOf valueOf valueOf valueOf}
+}
+
+test FuncSig-2.4 {getAccessibleStaticMethods} {
+    set c [java::field String class]
+    set m [java::call tcl.lang.FuncSig getAccessibleStaticMethods $c]
+
+    set list ""
+    for {set i 0} {$i < [$m length]} {incr i} {
+	lappend list [[$m get $i] getName]
+    }
+
+    set list
+} $FuncSig2_4
+
+set FuncSig2_5 \
+	{{equals java.lang.Object} {getClass java.lang.Object} {getNonPublicTesterI tests.invoke.PublicTester} {getStringC tests.invoke.PublicTester} {hashCode java.lang.Object} {notify java.lang.Object} {notifyAll java.lang.Object} {publicFunc tests.invoke.PublicTester} {toString java.lang.Object} {wait java.lang.Object} {wait java.lang.Object} {wait java.lang.Object}}
+
+test FuncSig-2.5 {getAccessibleMethods} {
+    set m [java::call tcl.lang.FuncSig getAccessibleInstanceMethods \
+        [java::field tests.invoke.PublicTester class]]
+
+    set results [list]
+    for {set i 0} {$i < [$m length]} {incr i} {
+	set method [$m get $i]
+        lappend results [list [$method getName] [[$method getDeclaringClass] getName]]
+    }
+
+    # Compare individual elements
+    if 0 {
+        for {set i 0} {$i < [llength $results]} {incr i} {
+            set o_info [lindex $FuncSig2_5 $i]
+            set info [lindex $results $i]
+            if {![string equal $o_info $info]} {
+                puts "expected \{$o_info\} got \{$info\}"
+            }
+        }
+    }
+
+    set results
+} $FuncSig2_5
+
+
+# Black box tests
+#
+
+test FuncSig-3.1 {public method} {
+    set a [java::new tests.invoke.PublicTester]
+    $a publicFunc
+} "access ok: Tester.publicFunc()"
+
+test FuncSig-3.2 {public method} {
+    set a [java::call tests.invoke.PublicTester getCNonPublicTester]
+    $a publicFunc
+} "access ok: NonPublicTester.publicFunc() overrides Tester.publicFunc()"
+
+test FuncSig-3.3 {public method} {
+    catch {unset results}
+    set a [java::call tests.invoke.PublicTester getCNonPublicTester]
+    lappend results [list [catch {$a getStringA} err] $err]
+    set a [java::cast tests.invoke.IntA $a]
+    lappend results [list [catch {$a getStringA} err] $err]
+} {{1 {no accessible method "getStringA" in class tests.invoke.PublicTester}}\
+   {0 {access ok: NonPublicTester.getStringA() implements IntA.getStringA()}}}
+
+test FuncSig-3.4 {public method} {
+    set a [java::call tests.invoke.PublicTester getCNonPublicTester]
+    $a getStringC
+} "access ok: NonPublicTester.getStringC() implements IntC.getStringC()"
+
+test FuncSig-3.5 {non public method} {
+    set a [java::new tests.invoke.PublicTester]
+    list [catch {$a noAccess} msg] $msg
+} {1 {no accessible method "noAccess" in class tests.invoke.PublicTester}}
+
+test FuncSig-3.6 {non public method} {
+    set a [java::call tests.invoke.PublicTester getCNonPublicTester]
+    list [catch {$a noAccess} msg] $msg
+} {1 {no accessible method "noAccess" in class tests.invoke.PublicTester}}
+
+test FuncSig-3.7 {non public class} {
+    list [catch {java::new tests.invoke.NonPublicTester} msg] $msg
+} {1 {Class "tests.invoke.NonPublicTester" is not accessible}}
+
+test FuncSig-3.8 {abstract class} {
+    list [catch {java::new tcl.lang.Extension} msg] $msg
+} {1 {Class "tcl.lang.Extension" is abstract}}
+
+
+# cleanup
+::tcltest::cleanupTests
+return

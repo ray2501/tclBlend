@@ -1,0 +1,93 @@
+# FieldSig.test --
+#
+#	Tests the implementation of the FieldSig.java file.
+#
+# Copyright (c) 1997 by Sun Microsystems, Inc.
+#
+# See the file "license.terms" for information on usage and redistribution
+# of this file, and for a DISCLAIMER OF ALL WARRANTIES.
+#
+# RCS: @(#) $Id: FieldSig.test,v 1.3 2002/12/23 20:38:11 mdejong Exp $
+
+if {[lsearch [namespace children] ::tcltest] == -1} {
+    package require tcltest
+    namespace import -force ::tcltest::*
+}
+
+setupJavaPackage
+
+test FieldSig-1.1 {get} {
+    set m sint
+    java::field tests.JavaTest $m
+    jtest type $m
+} tcl.lang.FieldSig
+
+test FieldSig-1.2 {get} {
+    set m sint
+    java::field tests.JavaTest $m
+    jtest type $m
+    set irep [[jtest getobject $m] getInternalRep]
+    java::info class $irep
+    #irep is of type tcl.lang.InternalRep but we want type tcl.lang.FieldSig
+    set fsig [java::cast {tcl.lang.FieldSig} $irep]
+    java::info class $fsig
+    [java::field $fsig targetCls] getName
+} tests.JavaTest
+
+test FieldSig-1.3 {get} {
+    set m foo
+    set x ""
+    java::field [java::new pkg1.MyClass] $m
+    set fsig [java::cast {tcl.lang.FieldSig} [[jtest getobject $m] getInternalRep]]
+    lappend x [[java::field $fsig targetCls] getName]
+    java::field [java::new pkg1.ProtectedClass] $m
+    set fsig [java::cast {tcl.lang.FieldSig} [[jtest getobject $m] getInternalRep]]
+    lappend x [[java::field $fsig targetCls] getName]
+    set x
+} {pkg1.MyClass pkg1.ProtectedClass}
+
+test FieldSig-1.4 {get} {
+    list [catch {java::field tests.JavaTest "\{"} msg] $msg
+} {1 {unmatched open brace in list}}
+
+test FieldSig-1.5 {get} {
+    list [catch {java::field tests.JavaTest ""} msg] $msg
+} {1 {bad field signature ""}}
+
+test FieldSig-1.6 {get} {
+    list [catch {java::field tests.JavaTest "x x x"} msg] $msg
+} {1 {bad field signature "x x x"}}
+
+test FieldSig-1.7 {get} {
+    list [catch {java::field tests.JavaTest {sint kk}} msg] $msg
+} {1 {unknown class "kk"}}
+
+test FieldSig-1.8 {get} {
+    list [catch {java::field tests.JavaTest {foobar Integer}} msg] $msg
+} {1 {"java.lang.Integer" is not a superclass of "tests.JavaTest"}}
+
+test FieldSig-1.9 {get} {
+    list [catch {java::field tests.JavaTest {foobar}} msg] $msg
+} {1 {no accessible field "foobar" found in class tests.JavaTest}}
+
+test FieldSig-1.10 {get} {
+    list [catch {java::field tests.JavaTest {foobar tests.JavaTest}} msg] $msg
+} {1 {no accessible field "foobar tests.JavaTest" found in class tests.JavaTest}}
+
+test FieldSig-1.11 {get} {
+    list [catch {java::field tests.JavaTest {foobar Object}} msg] $msg
+} {1 {no accessible field "foobar Object" found in class java.lang.Object}}
+
+test FieldSig-1.12 {get} {
+    java::field tests.JavaTest {sint} 10
+    list [catch {java::field tests.JavaTest {sint}} msg] $msg
+} {0 10}
+
+test FieldSig-1.13 {get} {
+    java::field tests.JavaTest {sint} 10
+    list [catch {java::field tests.JavaTest {sint tests.JavaTest}} msg] $msg
+} {0 10}
+
+# cleanup
+::tcltest::cleanupTests
+return

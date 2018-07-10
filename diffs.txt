@@ -1,0 +1,212 @@
+diffs.txt --  DIFFERENCES BETWEEN TCL and JACL
+
+RCS: @(#) $Id: diffs.txt,v 1.12 2006/02/08 23:53:46 mdejong Exp $
+
+This file contains a list of differences between Tcl 8.x and Jacl 1.x.
+
+What Works
+
+These features work as do those in Tcl. Please notify us if you find
+any behavior that deviates from that of native Tcl.
+
+- All Tcl control flow constructs are fully implemented:
+
+	break, bgerror, case, catch, continue, exit,
+	for, foreach, if, proc, return, switch, while
+
+- General Tcl commands that are completely implemented in Jacl.
+
+	after, append, array, auto_load, binary, cd, clock, concat, encoding, error,
+        eval, expr, format, global, history, incr, interp, join, lappend, lindex,
+        linsert list, llength, lrange, lreplace, lsearch, lsort, namespace, package,
+        parray, pwd, regexp, regsub, rename, scan, seek, set, source, split, string,
+        subst, tell, time, trace, unknown, unset, update, uplevel, upvar, variable,
+        vwait
+
+----------
+
+What Partially Works
+
+These commands are close to being complete.  Please notify us if you
+find errors other than those we have described.
+
+- Currently, the I/O commands handle only synchronous I/O.  The
+  following IO commands work but are limited to what Java allows. 
+
+	close, eof, fblocked, fconfigure, file, flush, gets, glob,
+	open, puts, read, seek, tell, write, socket
+
+- Environment variable array "env" doesn't have the same indices
+  defined in Jacl as in native Tcl.  USER and HOME are the only
+  indices that are defined in both implementations.  Jacl defines
+  non-native indices, such as CLASSPATH.
+
+- The auto_execok command works on UNIX systems but it does not
+  work on Windows systems. This command is used by the unknown
+  command to check to see if a given program can be exec'ed. The
+  auto_reset command also works on UNIX systems but has no effect
+  on Windows systems as it is closely related to auto_execok.
+
+- Tcl commands that are not fully functional
+
+	info:	Missing "loaded" option
+	exec:   Not implemented on Mac classic, pipes and redirections
+                don't work on unix or windows systems
+
+----------
+
+What Does Not Work
+
+- Tcl commands that are not yet implemented in Jacl
+
+	auto_mkindex, fcopy, fileevent, lset, memory, msgcat,
+        load, pkg_mkIndex, pid, resource
+
+
+----------
+
+Tcl/Java library classes and methods:
+
+Java Class/Interface	Constructor/Method	Equivalent C Function
+
+AssocData		disposeAssocData	Tcl_CmdDeleteProc
+
+Command			cmdProc			Tcl_CommandProc
+
+CommandWithDispose	disposeCmd		Tcl_CmdDeleteProc
+
+EventDeleter		deleteEvent		Tcl_EventDeleteProc
+
+Extension		init
+			safeInit
+			loadOnDemand		
+
+IdleHandler		IdleHandler		Tcl_CreateIdleHandler
+			cancel
+			processIdleEvent
+
+InternalRep		dispose			Tcl_ObjType.freeProc
+			duplicate		Tcl_ObjType.dupIntRepProc
+			toString		Tcl_ObjType.updateStringProc
+
+Interp			Interp			Tcl_CreateInterp
+			dispose			Tcl_DeleteInterp
+			setVar			Tcl_SetVar, Tcl_SetVar2
+			getVar			Tcl_GetVar, Tcl_GetVar2
+			unsetVar		Tcl_UnsetVar, Tcl_UnsetVar2
+			traceVar		Tcl_TraceVar, Tcl_TraceVar2
+			untraceVar		Tcl_UntraceVar, Tcl_UntraceVar2
+			createCommand		Tcl_CreateCommand
+			deleteCommand		Tcl_DeleteCommand
+			getCommand		Tcl_GetCommandInfo
+			eval			Tcl_Eval, Tcl_EvalObj
+						Tcl_GlobalEval
+			recordAndEval		Tcl_RecordAndEvalObj
+			evalFile		Tcl_EvalFile
+			commandComplete		Tcl_CommandComplete
+			setResult		Tcl_SetObjResult
+						Tcl_SetResult
+			getResult		Tcl_GetObjResult
+			resetResult		Tcl_ResetResult
+			backgroundError		Tcl_BackgroundError
+			addErrorInfo		Tcl_AddErrorInfo
+			setErrorCode		Tcl_SetObjErrorCode
+			getNotifier		
+			setAssocData		Tcl_SetAssocData
+			getAssocData		Tcl_GetAssocData
+			deleteAssocData		Tcl_DeleteAssocData
+			pkgRequire		Tcl_PkgRequire
+			pkgProvide		Tcl_PkgProvide
+
+Notifier		deleteEvents		Tcl_DeleteEvents
+			doOneEvent		Tcl_DoOneEvent
+			getNotifierForThread
+			preserve
+			queueEvent		Tcl_QueueEvent
+			release
+
+ReflectObject		newInstance
+			get
+			getClass
+
+TclBoolean		newInstance		Tcl_NewBooleanObj
+			get			Tcl_GetBooleanFromObj
+
+TclDouble		newInstance		Tcl_NewDoubleObj
+			get			Tcl_GetDoubleFromObj
+			set			Tcl_SetDoubleObj
+
+TclEvent		processEvent		Tcl_EventProc
+			sync			Tcl_ServiceAll
+
+TclException		TclException		
+
+TclIndex		get			Tcl_GetIndexFromObj
+
+TclInteger		newInstance		Tcl_NewIntObj
+			get			Tcl_GetIntFromObj
+			getForIndex		TclGetIntForIndex
+			set			Tcl_SetIntObj
+
+TclList			newInstance		Tcl_NewListObj
+			append			Tcl_ListObjAppendList
+			getLength		Tcl_ListObjLength
+			getElements		Tcl_ListObjGetElements
+			index			Tcl_ListObjIndex
+			replace			Tcl_ListObjReplace
+
+TclNumArgsException	TclNumArgsException	
+
+TclObject		TclObject		Tcl_NewObj
+			setInternalRep		Tcl_ConvertToType
+			getInternalRep		TclObj.typePtr
+			toString		Tcl_GetStringFromObj
+			invalidateStringRep	Tcl_InvalidateStringRep
+			preserve		Tcl_IncrRefCount
+			release			Tcl_DecrRefCount
+			isShared		Tcl_IsShared
+			duplicate		Tcl_DuplicateObj
+
+TclString		newInstance		Tcl_NewStringObj
+			append			Tcl_AppendToObj
+
+TimerHandler		Timerhandler		Tcl_CreateTimerHandler
+			cancel
+			processTimerEvent
+
+Util			stringMatch		Tcl_StringMatch
+
+VarTrace		traceProc		Tcl_TraceProc
+
+
+Jacl library classes and methods:
+
+Namespace		DeleteProc		Tcl_NamespaceDeleteProc
+			createNamespace		Tcl_CreateNamespace
+			deleteNamespace		Tcl_DeleteNamespace
+			exportList		Tcl_Export
+			findCommand		Tcl_FindCommand
+			findNamespace		Tcl_FindNamespace
+			findNamespaceVar	Tcl_FindNamespaceVar
+			forgetImport		Tcl_ForgetImport
+			getOriginalCommand	TclGetOriginalCommand
+			importList		Tcl_Import
+			popCallFrame		Tcl_PopCallFrame
+			pushCallFrame		Tcl_PushCallFrame
+			getCurrentNamespace	Tcl_GetCurrentNamespace
+			getGlobalNamespace	Tcl_GetGlobalNamespace
+			getNamespaceResolver	Tcl_GetNamespaceResolvers
+			setNamespaceResolver	Tcl_SetNamespaceResolvers
+
+Var			getVariableFullName	Tcl_GetVariableFullName
+
+WrappedCommand          WrappedCommand          struct Command
+
+Interp			addInterpResolver	Tcl_AddInterpResolvers
+			deleteCommandFromToken	Tcl_DeleteCommandFromToken
+                        getErrorLine		struct Tcl_Interp.errorLine
+			getInterpResolver	Tcl_GetInterpResolvers
+			processUnexpectedResult	ProcessUnexpectedResult
+                        removeInterpResolver	Tcl_RemoveInterpResolvers
+			updateReturnInfo	TclUpdateReturnInfo
+

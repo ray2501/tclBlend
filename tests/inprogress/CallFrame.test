@@ -1,0 +1,134 @@
+# CallFrame.test --
+#
+#	Tests the implementation of the CallFrame.java file.
+#
+# Copyright (c) 1997 by Sun Microsystems, Inc.
+#
+# See the file "license.terms" for information on usage and redistribution
+# of this file, and for a DISCLAIMER OF ALL WARRANTIES.
+#
+# SCCS: @(#) CallFrame.test 1.3 98/02/11 18:05:08
+
+# Note: This test file must be sourced from the parent directory
+#       or else the defs file may not be properly loaded.
+
+if {[lsearch [namespace children] ::tcltest] == -1} {
+    package require tcltest
+    namespace import -force ::tcltest::*
+}
+
+test CallFrame-1.1 {setVar: lappend on non-existent variable} {
+    catch {
+	unset x
+    }
+    lappend x aa
+} aa
+
+test CallFrame-1.2 {setVar: lappend on non-existent variable} {
+    catch {
+	unset x
+    }
+    lappend x aa aa aa
+} {aa aa aa}
+
+test CallFrame-1.3 {setVar: lappend on non-existent variable} {
+    catch {
+	unset x
+    }
+    lappend x [list aa]
+} aa
+
+test CallFrame-1.4 {setVar: lappend on non-existent variable} {
+    catch {
+	unset x
+    }
+    lappend x "{aa}" "{aa}" "{aa}"
+} {{{aa}} {{aa}} {{aa}}}
+
+
+# Testing CallFrame.lookUp from Tcl
+
+if {[catch {
+    proc testLookUp {part1 part2 val} {
+	set this [java::getinterp]
+	set sig {setVar String String tcl.lang.TclObject int}
+	set tobj [java::call tcl.lang.TclInteger newInstance $val]
+	$this $sig $part1 $part2 $tobj 1
+    }
+}]} {
+    puts "This application hasn't been compiled with the tests for assocData,"
+    puts "therefore I am skipping all of these tests."
+    return
+}
+
+test CallFrame-2.1 {lookUp} {
+    catch {unset x}
+    testLookUp x [java::null] 56
+    set x
+} 56
+
+test CallFrame-2.2 {lookUp} {knownbug} {
+    catch {unset x}
+    testLookUp x(3) [java::null] 56
+    testLookUp x() [java::null] 57
+    testLookUp x 4 58
+    list [lsort [array names x]] [set x()]
+} {{3 4} 57}
+
+test CallFrame-2.3 {lookUp} {
+    catch {unset x}
+    testLookUp x(3) [java::null] 56
+    testLookUp x "" 57
+    testLookUp x 4 58
+    list [lsort [array names x]] [set x()]
+} {{{} 3 4} 57}
+
+test CallFrame-2.4 {lookUp} {
+    catch {unset x}
+    list [catch {testLookUp x(3) a 56} msg] $msg
+} {1 {}}
+
+test CallFrame-2.5 {lookUp} {
+    catch {unset x}
+    list [catch {testLookUp x() a 56} msg] $msg
+} {1 {}}
+
+test CallFrame-2.6 {lookUp} {
+    catch {unset x)}
+    list [catch {
+	testLookUp x) [java::null] 56
+	set x)
+      } msg] $msg
+} {0 56}
+
+test CallFrame-2.6 {lookUp} {
+    catch {unset x)ab}
+    list [catch {
+	testLookUp x)ab [java::null] 56
+	set x)ab
+      } msg] $msg
+} {0 56}
+
+test CallFrame-2.6 {lookUp} {
+    catch {unset x(}
+    list [catch {
+	testLookUp x( [java::null] 56
+	set x(
+      } msg] $msg
+} {0 56}
+
+test CallFrame-2.7 {lookUp} {
+    catch {unset x(ab}
+    list [catch {
+	testLookUp x(ab [java::null] 56
+	set x(ab
+      } msg] $msg
+} {0 56}
+
+catch {
+    unset x
+    unset x(
+    unset x(ab
+    unset x)
+    unset x)ab
+}

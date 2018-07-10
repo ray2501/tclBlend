@@ -1,0 +1,335 @@
+# This file tests issues related to reference counting for
+# TclObject and native Tcl_Obj types in Tcl Blend.
+#
+# This file contains a collection of tests for one or more of the Tcl
+# built-in commands.  Sourcing this file into Tcl runs the tests and
+# generates output for errors.  No output means no errors were found.
+#
+# Copyright (c) 2002 by Mo DeJong.
+#
+# See the file "license.terms" for information on usage and redistribution
+# of this file, and for a DISCLAIMER OF ALL WARRANTIES.
+#
+# RCS: @(#) $Id: refCount.test,v 1.3 2002/12/31 05:22:16 mdejong Exp $
+
+if {[lsearch [namespace children] ::tcltest] == -1} {
+    package require tcltest
+    namespace import -force ::tcltest::*
+}
+
+setupJavaPackage
+
+test refcount-1.1 {Tcl_Obj.refCount} {
+    set obj mystring
+    btest refcount $obj
+} 1
+
+test refcount-1.2 {Tcl_Obj.refCount} {
+    btest refcount [list 1 2 3]
+} 0
+
+test refcount-1.3 {Tcl_Obj.refCount} {
+    set obj mystring
+    set copy $obj
+    btest refcount $obj
+} 2
+
+test refcount-1.4 {Tcl_Obj.refCount} {
+    set obj1 mystring
+    set obj2 [format %s $obj1]
+    list [btest refcount $obj1] \
+         [btest refcount $obj2]
+} {1 1}
+
+
+test refcount-2.1 {TclObject.refCount} {
+    set obj [java::new String mystring]
+    jtest refcount $obj
+} 1
+
+test refcount-2.2 {TclObject.refCount} {
+    # Tcl_Obj -> TclObject ref increments TclObject.refCount
+    jtest refcount [java::new String mystring]
+} 1
+
+test refcount-2.3 {TclObject.refCount != Tcl_Obj.refCount} {
+    set obj [java::new String mystring]
+    set copy $obj
+    list [btest refcount $obj] [jtest refcount $obj]
+} {2 1}
+
+test refcount-2.4 {Tcl_Obj.refCount for a TclObject} {
+    set obj1 [java::new String mystring]
+    set obj2 [format %s $obj1]
+    java::isnull $obj2
+    list [btest refcount $obj1] \
+         [btest refcount $obj2]
+} {1 1}
+
+
+test refcount-3.1 {TclObject.refCount for a CObject} {
+    set obj mystring
+    list [jtest refcount $obj] \
+         [btest refcount $obj]
+} {1 1}
+
+test refcount-3.2 {TclObject.refCount for a CObject} {
+    # A CObject starts life with a ref count of 1
+    # no matter what the native object ref count is
+    jtest refcount [list 1 2 3]
+} {1}
+
+test refcount-3.3 {TclObject.refCount for a CObject} {
+    set obj mystring
+    set copy $obj
+    list [jtest refcount $obj] \
+         [btest refcount $obj]
+} {1 2}
+
+
+test refcount-4.1 {change internal rep} {
+    # Setting a new internal rep for a TclObject
+    # should not leave the Tcl_Obj with an
+    # incremented ref count. The CObject.dispose()
+    # method will take care of dangling refs
+    # to the native Tcl_Obj. Also note that
+    # the TclObject ref count is not changed.
+    set results [list]
+
+    [java::getinterp] createCommand testrerep \
+        [java::new tests.ReRepCmd]
+
+    set obj mystring
+    lappend results [jtest type $obj] [jtest refcount $obj] [btest refcount $obj]
+    testrerep $obj
+    rename testrerep {}
+    lappend results [jtest type $obj] [jtest refcount $obj] [btest refcount $obj]
+} {tcl.lang.CObject 1 1 tcl.lang.TclString 1 1}
+
+test refcount-4.2 {change internal rep} {
+    # Setting a new internal rep does not
+    # change the TclObject.refCount when
+    # both internal reps are non-CObject types.
+    set results [list]
+
+    [java::getinterp] createCommand testrerep \
+        [java::new tests.ReRepCmd]
+
+    set obj [java::new String mystring]
+    lappend results [jtest type $obj] [jtest refcount $obj] [btest refcount $obj]
+    testrerep $obj
+    rename testrerep {}
+    lappend results [jtest type $obj] [jtest refcount $obj] [btest refcount $obj] 
+} {tcl.lang.ReflectObject 1 1 tcl.lang.TclString 1 1}
+
+test refcount-4.3 {change internal rep} {
+    # Converting from TclString->TclList->TclString
+    # should not create a dangling Tcl_Obj which
+    # could cause an infinite loop.
+    [java::getinterp] createCommand teststringliststring \
+        [java::new tests.StringListStringCmd]
+    teststringliststring
+} {}
+
+test refcount-4.4 {change internal rep} {
+    # Converting from TclString->TclList will
+    # add the CObject created for the TclList
+    # to the cleanup queue.
+    [java::getinterp] createCommand testlostlist \
+        [java::new tests.LostListCmd]
+    testlostlist
+} {}
+
+test refcount-4.5 {change internal rep} {
+    # Make sure an object added to the
+    # cleanup queue is cleaned up properly
+    [java::getinterp] createCommand testintlostlist \
+        [java::new tcl.lang.IntLostListCmd]
+    list [testintlostlist] [testintlostlist 1]
+} {saved 0}
+
+test refcount-4.6 {change internal rep} {
+    # Make sure an object added to the
+    # cleanup queue is cleaned up properly
+    # In this case a list was duplicated in C
+    # so it would leak memory if not cleaned up.
+    [java::getinterp] createCommand testintlistappend \
+        [java::new tcl.lang.IntListAppendCmd]
+    set colors [list red brown]
+    list [testintlistappend $colors] [btest refcount $colors] \
+        [testintlistappend $colors 1]
+} {saved 1 0}
+
+test refcount-4.7 {change internal rep} {
+    # This test will convert from a CObject to
+    # a TclDouble and then back to a TclList.
+    # When invoked the second time it will
+    # attempt to get the length of this TclList.
+    # This will crash if going from the
+    # TclDouble to the TclList does not break
+    # the ref from the native Tcl_Obj to the TclObject.
+    [java::getinterp] createCommand testargconvert \
+        [java::new tcl.lang.ArgConvertCmd]
+    set v 1.0
+    list [testargconvert $v] [testargconvert $v 1]
+} {converted checked}
+
+test refcount-4.8 {TclList.replace()} {
+    [java::getinterp] createCommand testlistreplace \
+        [java::new tests.ListReplaceCmd]
+    testlistreplace
+    set l [list ONE 2 3 4 5]
+    testlistreplace $l
+    testlistreplace [list UNO 2 3 4 5]
+    testlistreplace "" ""
+} {}
+
+test refcount-4.9 {TclObject.release()} {
+    # This test used to crash because of a bug in
+    # Java_tcl_lang_CObject_newCObject where the
+    # returned pointer was not set to zero first
+    [java::getinterp] createCommand testreleasenewlist \
+        [java::new tests.ReleaseNewListCmd]
+    testreleasenewlist
+    testreleasenewlist
+} {}
+
+
+test refcount-5.1 {TclObject.refCount} {
+    jtest refcount [[java::getinterp] getResult]
+} {1}
+
+test refcount-5.2 {changes in Tcl_Obj.refCount not
+        reflected in TclObject.refCount} {
+    set results [list]
+    set obj [java::new String mystring]
+    set copy1 $obj
+    lappend results [btest refcount $obj] [jtest refcount $obj]
+    set copy2 $obj
+    lappend results [btest refcount $obj] [jtest refcount $obj]
+    unset copy2
+    unset copy1
+    lappend results [btest refcount $obj] [jtest refcount $obj]
+} {2 1 3 1 1 1}
+
+test refcount-5.3 {Duplicate a Tcl_Obj that holds a TclObject} {
+    set results [list]
+    set obj [java::new Object]
+    set copy $obj
+    lappend results [btest refcount $obj] [btest refcount $copy]
+    # Invoke DupTclObject to copy Tcl_Obj
+    lappend obj BLAH
+    lappend results [btest refcount $obj] [btest refcount $copy]
+    set copy2 $copy
+    set copy3 $copy
+    set copy4 $obj
+    lappend results [btest refcount $obj] [btest refcount $copy]
+} {2 2 1 1 2 3}
+
+test refcount-5.4 {java::isnull should not change Tcl_Obj.refCount} {
+    set results [list]
+    set obj [java::new Object]
+    set copy [format %s $obj]
+    lappend results [btest refcount $obj] [btest refcount $copy]
+    # Set internal rep to TclObject type, this should
+    # not change the Tcl_Obj.refCount
+    java::isnull $copy
+    lappend results [btest refcount $obj] [btest refcount $copy]
+} {1 1 1 1}
+
+test refcount-5.5 {java::isnull should not change TclObject.refCount} {
+    set results [list]
+    set obj [java::new Object]
+    set copy [format %s $obj]
+    lappend results [jtest refcount $obj] [jtest refcount $copy]
+    # Setting the internal rep will increment the TclObject.refCount
+    java::isnull $copy
+    lappend results [jtest refcount $obj] [jtest refcount $copy]
+} {1 1 1 1}
+
+test refcount-5.6 {hold ref to CObject} {
+    # Incrementing a TclObject that wraps a CObject
+    # will increment the Tcl_Obj.refCount
+
+    [java::getinterp] createCommand testholdref \
+        [java::new tests.HoldRefCmd]
+
+    set results [list]
+    set obj mystring
+    lappend results [btest refcount $obj]
+    testholdref $obj
+    lappend results [btest refcount $obj]
+    testholdref $obj
+    lappend results [btest refcount $obj]
+    rename testholdref {}
+    lappend results [btest refcount $obj]
+} {1 2 3 1}
+
+test refcount-5.7 {hold ref to TclObject} {
+    # Incrementing a TclObject that wraps a non-CObject
+    # type will increment the TclObject.refCount
+
+    [java::getinterp] createCommand testholdref \
+        [java::new tests.HoldRefCmd]
+
+    set results [list]
+    set obj [java::new Object]
+    lappend results [jtest refcount $obj]
+    testholdref $obj
+    lappend results [jtest refcount $obj]
+    testholdref $obj
+    lappend results [jtest refcount $obj]
+    rename testholdref {}
+    lappend results [jtest refcount $obj]
+} {1 2 3 1}
+
+test refcount-6.1 {TclObject reflected} {
+    # Incrementing and decrementing the TclObject
+    # ref count in JavaCmdProc should not
+    # dispose of the TclObject wrapper created
+    # for the argument. If it did, the toString
+    # method below would fail because tobj was dead.
+
+    set str "foo"
+    set tobj [jtest getobject $str]
+    $tobj toString
+} {foo}
+
+
+test refcount-7.1 {SetJavaCmdFromAny} {
+    set results [list]
+    set o [java::new String foo]
+    lappend results [btest refcount $o] [jtest refcount $o]
+    lappend results [$o toString]
+    lappend results [btest refcount $o] [jtest refcount $o]
+    set copy [format %s $o]
+    unset o
+    lappend results [catch {$copy toString} err] \
+        [string equal $err "invalid command name \"$copy\""]
+} {1 1 foo 1 1 1 1}
+
+test refcount-7.2 {SetJavaCmdFromAny} {
+    set results [list]
+    set o [java::new String foo]
+    lappend results [btest refcount $o] [jtest refcount $o]
+    set copy [format %s $o]
+    lappend results [$copy toString]
+    lappend results [btest refcount $o] [jtest refcount $o]
+    unset o
+    # Toss cmd+ref internal rep, cmd table must be searched again.
+    llength $copy
+    lappend results [catch {$copy toString} err] \
+        [string equal $err "invalid command name \"$copy\""]
+} {1 1 foo 1 1 1 1}
+
+
+
+# cleanup
+catch {unset obj}
+catch {unset copy}
+catch {unset obj1}
+catch {unset obj2}
+catch {unset str}
+catch {unset results}
+::tcltest::cleanupTests
+return

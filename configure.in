@@ -1,0 +1,379 @@
+dnl	This file is an input file used by the GNU "autoconf" program to
+dnl	generate the file "configure", which is run to configure the
+dnl	Makefile in this directory.
+AC_INIT(ChangeLog)
+
+AC_PREREQ(2.50)
+
+sinclude(tcljava.m4)
+
+#------------------------------------------------------------------------
+# Handle the --prefix=... option
+#------------------------------------------------------------------------
+
+if test "${prefix}" = "NONE"; then
+    prefix=/usr/local
+fi
+if test "${exec_prefix}" = "NONE"; then
+    exec_prefix=$prefix
+fi
+
+#--------------------------------------------------------------------
+# 	Version identification info (also set in source files)
+#--------------------------------------------------------------------
+TCLJAVA_VERSION=1.4.5
+TCLJAVA_NODOT_VERSION=`echo $TCLJAVA_VERSION | sed -e 's/\.//g'`
+
+# Convert into full path name
+srcdir=`cd $srcdir ; pwd`
+AC_MSG_LOG([srcdir is $srcdir])
+
+
+# Check our version numbers hard coded into files. Update if needed.
+
+TCLJAVA_VERSION_CHECK
+
+# Figure out if we should be building Jacl or Tcl Blend
+
+TCLJAVA_ENABLE_JACL_OR_TCLBLEND
+
+# Process the --with-tcl command line option
+
+TCLJAVA_WITH_TCL
+
+if test "$ac_cv_tcl_win32" = ""; then
+    # Make sure ac_cv_tcl_win32 is set for Jacl under msys
+    if (uname -s | grep MINGW > /dev/null) ; then
+        ac_cv_tcl_win32=yes
+    fi
+fi
+
+# Process the --with-thread command line option
+
+TCLJAVA_WITH_THREAD
+
+# Check that Tcl install works and is the correct version.
+
+TCLJAVA_CHECK_TCLSH
+
+# See if --with-jdk command line argument is given
+
+AC_JAVA_WITH_JDK
+
+# Try to detect the installed JVM, this could be controlled
+# by the above --with options
+
+AC_JAVA_DETECT_JVM
+
+# Find all the Java tools like java, jar, and javah
+
+AC_JAVA_TOOLS
+
+
+# Look for debuggers on the PATH, we do not care if thay can not be found
+
+AC_PATH_PROG(DDD, ddd,)
+AC_PATH_PROG(GDB, gdb,)
+
+
+
+# Look for JNI include and library info when Tcl Blend is being compiled
+# We only support native threads with JNI so don't worry about green threads
+
+if test $TCLJAVA = "tclblend" || test $TCLJAVA = "both"; then
+
+    # Find out where JNI include directories live
+
+    AC_JAVA_JNI_INCLUDE
+
+    # Find out where the JNI native thread libraries live
+
+    AC_JAVA_JNI_LIBS
+
+fi
+
+
+
+
+# Do a more in depth test of the Java tools (JAVAC, JAVA, and JAR)
+
+AC_MSG_CHECKING([the Java compiler])
+
+CLASSPATH=$ac_java_classpath
+export CLASSPATH
+AC_MSG_LOG([Using CLASSPATH=$CLASSPATH], 1)
+
+AC_MSG_LOG([Copied $srcdir/src/Test.tcl to `pwd`], 1)
+cp $srcdir/src/Test.tcl .
+
+rm -f Test.class
+AC_MSG_LOG([$JAVAC $JAVAC_FLAGS $JAVAC_D_FLAG . $srcdir/src/Test.java], 1)
+if ( $JAVAC $JAVAC_FLAGS $JAVAC_D_FLAG . $srcdir/src/Test.java 1>&5 2>&5 ) &&
+    test -f Test.class ; then
+    AC_MSG_RESULT([the Java compiler works])
+
+    AC_MSG_CHECKING([the the Java runtime])
+
+    if test "$ac_java_classpath" = ""; then
+        CLASSPATH=.
+    else
+        CLASSPATH=$ac_java_classpath:.
+    fi
+    export CLASSPATH
+    AC_MSG_LOG([Using CLASSPATH=$CLASSPATH], 1)
+
+    # Do basic runtime check
+
+    if test "`$JAVA Test 2>&5`" = "OK"; then
+        JAVA_FLAGS=""
+        AC_MSG_RESULT([the Java runtime works])
+    else
+        AC_MSG_ERROR([could not run simple test program Test.class with $JAVA, you need to check the Java runtime to make sure it is installed correctly])
+    fi
+
+    AC_MSG_CHECKING([the Java archive program])
+
+    # Flags we will pass to the jar executable
+    JAR_EXTRACT_FLAGS=-xf
+    JAR_COMPRESS_FLAGS=-cfM
+    JAR_NOCOMPRESS_FLAGS=-cf0M
+
+    # Use jar program to create an uncompressed archive
+
+    rm -f Test.jar
+    AC_MSG_LOG([$JAR $JAR_NOCOMPRESS_FLAGS Test.jar Test.class], 1)
+    if ($JAR $JAR_NOCOMPRESS_FLAGS Test.jar Test.class 2>&5) && test -f Test.jar; then
+        AC_MSG_RESULT([the jar program creates uncompressed archives])
+    else
+	AC_MSG_LOG([the jar program could not create an uncompressed archive], 1)
+	AC_MSG_ERROR([the jar program could not create an uncompressed archive])
+    fi
+
+    # Test out extraction of .class file from an uncompressed jar
+
+    rm -f Test.class
+    AC_MSG_LOG([$JAR $JAR_EXTRACT_FLAGS Test.jar], 1)
+    if ($JAR $JAR_EXTRACT_FLAGS Test.jar 2>&5) && test -f Test.class; then
+        AC_MSG_RESULT([the jar program extracts uncompressed archives])
+    else
+        AC_MSG_LOG([the jar program could not extract from an uncompressed archive], 1)
+        AC_MSG_ERROR([the jar program could not extract from an uncompressed archive])
+    fi
+
+    # Use jar program to create a compressed archive
+    rm -f Test.jar
+    AC_MSG_LOG([$JAR $JAR_COMPRESS_FLAGS Test.jar Test.class], 1)
+    if ($JAR $JAR_COMPRESS_FLAGS Test.jar Test.class 2>&5) && test -f Test.jar; then
+        AC_MSG_RESULT([the jar program creates compressed archives])
+    else
+        AC_MSG_LOG([the jar program could not create a compressed archive], 1)
+        AC_MSG_ERROR([the jar program could not create a compressed archive])
+    fi
+
+    # Test out extraction of .class file from a compressed jar
+
+    rm -f Test.class
+    AC_MSG_LOG([$JAR $JAR_EXTRACT_FLAGS Test.jar], 1)
+    if ($JAR $JAR_EXTRACT_FLAGS Test.jar 2>&5) && test -f Test.class; then
+        AC_MSG_RESULT([the jar program extracts compressed archives])
+    else
+        AC_MSG_LOG([the jar program could not extract from a compressed archive], 1)
+        AC_MSG_ERROR([the jar program could not extract from a compressed archive])
+    fi
+
+    # Clean up, people might think they need Test.jar
+    rm -f Test.jar
+
+
+    # Run Test.class again so that we are sure the jar
+    # programs did not screw it up
+
+    AC_MSG_CHECKING([that the jar program did not corrupt the test file])
+
+    AC_MSG_LOG([$JAVA Test], 1)
+    if test "`$JAVA Test 2>&5`" = "OK"; then
+        AC_MSG_RESULT([it did not])
+    else
+        AC_MSG_ERROR([Test.class has been corrupted.])
+    fi
+
+    # Test.class is not removed because it is needed later
+    # to verify that the installed shell is working.
+
+else
+    AC_MSG_LOG([Could not compile simple test program Test.java with $JAVAC], 1)
+    AC_MSG_ERROR([Could not compile simple test program Test.java with $JAVAC])
+fi
+
+# Check for gcc bug(s) that cause Tcl Blend to fail
+
+AC_GCC_BUGS
+
+# Subst variables that are only used by Tcl Blend
+
+if test "$ac_java_jvm_name" = "kaffe"; then
+    TCL_CFLAGS="$TCL_CFLAGS -DTCLBLEND_KAFFE"
+fi
+
+# Avoid silly make warnings about duplicate targets
+# by setting SHLIB_PREFIX to a non-empty value.
+if test "$TCLJAVA" = "jacl" ; then
+    SHLIB_PREFIX=dummy
+fi
+
+AC_SUBST(CC)
+AC_SUBST(SHLIB_CFLAGS)
+AC_SUBST(SHLIB_LD)
+AC_SUBST(SHLIB_LD_LIBS)
+AC_SUBST(SHLIB_PREFIX)
+AC_SUBST(SHLIB_SUFFIX)
+AC_SUBST(SHLIB_VERSION)
+AC_SUBST(TCL_BUILD_LIB_SPEC)
+AC_SUBST(TCL_CFLAGS)
+AC_SUBST(TCL_DEFS)
+AC_SUBST(TCL_LIBS)
+AC_SUBST(TCL_VERSION)
+AC_SUBST(TCL_SRC_DIR)
+AC_SUBST(TCL_BIN_DIR)
+AC_SUBST(TCL_LD_SEARCH_FLAGS)
+AC_SUBST(TCL_DBGX)
+
+AC_SUBST(TCLJAVA_DBGX)
+
+
+JAVA_INCLUDE_FLAGS=$ac_java_jvm_jni_include_flags
+AC_SUBST(JAVA_INCLUDE_FLAGS)
+
+JAVA_LIB_FLAGS=$ac_java_jvm_jni_lib_flags
+AC_SUBST(JAVA_LIB_FLAGS)
+
+JAVA_LIB_RUNTIME_PATH=$ac_java_jvm_jni_lib_runtime_path
+AC_SUBST(JAVA_LIB_RUNTIME_PATH)
+
+TCLBLEND_LD_PRELOAD=$ac_java_jvm_ld_preload
+TCLBLEND_LD_BIND_NOW=$ac_java_jvm_ld_bind_now
+
+AC_SUBST(TCLBLEND_LD_PRELOAD)
+AC_SUBST(TCLBLEND_LD_BIND_NOW)
+
+AC_SUBST(WISH)
+AC_SUBST(TCLSH)
+TCL_BIN_TCLSH=$TCLSH_LOC
+AC_SUBST(TCL_BIN_TCLSH)
+AC_SUBST(TCL_INSTALL_LIB_DIR)
+
+
+# Subst variables that are used in both jacl and tclblend
+
+BUILD_DIR=`pwd`
+AC_SUBST(BUILD_DIR)
+
+TOP_DIR=$srcdir
+if test "$ac_cv_tcl_win32" = "yes"; then
+    TOP_DIR_NATIVE=`sh $srcdir/mingw_path.sh "$TOP_DIR"`
+else
+    TOP_DIR_NATIVE=$TOP_DIR
+fi
+AC_SUBST(TOP_DIR)
+AC_SUBST(TOP_DIR_NATIVE)
+
+if test "$ac_cv_tcl_win32" = "yes"; then
+    BUILD_DIR_NATIVE=`sh $srcdir/mingw_path.sh "$BUILD_DIR"`
+else
+    BUILD_DIR_NATIVE=$BUILD_DIR
+fi
+AC_SUBST(BUILD_DIR_NATIVE)
+
+if test "$ac_cv_tcl_win32" = "yes"; then
+    THREAD_BIN_DIR_NATIVE=`sh $srcdir/mingw_path.sh "$THREAD_BIN_DIR"`
+else
+    THREAD_BIN_DIR_NATIVE=$THREAD_BIN_DIR
+fi
+AC_SUBST(THREAD_BIN_DIR_NATIVE)
+
+dnl Used in the Makefile to detect when Win32 specific code needs
+dnl to be run.
+
+if test "$ac_cv_tcl_win32" = "yes"; then
+    WIN32_HOST=1
+else
+    WIN32_HOST=0
+fi
+AC_SUBST(WIN32_HOST)
+
+AC_SUBST(JAVA)
+AC_SUBST(JAVA_G)
+AC_SUBST(JAVAC)
+AC_SUBST(JAR)
+AC_SUBST(JDB)
+AC_SUBST(DDD)
+AC_SUBST(GDB)
+
+JAVA_CLASSPATH=$ac_java_classpath
+AC_SUBST(JAVA_CLASSPATH)
+
+# Start Java runtime with 5 Meg Min Heap and 32 Meg Max Heap
+JAVA_FLAGS="$JAVA_FLAGS -ms5m -mx32m"
+AC_SUBST(JAVA_FLAGS)
+
+AC_SUBST(JAVAC_FLAGS)
+AC_SUBST(JAVAC_D_FLAG)
+AC_SUBST(JAVAC_H_FLAG)
+AC_SUBST(JAVA_G_FLAGS)
+AC_SUBST(JDB_ATTACH_FLAGS)
+
+AC_SUBST(JAR_EXTRACT_FLAGS)
+AC_SUBST(JAR_COMPRESS_FLAGS)
+AC_SUBST(JAR_NOCOMPRESS_FLAGS)
+
+AC_SUBST(TCLJAVA_VERSION)
+AC_SUBST(TCLJAVA_NODOT_VERSION)
+
+# Subst variable that may need to be converted to Win32
+# native paths.
+
+if test "$ac_cv_tcl_win32" = "yes" ; then
+    JAVA_NATIVE=`sh $srcdir/mingw_path.sh "$JAVA"`
+    AC_SUBST(JAVA_NATIVE)
+    PREFIX_NATIVE=`sh $srcdir/mingw_path.sh "$prefix"`
+    AC_SUBST(PREFIX_NATIVE)
+    EXEC_PREFIX_NATIVE=$exec_prefix
+    if test "$EXEC_PREFIX_NATIVE" = "NONE"; then
+        EXEC_PREFIX_NATIVE=$PREFIX_NATIVE
+    else
+        EXEC_PREFIX_NATIVE=`sh $srcdir/mingw_path.sh "$EXEC_PREFIX_NATIVE"`
+    fi
+    AC_SUBST(EXEC_PREFIX_NATIVE)
+    TCLSH_NATIVE=`sh $srcdir/mingw_path.sh "$TCLSH"`
+    AC_SUBST(TCLSH_NATIVE)
+    JAVA_CLASSPATH_NATIVE=`sh $srcdir/mingw_paths.sh "$JAVA_CLASSPATH"`
+    AC_SUBST(JAVA_CLASSPATH_NATIVE)
+    JAVA_LIB_RUNTIME_PATH_NATIVE=`sh $srcdir/mingw_paths.sh "$JAVA_LIB_RUNTIME_PATH"`
+    AC_SUBST(JAVA_LIB_RUNTIME_PATH_NATIVE)
+fi
+
+# Need to subst TCLJAVA="tclblend" not TCLJAVA="both".
+ORIG_TCLJAVA=$TCLJAVA
+if test "$TCLJAVA" = "both" ; then
+    TCLJAVA=tclblend
+fi
+AC_SUBST(TCLJAVA)
+
+if test $ORIG_TCLJAVA = "both"; then
+    OUTPUT_FILES="Makefile tcljavaConfig.sh jaclsh tjc jtclsh"
+    if test "$ac_cv_tcl_win32" = "yes" ; then
+        OUTPUT_FILES="$OUTPUT_FILES jaclsh.bat tjc.bat jtclsh.bat"
+    fi
+elif test $ORIG_TCLJAVA = "tclblend"; then
+    OUTPUT_FILES="Makefile tcljavaConfig.sh jtclsh"
+    if test "$ac_cv_tcl_win32" = "yes" ; then
+        OUTPUT_FILES="$OUTPUT_FILES jtclsh.bat"
+    fi
+else
+    OUTPUT_FILES="Makefile tcljavaConfig.sh jaclsh tjc"
+    if test "$ac_cv_tcl_win32" = "yes" ; then
+        OUTPUT_FILES="$OUTPUT_FILES jaclsh.bat tjc.bat"
+    fi
+fi
+
+AC_OUTPUT([$OUTPUT_FILES])

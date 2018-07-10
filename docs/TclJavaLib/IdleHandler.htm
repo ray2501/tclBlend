@@ -1,0 +1,74 @@
+<HTML><HEAD><TITLE>TclJava Library Procedures - IdleHandler manual page</TITLE></HEAD><BODY>
+<DL>
+<DD><A HREF="IdleHandler.htm#M2" NAME="L51">CLASS</A>
+<DL><DD>tcl.lang.IdleHandler -- Subclass from this abstract base class to
+create idle event handlers.</DL>
+<DD><A HREF="IdleHandler.htm#M3" NAME="L52">METHODS</A>
+<DL><DD><B>IdleHandler</B>(Notifier <I>notifier</I>)</DL>
+<DL><DD>synchronized void <B>cancel</B>()</DL>
+<DL><DD>abstract void <B>processIdleEvent</B>()</DL>
+<DD><A HREF="IdleHandler.htm#M4" NAME="L53">ARGUMENTS</A>
+<DL>
+</DL>
+<DD><A HREF="IdleHandler.htm#M5" NAME="L54">DESCRIPTION</A>
+<DL>
+<DD><A HREF="IdleHandler.htm#M6" NAME="L55"><B>IdleHandler</B></A>
+<DD><A HREF="IdleHandler.htm#M7" NAME="L56"><B>cancel</B></A>
+<DD><A HREF="IdleHandler.htm#M8" NAME="L57"><B>processIdleEvent</B></A>
+</DL>
+<DD><A HREF="IdleHandler.htm#M9" NAME="L58">EQUIVALENT C FUNCTIONS</A>
+<DD><A HREF="IdleHandler.htm#M10" NAME="L59">SEE ALSO</A>
+<DD><A HREF="IdleHandler.htm#M11" NAME="L60">KEYWORDS</A>
+</DL><HR>
+<H3><A NAME="M2">CLASS</A></H3>
+tcl.lang.IdleHandler -- Subclass from this abstract base class to
+create idle event handlers.
+<H3><A NAME="M3">METHODS</A></H3>
+<P><B>IdleHandler</B>(Notifier <I>notifier</I>)
+<P>synchronized void <B>cancel</B>()
+<P>abstract void <B>processIdleEvent</B>()
+<H3><A NAME="M4">ARGUMENTS</A></H3>
+<DL>
+<P><DT>Notifier <B>notifier</B> ()<DD>
+The Notifier in which to register the new IdleHandler.
+<P></DL>
+<H3><A NAME="M5">DESCRIPTION</A></H3>
+The <B>IdleHandler</B> class is used to schedule code to be executed
+when the specified <I>notifier</I> becomes idle. The <I>notifier</I> is
+considered to be idle when <I>notifier</I>.<B><A HREF="../TclJavaLib/Notifier.htm">doOneEvent</A></B> has been
+called, couldn't find any events to handle, and is about to go to
+sleep waiting for an event to occur. At this point all pending idle
+handlers are invoked. For each currently registered IdleHandler
+instance, there will be a single call to its <B>processIdleEvent</B>
+method; after that the IdleHandler instance is automatically
+removed. The IdleHandler class is only usable in programs that use
+<I>notifier</I>.<B><A HREF="../TclJavaLib/Notifier.htm">doOneEvent</A></B> to dispatch events.
+
+<P>
+<DL>
+<P><DT><A NAME="M6"><B>IdleHandler</B></A><DD>
+This constructor creates an IdleHandler instance and register it
+inside the given <I>notifier</I>.
+<P><DT><A NAME="M7"><B>cancel</B></A><DD>
+If the <B>processIdleEvent</B> method has not been invoked yet, cancels
+this idle handler. If the <B>processIdleEvent</B> method has already
+been invoked, this call has no effect.
+<P><DT><A NAME="M8"><B>processIdleEvent</B></A><DD>
+This method is called when the <I>notifier</I> is idle. You can
+override this method to perform the desired actions when the idle
+event occurs. The IdleHandler instance can be created in any
+thread. However, <B>processIdleEvent</B> is always called in the
+primary thread of the <I>notifier</I> that was specified in the
+IdleHandler constructor.
+
+<P></DL>
+<H3><A NAME="M9">EQUIVALENT C FUNCTIONS</A></H3>
+<A href="../cFunctions.html">Tcl_CreateIdleHandler</A>
+<H3><A NAME="M10">SEE ALSO</A></H3>
+<B><A HREF="../TclJavaLib/Notifier.htm">Notifier</A></B>, <B><A HREF="../TclJavaLib/TimerHandler.htm">TimerHandler</A></B>
+<H3><A NAME="M11">KEYWORDS</A></H3>
+<A href="../Keywords/I.htm#idle">idle</A>, <A href="../Keywords/E.htm#event">event</A>, <A href="../Keywords/E.htm#event queue">event queue</A>
+<HR><PRE>
+<A HREF="../license.html">Copyright</A> &#169; 1998 Sun Microsystems, Inc.
+<A HREF="../license.html">Copyright</A> &#169; 1995-1997 Roger E. Critchlow Jr.</PRE>
+</BODY></HTML>

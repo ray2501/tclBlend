@@ -1,0 +1,28 @@
+<HTML><HEAD><TITLE>TclJava Library Procedures - CommandWithDispose manual page</TITLE></HEAD><BODY>
+<H3><A NAME="M2">INTERFACE</A></H3>
+tcl.lang.CommandWithDispose -- interface for defining new
+Tcl commands that requires clean-up.
+<H3><A NAME="M3">EXTENDS</A></H3>
+Command
+
+<H3><A NAME="M4">METHODS</A></H3>
+<P>abstract void <B>disposeCmd</B>()
+<H3><A NAME="M5">DESCRIPTION</A></H3>
+This interface is used to define more sophisticated commands that
+require clean-up when the command is deleted from an interpreter.
+When the command represented by the CommandWithDispose instance is
+deleted from an interpreter, either via the <I>interp</I>.<B><A HREF="../TclJavaLib/createCmd.htm">deleteCommand</A></B>
+method or when the interpreter itself is deleted, the <B>disposeCmd</B>
+method is invoked to free any resources that were allocated when the
+command was created.
+
+<H3><A NAME="M6">EQUIVALENT C FUNCTIONS</A></H3>
+<A href="../cFunctions.html">Tcl_CmdDeleteProc</A>
+<H3><A NAME="M7">SEE ALSO</A></H3>
+<B><A HREF="../TclJavaLib/Interp.htm">Interp</A></B>, <B><A HREF="../TclJavaLib/Command.htm">Command</A></B>
+<H3><A NAME="M8">KEYWORDS</A></H3>
+<A href="../Keywords/C.htm#command">command</A>, <A href="../Keywords/C.htm#create">create</A>, <A href="../Keywords/D.htm#delete">delete</A>, <A href="../Keywords/I.htm#interpreter">interpreter</A>
+<HR><PRE>
+<A HREF="../license.html">Copyright</A> &#169; 1998 Sun Microsystems, Inc.
+<A HREF="../license.html">Copyright</A> &#169; 1995-1997 Roger E. Critchlow Jr.</PRE>
+</BODY></HTML>

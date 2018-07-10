@@ -1,0 +1,162 @@
+<HTML>
+<TITLE>
+Building Tcl Blend under UNIX/Linux
+</TITLE>
+
+<BODY>
+<HR>
+
+<H3>
+Building Tcl Blend under UNIX/Linux
+</H3>
+
+<HR>
+
+<DL>
+
+<DT>
+<H3>
+About:
+</H3>
+</DT>
+
+<DD>
+
+<P>
+Tcl Blend is built using a <code>configure</code> script and has
+been tested on a variety of UNIX/Linux systems. Tcl Blend
+depends on Tcl and the Tcl Threads extension. Most Unix systems
+ship with Tcl installed by default, but Tcl thread support is not
+typically enabled. Tcl Blend requires a version of Tcl that is
+compiled with Thread support, so you will need to compile Tcl,
+the Tcl Thread extension, and Tcl Blend.
+</P>
+
+<P>
+Download
+<A HREF="http://sourceforge.net/project/showfiles.php?group_id=10894">
+Tcl (8.4.13)
+</A>
+, the
+
+<A HREF="http://sourceforge.net/project/showfiles.php?group_id=10894">
+Tcl Threads package (2.6.3)
+</A>
+, and the
+
+<A HREF="http://sourceforge.net/project/showfiles.php?group_id=13005">
+Tcl Blend (1.4.0)
+</A>
+
+archive files and save them in a temp directory.
+
+The following assumes that the user has created
+a temp directory <code>/tmp/tclblend</code>, that the archives
+have been saved in this directory, that
+Tcl Blend will be installed into <code>/opt/tclblend</code>, and
+that the JDK install is located in <code>/opt/jdk14</code>.
+
+<blockquote>
+<pre>
+<code>
+cd /tmp/tclblend
+tar -xzvf tcl8.4.13-src.tar.gz
+tar -xzvf thread2.6.3.tar.gz
+tar -xzvf tclBlend1.4.0.tar.gz
+
+mkdir build_tcl
+mkdir build_thread
+mkdir build_tclblend
+
+cd build_tcl
+../tcl8.4.13/unix/configure --prefix=/opt/tclblend --enable-threads
+make
+make install
+cd ..
+
+cd build_thread
+../thread2.6.3/configure --prefix=/opt/tclblend --enable-threads \
+  --with-tcl=/tmp/tclblend/build_tcl
+make
+make install
+cd ..
+
+cd build_tclblend
+../tclBlend1.4.0/configure --prefix=/opt/tclblend \
+  --with-tcl=/tmp/tclblend/build_tcl --with-thread=/tmp/tclblend/build_thread \
+  --with-jdk=/opt/jdk14
+make
+make install
+</pre>
+</code>
+</blockquote>
+</p>
+
+<p>
+At this point, Tcl, the Thread extension, and
+Tcl Blend have been installed into <code>/opt/tclblend</code>.
+One can also build and run the optional Tcl Blend regression
+tests with the following command.
+
+<blockquote>
+<pre>
+<code>
+make test
+</code>
+</pre>
+</blockquote>
+</p>
+
+<p>
+The install process creates a startup script that should be used
+to run Tcl Blend. This script is named <code>jtclsh</code>,
+it would be installed into <code>/opt/tclblend/bin/jtclsh</code> by
+the example above.
+</p>
+
+
+<blockquote>
+<pre>
+<code>
+/opt/tclblend/bin/jtclsh
+% package require java
+1.4.0
+% exit
+</code>
+</pre>
+</blockquote>
+</p>
+
+
+<H4>Installed Files</H4>
+
+<p>
+<ul>
+
+<li>
+<code>jtclsh</code> : Startup script for Tcl Blend
+</li>
+
+<br>
+
+<li>
+<code>tcljava.jar</code> : Files common to both Jacl and Tcl Blend
+</li>
+
+<li>
+<code>tclblend.jar</code> : Files specific to Tcl Blend
+</li>
+
+<li>
+<code>libtclblend.so</code> : Shared library for Tcl Blend
+</li>
+
+</ul>
+</p>
+
+</DD>
+
+</DL>
+
+</BODY>
+</HTML>

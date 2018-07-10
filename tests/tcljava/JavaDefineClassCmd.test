@@ -1,0 +1,173 @@
+# JavaDefineClassCmd.test --
+#
+#	Tests the JavaIsNullCmd class.
+#
+# Copyright (c) 1998 by Sun Microsystems, Inc.
+#
+# See the file "license.terms" for information on usage and redistribution
+# of this file, and for a DISCLAIMER OF ALL WARRANTIES.
+#
+# RCS: @(#) $Id: JavaDefineClassCmd.test,v 1.8 2006/02/08 23:53:47 mdejong Exp $
+
+if {[lsearch [namespace children] ::tcltest] == -1} {
+    package require tcltest
+    namespace import -force ::tcltest::*
+}
+
+setupJavaPackage
+
+# This code is necessary to locate the class file 
+# that are loaded as part of the testing.
+
+set platform [testgetplatform]
+
+if {[info exists env(BUILD_DIR)]} {
+    set root_path [file join $env(BUILD_DIR) btests]
+} elseif {$platform == "windows"} {
+    set root_path [file join .. win tests]
+} else {
+    set root_path [file join .. $platform tests]
+}
+
+if {! [file isdirectory $root_path]} {
+    puts "Unable to find directory \"$root_path\".  Cannot run tests."	
+    return
+}
+
+set javaload_path [file join $root_path javaload]
+if {! [file isdirectory $javaload_path]} {
+    puts "Unable to find directory \"$javaload_path\".  Cannot run tests."
+    return
+}
+
+set javaload_full_path [file join $javaload_path tests javaload]
+if {! [file isdirectory $javaload_full_path]} {
+    puts "Unable to find directory \"$javaload_full_path\".  Cannot run tests."
+    return
+}
+
+
+# Tests begin here.
+
+test java::defineclass-1.1 {error checking} {
+    list [catch {java::defineclass} msg] $msg
+} {1 {wrong # args: should be "java::defineclass classbytes"}}
+
+test java::defineclass-1.2 {error checking} {
+    list [catch {java::defineclass a b} msg] $msg
+} {1 {wrong # args: should be "java::defineclass classbytes"}}
+
+test java::defineclass-1.3 {error checking} {
+    set x [java::defineclass tclbabe]
+    java::isnull $x
+} {1}
+
+test java::defineclass-2.1 {loading a class} {
+    set file  [open [file join $javaload_full_path Test1Cmd.class]]
+    fconfigure $file -translation binary
+    set bytes [read $file]
+    close $file
+    set class [java::defineclass $bytes]
+    java::isnull $class
+} {0}
+
+test java::defineclass-2.2 {instantiating a loaded class} {
+    set file  [open [file join $javaload_path Test2Cmd.class]]
+    fconfigure $file -translation binary
+    set bytes [read $file]
+    close $file
+    set class [java::defineclass $bytes]
+    set obj   [java::new Test2Cmd]
+    java::isnull $obj
+} {0}
+
+test java::defineclass-3.0 {java::defineclass with byte[] argument} {
+    set file [open [file join $javaload_full_path Test3Cmd.class]]
+    fconfigure $file -translation binary
+    set bytes [read $file]
+    close $file
+
+    # Convert to a byte[] reflected object, Jacl only.
+
+    if {[catch {
+        # Make a copy of the TclByteArray with the correct array
+        # length before reflecting as a byte[]. The TclByteArray
+        # class can allocate extra space at the end of the array.
+
+        set len [java::call tcl.lang.TclByteArray getLength \
+            [java::getinterp] \
+            $bytes]
+        set extra_jbytes [java::call -noconvert tcl.lang.TclByteArray getBytes \
+                [java::getinterp] $bytes]
+        set dup [java::call tcl.lang.TclByteArray newInstance \
+            $extra_jbytes 0 $len]
+        set jbytes [java::call -noconvert tcl.lang.TclByteArray getBytes \
+            [java::getinterp] $dup]
+        set bytes $jbytes
+        if {[java::instanceof $bytes {byte[]}]} {
+            #puts "converted to Java byte\[\] in Jacl"
+        }
+    } err]} {
+        #puts "err is $err"
+    }
+
+    # Pass byte[] to java::defineclass, Jacl only.
+
+    set class [java::defineclass $bytes]
+    java::isnull $class
+} {0}
+
+test java::defineclass-3.1 {duplicate loading of a class} {
+    set file [open [file join $javaload_full_path Test4Cmd.class]]
+    fconfigure $file -translation binary
+    set bytes [read $file]
+    close $file
+    set results [list]
+    # Attempting to load the same class twice should
+    # not raise a LinkageError. The redefinition
+    # will fail and return null.
+    set class [java::defineclass $bytes]
+    lappend results [java::isnull $class]
+    set class [java::defineclass $bytes]
+    lappend results [java::isnull $class]
+    set results
+} {0 1}
+
+test java::defineclass-3.2 {load same class in two different interps} {
+    set file [open [file join $javaload_full_path Test5Cmd.class]]
+    fconfigure $file -translation binary
+    set bytes [read $file]
+    close $file
+    
+    # Loading the same class twice in two different interps should
+    # not generate an error since each interp has a different
+    # TclClassLoader.
+
+    set results [list]
+
+    set i1 [interp create]
+    $i1 eval {package require java}
+    $i1 eval [list set bytes $bytes]
+
+    lappend results [$i1 eval {
+        java::isnull [java::defineclass $bytes]
+    }]
+
+    set i2 [interp create]
+    $i2 eval {package require java}
+    $i2 eval [list set bytes $bytes]
+
+    lappend results [$i2 eval {
+        java::isnull [java::defineclass $bytes]
+    }]
+
+    interp delete $i1
+    interp delete $i2
+
+    set results
+} {0 0}
+
+
+# cleanup
+::tcltest::cleanupTests
+return

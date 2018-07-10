@@ -1,0 +1,30 @@
+@echo off
+setlocal
+
+set PREFIX=@PREFIX_NATIVE@
+set EXEC_PREFIX=@EXEC_PREFIX_NATIVE@
+set XP_TCLJAVA_INSTALL_DIR=%PREFIX%/lib/tcljava@TCLJAVA_VERSION@
+set TCLJAVA_INSTALL_DIR=%EXEC_PREFIX%/lib/tcljava@TCLJAVA_VERSION@
+
+rem Setup the CLASSPATH env variable
+
+set CLASSPATH=%CLASSPATH%;@JAVA_CLASSPATH_NATIVE@
+set CLASSPATH=%CLASSPATH%;%XP_TCLJAVA_INSTALL_DIR%/tcljava.jar
+set CLASSPATH=%CLASSPATH%;%XP_TCLJAVA_INSTALL_DIR%/tclblend.jar
+
+rem Setup TCLLIBPATH which becomes the default setting for the auto_path
+rem in the Tcl shell. Tcl uses this when doing a "package require java".
+
+set TCLLIBPATH=%PREFIX%/lib %TCLLIBPATH%
+
+rem Setup the PATH env variable so that Java and Tcl dlls can be found.
+rem Prepend to PATH just in case a directory on the existing PATH
+rem contains a dll with the same name as the ones Tcl Blend depend on.
+
+set PATH=@JAVA_LIB_RUNTIME_PATH_NATIVE@;%TCLJAVA_INSTALL_DIR%;%PATH%
+
+set TCLSH=@TCLSH_NATIVE@
+%TCLSH% %1 %2 %3 %4 %5 %6 %7 %8 %9
+
+endlocal
+

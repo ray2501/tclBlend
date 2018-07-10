@@ -1,0 +1,312 @@
+# AutomaticSignature.test --
+#
+#       These tests check a number of things related to the automatic
+#       Java Method Resolver. The automatic resolver is used whenever
+#       a Java method is invoked with a simple signature instead of
+#       a full signature.
+#
+# Copyright (c) 1998 by Moses DeJong.
+#
+# See the file "license.terms" for information on usage and redistribution
+# of this file, and for a DISCLAIMER OF ALL WARRANTIES.
+
+if {[lsearch [namespace children] ::tcltest] == -1} {
+    package require tcltest
+    namespace import -force ::tcltest::*
+}
+
+setupJavaPackage
+
+test AutomaticSignature-1.0 {error conditions} {
+    set o [java::new Object]
+    list [catch {$o {} [java::null]} err] $err
+} {1 {bad signature ""}}
+
+
+test AutomaticSignature-1.1 {error conditions} {
+    set o [java::new Object]
+    list [catch {$o {{} java.util.Vector java.util.Hashtable} [java::null] [java::null]} err] $err
+} {1 {no accessible method "{} java.util.Vector java.util.Hashtable" in class java.lang.Object}}
+
+
+test AutomaticSignature-1.2 {error conditions} {
+    set o [java::new Object]
+    list [catch {$o {equals Object Object} [java::null]} err] $err
+} {1 {no accessible method "equals Object Object" in class java.lang.Object}}
+
+
+
+test AutomaticSignature-2.1 {overloaded method invocation} {
+    set class tests.signature.MethodInvoker1
+    set a [java::call $class getA]
+    set b [java::call $class getB]
+
+    set result {}
+    lappend result [java::call $class call $a $a]
+    lappend result [java::call $class call $a $b]
+    lappend result [java::call $class call $b $b]
+    lappend result [java::call $class call $b $a]
+    set result
+} {A+A A+B A+B A+A}
+
+
+test AutomaticSignature-2.2 {overloaded method invocation} {
+    set class tests.signature.MethodInvoker2
+    set a [java::call $class getA]
+    set b [java::call $class getB]
+    set c [java::call $class getC]
+
+    set result {}
+    lappend result [java::call $class call $a $a]
+    lappend result [java::call $class call $a $c]
+    lappend result [java::call $class call $c $a]
+    lappend result [java::call $class call $c $c]
+    set result
+} {A+A A+C A+A B+C}
+
+
+test AutomaticSignature-2.3 {overloaded instance method invocation} {
+    set class tests.signature.MethodInvoker3
+    set m [java::new $class]
+
+    set h  [java::call $class getHashtable]
+    set h2 [java::call $class getHashtable2]
+    set h2_cast [java::cast java.util.Hashtable $h2]
+    set h3 [java::call $class getHashtable3]
+
+    set v  [java::call $class getVector]
+    set v2 [java::call $class getVector2]
+
+    set result {}
+
+    lappend result [$m call $h]
+    lappend result [$m call $v]
+    lappend result [$m call $v $h]
+    lappend result [$m call $v $v]
+    lappend result [$m call $h2]
+    lappend result [$m call $v2]
+    lappend result [$m call $h2_cast]
+    lappend result [$m call $v $h2]
+    lappend result [$m call $v $v2]
+    lappend result [$m call $h3]
+    lappend result [$m call $v2 $h3]
+    set result
+} {Hashtable Vector Vector+Hashtable Vector+Vector Hashtable2 Vector2 Hashtable Vector+Hashtable Vector+Vector Hashtable2 Vector+Hashtable}
+
+
+test AutomaticSignature-2.4 {overloaded method invocation} {
+    set class tests.signature.MethodInvoker4
+    set a [java::call $class getA]
+    set b [java::call $class getB]
+    set i [java::call $class getI]
+
+    set result {}
+    lappend result [java::call $class call $a]
+    lappend result [java::call $class call $i]
+    lappend result [java::call $class call $b]
+    set result
+} {A I I}
+
+
+test AutomaticSignature-2.5 {overloaded method invocation} {
+    set class tests.signature.MethodInvoker5
+    set i  [java::call $class getI]
+    set i2 [java::call $class getI2]
+    set i3 [java::call $class getI3]
+
+    set result {}
+    lappend result [java::call $class call $i]
+    lappend result [java::call $class call $i2]
+    lappend result [java::call $class call $i3]
+    set result
+} {I I2 I2}
+
+
+test AutomaticSignature-2.6 {overloaded method rules exception} {
+    set class tests.signature.MethodInvoker6
+    set o [java::call $class getO]
+    set a [java::call $class getA]
+
+    list [java::call $class call $o] [java::call $class call $a]
+} {O I}
+
+
+
+test AutomaticSignature-3.1 {ambiguous method failures} {
+    set class tests.signature.MethodFailure1
+    set a [java::call $class getA]
+    set b [java::call $class getB]
+    set i [java::call $class getI]
+
+    set result {}
+    lappend result [java::call $class call $a]
+    lappend result [java::call $class call $i]
+    list $result [catch {java::call $class call $b} err] $err
+} {{A I} 1 {ambiguous method signature, assignable signatures are {call tests.signature.MethodFailure1.A} {call tests.signature.MethodFailure1.I}}}
+
+
+test AutomaticSignature-3.2 {ambiguous method failures} {
+    set class tests.signature.MethodFailure2
+    set a [java::call $class getA]
+    set b [java::call $class getB]
+    set i [java::call $class getI]
+    
+    set result {}
+    lappend result [java::call $class call $a]
+    lappend result [java::call $class call $i]
+    list $result [catch {java::call $class call $b} err] $err
+} {{A I} 1 {ambiguous method signature, assignable signatures are {call tests.signature.MethodFailure2.A} {call tests.signature.MethodFailure2.I}}}
+
+
+test AutomaticSignature-3.3 {ambiguous method failures} {
+    set class tests.signature.MethodFailure3
+    set a [java::call $class getA]
+    set b [java::call $class getB]
+    set c [java::call $class getC]
+    set i [java::call $class getI]
+    
+    set result {}
+    lappend result [java::call $class call $a]
+    lappend result [java::call $class call $b]
+    lappend result [java::call $class call $i]
+    list $result [catch {java::call $class call $c} err] $err
+} {{A A I} 1 {ambiguous method signature, assignable signatures are {call tests.signature.MethodFailure3.A} {call tests.signature.MethodFailure3.I}}}
+
+
+test AutomaticSignature-3.4 {ambiguous method failures} {
+    set class tests.signature.MethodFailure4
+    set a [java::call $class getA]
+    set b [java::call $class getB]
+    set c [java::call $class getC]
+    set i [java::call $class getI]
+
+    set result {}
+    lappend result [java::call $class call $a]
+    lappend result [java::call $class call $i]
+    list $result [catch {java::call $class call $b} err] $err \
+                 [catch {java::call $class call $c} err] $err
+} {{A I} 1 {ambiguous method signature, assignable signatures are {call tests.signature.MethodFailure4.A} {call tests.signature.MethodFailure4.I}} 1 {ambiguous method signature, assignable signatures are {call tests.signature.MethodFailure4.A} {call tests.signature.MethodFailure4.I}}}
+
+
+test AutomaticSignature-3.5 {ambiguous method failures} {
+    set class tests.signature.MethodFailure5
+    set h [java::call $class getH]
+    set d [java::call $class getD]
+
+    set result {}
+    lappend result [java::call $class call $h $d]
+    lappend result [java::call $class call $d $h]
+    list $result [catch {java::call $class call $d $d} err] $err \
+	         [catch {java::call $class call $h $h} err] $err
+
+} {{H+D D+H} 1 {ambiguous method signature, could not choose between {call java.util.Dictionary java.util.Hashtable} {call java.util.Hashtable java.util.Dictionary}} 1 {ambiguous method signature, could not choose between {call java.util.Dictionary java.util.Hashtable} {call java.util.Hashtable java.util.Dictionary}}}
+
+
+
+test AutomaticSignature-4.1 {call primitive type method with String argument} {
+  set class tests.signature.NullSignature
+  set ns [java::new $class]
+
+  list [catch {$ns primitive_call 1} err] $err
+} {1 {ambiguous method signature, could not choose between {primitive_call float} {primitive_call int}}}
+
+test AutomaticSignature-4.2 {call primitive type method with null argument} {
+  set class tests.signature.NullSignature
+  set ns [java::new $class]
+
+  list [catch {$ns primitive_call [java::null]} err] $err
+} {1 {ambiguous method signature, could not choose between {primitive_call float} {primitive_call int}}}
+
+test AutomaticSignature-4.3 {call object type method with untyped null} {
+  set class tests.signature.NullSignature
+  set ns [java::new $class]
+
+  list [catch {$ns object_call [java::null]} err] $err
+} {1 {ambiguous method signature, assignable signatures are {object_call java.lang.Float} {object_call {java.lang.Float[]}} {object_call java.lang.Integer}}}
+
+test AutomaticSignature-4.4 {call object and primitive type method with untyped null} {
+  set class tests.signature.NullSignature
+  set ns [java::new $class]
+
+  list [catch {$ns combined_call [java::null]} err] $err
+} {1 {ambiguous method signature, assignable signatures are {combined_call java.lang.Float} {combined_call java.lang.Integer}}}
+
+test AutomaticSignature-4.5 {call object type method with null typed as Object} {
+  set class tests.signature.NullSignature
+  set ns [java::new $class]
+  set O_null [$ns getNullAsObject]
+
+  list [catch {$ns object_call $O_null} err] $err
+} {1 {ambiguous method signature, could not choose between {object_call java.lang.Float} {object_call {java.lang.Float[]}} {object_call java.lang.Integer}}}
+
+test AutomaticSignature-4.6 {call object and primitive type method with null typed as Object} {
+  set class tests.signature.NullSignature
+  set ns [java::new $class]
+  set O_null [$ns getNullAsObject]
+
+  list [catch {$ns combined_call $O_null} err] $err
+} {1 {ambiguous method signature, could not choose between {combined_call float} {combined_call int} {combined_call java.lang.Float} {combined_call java.lang.Integer}}}
+
+test AutomaticSignature-4.7 {call object type method with null typed as Integer} {
+  set class tests.signature.NullSignature
+  set ns [java::new $class]
+  set I_null [$ns getNullAsInteger]
+
+  list [catch {$ns object_call $I_null} err] $err
+} {0 Integer}
+
+
+test AutomaticSignature-4.8 {call object and primitive type method with null typed as Integer} {
+  set class tests.signature.NullSignature
+  set ns [java::new $class]
+  set I_null [$ns getNullAsInteger]
+
+  list [catch {$ns combined_call $I_null} err] $err
+} {0 Integer}
+
+
+test AutomaticSignature-4.9 {call object type method with null typed as Float} {
+  set class tests.signature.NullSignature
+  set ns [java::new $class]
+  set F_null [$ns getNullAsFloat]
+
+  list [catch {$ns object_call $F_null} err] $err
+} {0 Float}
+
+
+test AutomaticSignature-4.10 {call object and primitive type method with null typed as Float} {
+  set class tests.signature.NullSignature
+  set ns [java::new $class]
+  set F_null [$ns getNullAsFloat]
+
+  list [catch {$ns combined_call $F_null} err] $err
+} {0 Float}
+
+
+test AutomaticSignature-4.11 {call object type method with null typed as String} {
+  set class tests.signature.NullSignature
+  set ns [java::new $class]
+  set S_null [$ns getNullAsString]
+
+  list [catch {$ns object_call $S_null} err] $err
+} {1 {ambiguous method signature, could not choose between {object_call java.lang.Float} {object_call {java.lang.Float[]}} {object_call java.lang.Integer}}}
+
+test AutomaticSignature-4.12 {check conversion and return values for null} {
+  set class tests.signature.NullSignature
+  set ns [java::new $class]
+
+  set O_null1 [$ns getNullAsObject]
+  set O_null2 [$ns -noconvert getNullAsObject]
+
+  set S_null1 [$ns getNullAsString]
+  set S_null2 [$ns -noconvert getNullAsString]
+
+  list [java::isnull $O_null1] [java::isnull $O_null2] \
+       [expr {$S_null1 == ""}] [java::isnull $S_null2] \
+       [java::info class $O_null1] [java::info class $O_null2] \
+       [java::info class $S_null2]
+} {1 1 1 1 java.lang.Object java.lang.Object java.lang.String}
+
+# cleanup
+::tcltest::cleanupTests
+return

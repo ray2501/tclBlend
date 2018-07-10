@@ -1,0 +1,239 @@
+<HTML><HEAD><TITLE>TclJava Library Procedures - traceVar manual page</TITLE></HEAD><BODY>
+<DL>
+<DD><A HREF="traceVar.htm#M2" NAME="L372">CLASS</A>
+<DL><DD>tcl.lang.Interp -- This manual entry contains Interp methods that
+monitor accesses of Tcl variables.</DL>
+<DD><A HREF="traceVar.htm#M3" NAME="L373">METHODS</A>
+<DL><DD>void <B>traceVar</B>(String <I>name</I>, VarTrace <I>trace</I>, int <I>flags</I>) throws TclException</DL>
+<DL><DD>void <B>traceVar</B>(String <I>part1</I>, String <I>part2</I>, VarTrace <I>trace</I>, int <I>flags</I>) throws TclException</DL>
+<DL><DD>void <B>untraceVar</B>(String <I>name</I>, VarTrace <I>trace</I>, int <I>flags</I>) throws TclException</DL>
+<DL><DD>void <B>untraceVar</B>(String <I>part1</I>, String <I>part2</I>, VarTrace <I>trace</I>, int <I>flags</I>) throws TclException</DL>
+<DD><A HREF="traceVar.htm#M4" NAME="L374">OTHER METHODS</A>
+<DD><A HREF="traceVar.htm#M5" NAME="L375">ARGUMENTS</A>
+<DL>
+</DL>
+<DD><A HREF="traceVar.htm#M6" NAME="L376">DESCRIPTION</A>
+<DL>
+<DD><A HREF="traceVar.htm#M7" NAME="L377"><B>traceVar</B></A>
+<DD><A HREF="traceVar.htm#M8" NAME="L378"><B>untraceVar</B></A>
+</DL>
+<DD><A HREF="traceVar.htm#M9" NAME="L379">OVERLOADING</A>
+<DL>
+</DL>
+<DD><A HREF="traceVar.htm#M10" NAME="L380">FLAGS</A>
+<DL>
+<DD><A HREF="traceVar.htm#M11" NAME="L381"><B>TCL.TRACE_READS</B></A>
+<DD><A HREF="traceVar.htm#M12" NAME="L382"><B>TCL.TRACE_WRITES</B></A>
+<DD><A HREF="traceVar.htm#M13" NAME="L383"><B>TCL.TRACE_UNSETS</B></A>
+<DD><A HREF="traceVar.htm#M14" NAME="L384"><B>TCL.GLOBAL_ONLY</B></A>
+<DD><A HREF="traceVar.htm#M15" NAME="L385"><B>TCL.NAMESPACE_ONLY</B></A>
+</DL>
+<DD><A HREF="traceVar.htm#M16" NAME="L386">CALLBACK TIMING</A>
+<DD><A HREF="traceVar.htm#M17" NAME="L387">WHOLE-ARRAY TRACES</A>
+<DD><A HREF="traceVar.htm#M18" NAME="L388">MULTIPLE TRACES</A>
+<DD><A HREF="traceVar.htm#M19" NAME="L389">RESTRICTIONS</A>
+<DD><A HREF="traceVar.htm#M20" NAME="L390">UNDEFINED VARIABLES</A>
+<DD><A HREF="traceVar.htm#M21" NAME="L391">EQUIVALENT C FUNCTIONS</A>
+<DD><A HREF="traceVar.htm#M22" NAME="L392">SEE ALSO</A>
+<DD><A HREF="traceVar.htm#M23" NAME="L393">KEYWORDS</A>
+</DL><HR>
+<H3><A NAME="M2">CLASS</A></H3>
+tcl.lang.Interp -- This manual entry contains Interp methods that
+monitor accesses of Tcl variables.
+<H3><A NAME="M3">METHODS</A></H3>
+<P>void <B>traceVar</B>(String <I>name</I>, VarTrace <I>trace</I>, int <I>flags</I>) throws TclException
+<P>void <B>traceVar</B>(String <I>part1</I>, String <I>part2</I>, VarTrace <I>trace</I>, int <I>flags</I>) throws TclException
+<P>void <B>untraceVar</B>(String <I>name</I>, VarTrace <I>trace</I>, int <I>flags</I>) throws TclException
+<P>void <B>untraceVar</B>(String <I>part1</I>, String <I>part2</I>, VarTrace <I>trace</I>, int <I>flags</I>) throws TclException
+<H3><A NAME="M4">OTHER METHODS</A></H3>
+<B><A HREF="../TclJavaLib/setVar.htm">setVar</A></B>, 
+<B><A HREF="../TclJavaLib/createCmd.htm">createCommand</A></B>,
+<B><A HREF="../TclJavaLib/Eval.htm">eval</A></B>, 
+<B><A HREF="../TclJavaLib/setResult.htm">setResult</A></B>, 
+<B><A HREF="../TclJavaLib/backgdErr.htm">backgroundError</A></B>,
+<BR>
+<B><A HREF="../TclJavaLib/getNotifier.htm">getNotifier</A></B>, 
+<B><A HREF="../TclJavaLib/setAssocData.htm">setAssocData</A></B>, 
+<B><A HREF="../TclJavaLib/dispose.htm">dispose</A></B>, 
+<B><A HREF="../TclJavaLib/pkgRequire.htm">pkgRequire</A></B>
+
+<H3><A NAME="M5">ARGUMENTS</A></H3>
+<DL>
+<P><DT>String <B>name</B> ()<DD>
+Name of variable.  May refer to a scalar variable, an array variable
+with no index, or an array variable with a parenthesized index.
+<P><DT>String <B>part1</B> ()<DD>
+Name of scalar or array variable.  If <I>part2</I>
+is null, <I>part1</I> is treated like <I>name</I>.  Otherwise,
+<I>part1</I> cannot be array variable with a parenthesized index.
+<P><DT>String <B>part2</B> ()<DD>
+If not null, gives name of element within array; in this
+case <I>part1</I> must refer to an array variable with no index.
+<P><DT>int <B>flags</B> ()<DD>
+OR-ed combination of bits providing additional information. See below
+for valid values.
+<P><DT>VarTrace <B>trace</B> ()<DD>
+The trace to add to or remove from a variable.
+<P></DL>
+<H3><A NAME="M6">DESCRIPTION</A></H3>
+A trace is used to monitor and control access )reads, writes, and/or
+unsets) to a specified Tcl variable.  Traces are instances of the
+<B><A HREF="../TclJavaLib/VarTrace.htm">VarTrace</A></B> class, whose <B><A HREF="../TclJavaLib/VarTrace.htm">traceProc</A></B> method is called whenever
+the specified Tcl Variable is accessed.  The <B>traceVar</B> methods
+create traces, and the <B>untraceVar</B> methods delete them.
+<P>
+<DL>
+<P><DT><A NAME="M7"><B>traceVar</B></A><DD>
+The <B>traceVar</B> methods create an instance of the <B><A HREF="../TclJavaLib/VarTrace.htm">VarTrace</A></B>
+class to monitor and control access to Tcl variable whose name is
+<I>name</I> or the combination of <I>part1</I> and <I>part2</I>.  See the
+<B>OVERLOADING</B> section below to learn how arguments <I>part1</I> and
+<I>part2</I> are combined to form a valid variable name.  The result of
+creating a variable trace VarTrace's traceProc is invoked whenever the
+variable is read, written or unset, dpending on the value of the
+<I>flags</I> argument.  The <I>flags</I> argument indicates when the
+trace procedure is to be invoked and provides information for setting
+up the trace.  See the <B>FLAGS</B> section below for details.
+<P><DT><A NAME="M8"><B>untraceVar</B></A><DD>
+The <B>untraceVar</B> methods allow a java method to remove a trace
+previously placed on the variable whose name is <I>name</I> or the
+combination of <I>part1</I> and <I>part2</I> (as described for the
+<B>traceVar</B> method above).  If an error occurs while removing the
+trace (e.g. the variable doesn't have a trace on it), then a
+<B><A HREF="../TclJavaLib/TclException.htm">TclException</A></B> is generated and an error message is left in
+<I>interp</I>'s result unless the <B>TCL.DONT_THROW_EXCEPTION</B>
+<I>flag</I> bit is set.
+
+<P></DL>
+<H3><A NAME="M9">OVERLOADING</A></H3>
+These methods are overloaded to allow three different ways to specify
+variable names.
+<P>
+<DL>
+<P><DT>[1]<DD>
+If <B>traceVar</B> or <B>untraceVar</B> is invoked with the
+<I>name</I> argument, the variable name is given as a single string,
+<I>name</I>.  If <I>name</I> contains an open parenthesis and ends with
+a close parenthesis, then the value between the parentheses is treated
+as an index (which can have any string value) and the characters
+before the first open parenthesis are treated as the name of an array
+variable.  If <I>name</I> doesn't have parentheses as described above,
+then the entire string is treated as the name of a scalar variable or
+array name with no index.
+<P><DT>[2]<DD>
+If the <I>part1</I> and <I>part2</I> arguments are provided and
+<I>part2</I> is not null, then the variable <I>part1</I>(<I>part2</I>) is
+specified.  The <I>part1</I> argument contains the array name, and the
+<I>part2</I> argument contains the index.
+<P><DT>[3]<DD>
+If the <I>part1</I> and <I>part2</I> arguments are provided and
+<I>part2</I> is null, then <I>part1</I> is treated the same as the
+<I>name</I> argument in step [1].
+
+<P></DL>
+<H3><A NAME="M10">FLAGS</A></H3>
+The <I>flags</I> argument may be used to specify any of several options
+to the methods.  It consists of an OR-ed combination of the following
+bits.
+<P>
+<DL>
+<P><DT><A NAME="M11"><B>TCL.TRACE_READS</B></A><DD>
+Invoke <I>proc</I> whenever an attempt is made to read the variable.
+This flag is only active for the <B>traceVar</B> methods.
+<P><DT><A NAME="M12"><B>TCL.TRACE_WRITES</B></A><DD>
+Invoke <I>proc</I> whenever an attempt is made to modify the variable.
+This flag is only active for the <B>traceVar</B> methods.
+<P><DT><A NAME="M13"><B>TCL.TRACE_UNSETS</B></A><DD>
+Invoke <I>proc</I> whenever the variable is unset.
+A variable may be unset either explicitly by an <B>unset</B> command,
+or implicitly when a procedure returns (its local variables are
+automatically unset) or when the interpreter is deleted (all
+variables are automatically unset).  This flag is only active for the
+<B>traceVar</B> methods.
+<P><DT><A NAME="M14"><B>TCL.GLOBAL_ONLY</B></A><DD>
+Under normal circumstances, the procedures look up variables as follows.
+If a procedure call is active in <B><A HREF="../TclJavaLib/Interp.htm">Interp</A></B>,
+the variable is looked up at the current level of procedure call.
+Otherwise, the variable is looked up first in the current namespace,
+then in the global namespace.
+However, if this bit is set in <I>flags</I> then the variable
+is looked up only in the global namespace,
+even if there is an active procedure call.
+If both <B>TCL.GLOBAL_ONLY</B> and <B>TCL.NAMESPACE_ONLY</B> are given,
+<B>TCL.GLOBAL_ONLY</B> is ignored.
+<P><DT><A NAME="M15"><B>TCL.NAMESPACE_ONLY</B></A><DD>
+If this bit is set in <I>flags</I> then the variable
+is looked up only in the current namespace; if a procedure is active,
+its variables are ignored, and the global namespace is also ignored unless
+it is the current namespace.
+
+<P></DL>
+<H3><A NAME="M16">CALLBACK TIMING</A></H3>
+When read tracing has been specified for a variable, <B><A HREF="../TclJavaLib/VarTrace.htm">traceProc</A></B>
+will be invoked whenever the variable's value is read.  This includes
+<B>set</B> Tcl commands, <B>$</B>-notation in Tcl commands, and
+invocations of <B><A HREF="../TclJavaLib/Interp.htm">Interp</A></B>.<B><A HREF="../TclJavaLib/setVar.htm">getVar</A></B>.
+<B><A HREF="../TclJavaLib/VarTrace.htm">traceProc</A></B> is invoked just before the variable's value is
+returned.  It may modify the value of the variable to affect what is
+returned by the traced access.  If it unsets the variable then the
+access will return an error just as if the variable never existed.
+<P>
+When write tracing has been specified for a variable, <B><A HREF="../TclJavaLib/VarTrace.htm">traceProc</A></B>
+will be invoked whenever the variable's value is modified.  This
+includes <B>set</B> commands, commands that modify variables as side
+effects (such as <B>catch</B> and <B>scan</B>), and calls
+to<B><A HREF="../TclJavaLib/Interp.htm">Interp</A></B>.<B><A HREF="../TclJavaLib/setVar.htm">setVar</A></B>).  <B>tracProc</B> will be invoked after
+the variable's value has been modified, but before the new value of
+the variable has been returned.  It may modify the value of the
+variable to override the change and to determine the value actually
+returned by the traced access.  If it deletes the variable then the
+traced access will return an empty string.
+<P>
+When unset tracing has been specified,<B><A HREF="../TclJavaLib/VarTrace.htm">traceProc</A></B> will be invoked
+whenever the variable is destroyed.  The traces will be called after
+the variable has been completely unset.
+
+<H3><A NAME="M17">WHOLE-ARRAY TRACES</A></H3>
+If a call to <B>traceVar</B> specifies the name of an array variable
+without an index into the array, then the trace will be set on the
+array as a whole.  This means that <B>trceProc</B> will be invoked
+whenever any element of the array is accessed in the ways specified by
+<I>flags</I>.  When an array is unset, a whole-array trace will be
+invoked just once, with <I>part1</I> equal to the name of the array and
+<I>part2</I> null; it will not be invoked once for each element.
+
+<H3><A NAME="M18">MULTIPLE TRACES</A></H3>
+It is possible for multiple traces to exist on the same variable.
+When this happens, all of the trace procedures will be invoked on each
+access, in order from most-recently-created to least-recently-created.
+When there exist whole-array traces for an array as well as
+traces on individual elements, the whole-array traces are invoked
+before the individual-element traces.
+If a read or write trace unsets the variable then all of the unset
+traces will be invoked but the remainder of the read and write traces
+will be skipped.
+
+<H3><A NAME="M19">RESTRICTIONS</A></H3>
+A trace procedure can be called at any time, even when there is a
+partially-formed result in the interpreter's result area.  If the
+trace procedure does anything that could damage this result (such as
+calling <B><A HREF="../TclJavaLib/Interp.htm">Interp</A></B>.<B><A HREF="../TclJavaLib/Eval.htm">eval</A></B>) then it must save the original values
+of the interpreter's <B>result</B> and restore it before it returns.
+
+<H3><A NAME="M20">UNDEFINED VARIABLES</A></H3>
+It is legal to set a trace on an undefined variable.  The variable
+will still appear to be undefined until the first time its value is
+set.  If an undefined variable is traced and then unset, the unset
+will fail with an error (``no such variable''), but the trace
+procedure will still be invoked.
+
+<H3><A NAME="M21">EQUIVALENT C FUNCTIONS</A></H3>
+<A href="../cFunctions.html">Tcl_TraceVar</A>, <A href="../cFunctions.html">Tcl_TraceVar2</A>, <A href="../cFunctions.html">Tcl_UntraceVar</A>, <A href="../cFunctions.html">Tcl_UntraceVar2</A>
+<H3><A NAME="M22">SEE ALSO</A></H3>
+<B><A HREF="../TclJavaLib/Interp.htm">Interp</A></B>, <B><A HREF="../TclJavaLib/VarTrace.htm">VarTrace</A></B>, <B><A HREF="../TclJavaLib/setVar.htm">setVar</A></B>, <B><A HREF="../TclJavaLib/setResult.htm">setResult</A></B>, <B><A HREF="../TclJavaLib/Eval.htm">Eval</A></B>
+<H3><A NAME="M23">KEYWORDS</A></H3>
+<A href="../Keywords/A.htm#array">array</A>, <A href="../Keywords/G.htm#get">get</A>, <A href="../Keywords/I.htm#interpreter">interpreter</A>, <A href="../Keywords/S.htm#scalar">scalar</A>, <A href="../Keywords/S.htm#set">set</A>, <A href="../Keywords/T.htm#trace">trace</A>, <A href="../Keywords/U.htm#unset">unset</A>, <A href="../Keywords/V.htm#variable">variable</A>
+<HR><PRE>
+<A HREF="../license.html">Copyright</A> &#169; 1998 by Sun Microsystems, Inc.
+<A HREF="../license.html">Copyright</A> &#169; 1995-1997 Roger E. Critchlow Jr.</PRE>
+</BODY></HTML>
