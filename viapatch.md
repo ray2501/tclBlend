@@ -103,6 +103,16 @@ And execute `make` and `make install`.
 Tcl 8.6.1-8.6.5 maybe need patch, please check [tclBlend](http://wiki.tcl.tk/1313).
 
 Notice:
-Now requires JDK >= 8,
+Now requires JDK >= 8.
 For JEP 313: Remove the Native-Header Generation Tool update
+
+Notice:
+Fix Java unchecked message
+
+Notice:
+This package already replace CONST84 to const.
+For TIP 503: End Tcl 8.3 Source Compatibility Support.
+
+Notice:
+Remove _ANSI_ARGS_ flag
 
