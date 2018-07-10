@@ -114,5 +114,5 @@ This package already replace CONST84 to const.
 For TIP 503: End Tcl 8.3 Source Compatibility Support.
 
 Notice:
-Remove _ANSI_ARGS_ flag
+Remove `_ANSI_ARGS_` flag
 
