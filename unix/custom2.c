@@ -98,7 +98,7 @@ main(argc, argv)
         #elif (defined JDK1_4) || (defined JNI_VERSION_1_4)
         vm_args.version = 0x00010004;
         #else
-        m_args.version = 0x00010002;
+        vm_args.version = 0x00010002;
         #endif        
         vm_args.options = options;
         vm_args.ignoreUnrecognized = 1;
