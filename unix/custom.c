@@ -64,12 +64,22 @@ main(argc, argv)
     if (nVMs == 0) {
         memset(&vm_args, 0, sizeof(vm_args));
 
-#ifdef JDK1_2
+#if (defined JDK1_2) || (defined JDK1_4) || (defined JNI_VERSION_1_4) || \
+    (defined JNI_VERSION_1_6) || (defined JNI_VERSION_1_8)
+
 
 	#define maxOptions 2
 
 	options = (JavaVMOption *) ckalloc(sizeof(JavaVMOption) * maxOptions);
+        #ifdef JNI_VERSION_1_8
+        vm_args.version = 0x00010008;
+        #elif (defined JNI_VERSION_1_6)
+        vm_args.version = 0x00010006;
+        #elif (defined JDK1_4) || (defined JNI_VERSION_1_4)
+        vm_args.version = 0x00010004;
+        #else
         vm_args.version = 0x00010002;
+        #endif
         vm_args.options = options;
         vm_args.ignoreUnrecognized = 1;
         vm_args.nOptions = 0;
