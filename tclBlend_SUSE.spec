@@ -4,8 +4,8 @@
 
 Summary:	Tcl Blend - Java access for Tcl system
 Name:		tclBlend
-Version:	1.4.5
-Release:	1
+Version:	1.4.6
+Release:	0
 License:	BSD
 Group:		Development/Languages/Tcl
 Source0:	%{name}-%{version}.tar.gz

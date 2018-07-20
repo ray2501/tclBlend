@@ -138,7 +138,7 @@ throws TclException
     // win/makefile.vc
     // unix/configure.in
 
-    interp.eval("package provide java 1.4.5");
+    interp.eval("package provide java 1.4.6");
 
 }
 

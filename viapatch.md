@@ -116,3 +116,6 @@ For TIP 503: End Tcl 8.3 Source Compatibility Support.
 Notice:
 Remove `_ANSI_ARGS_` flag
 
+Notice:
+Try to use `JNI_VERSION` flag
+
