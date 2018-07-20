@@ -440,9 +440,18 @@ JavaInitEnv(
 
     ThreadSpecificData *tsdPtr = TCL_TSD_INIT(&dataKey);
 
+/*
+ * Use JNI_VERSION flag to mark JDK version, I don't know it is OK or not.
+ */	
 #ifdef TCLBLEND_DEBUG
     fprintf(stderr, "TCLBLEND_DEBUG: JavaInitEnv for %s JVM\n",
-#ifdef JDK1_2
+#ifdef   JNI_VERSION_1_8
+        "JDK1_8"
+#elseif  JNI_VERSION_1_6
+        "JDK1_6"
+#elseif  JNI_VERSION_1_4
+        "JDK1_4"
+#elseif  JDK1_2
         "JDK1_2"
 #elif defined TCLBLEND_KAFFE
         "Kaffe"
@@ -495,7 +504,8 @@ JavaInitEnv(
 #endif /* TCLBLEND_DEBUG */
 
         memset(&vm_args, 0, sizeof(vm_args));
-#ifdef JDK1_2
+#if (defined JDK1_2) || (defined JDK1_4) || (defined JNI_VERSION_1_4) || \
+    (defined JNI_VERSION_1_6) || (defined JNI_VERSION_1_8)
         /*
          * If the global tcl_variable tclblend_init is set,
          * we will pass each element to the JVM as an option.
@@ -513,7 +523,15 @@ JavaInitEnv(
         }
 
         options = (JavaVMOption *) ckalloc(sizeof(JavaVMOption) * (tclblend_init_len+1));
+        #ifdef JNI_VERSION_1_8
+        vm_args.version = 0x00010008;
+        #elif (defined JNI_VERSION_1_6)
+        vm_args.version = 0x00010006;
+        #elif (defined JDK1_4) || (defined JNI_VERSION_1_4)
+        vm_args.version = 0x00010004;
+        #else
         vm_args.version = 0x00010002;
+        #endif
         vm_args.options = options;
         vm_args.ignoreUnrecognized= 1;
         vm_args.nOptions = 0;
