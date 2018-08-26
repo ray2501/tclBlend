@@ -13,7 +13,7 @@ URL:		https://github.com/ray2501/tclBlend
 BuildRequires:	autoconf >= 2.50
 BuildRequires:	gcc
 %if 0%{?suse_version} >= 1500
-BuildRequires:	java-10-openjdk-devel
+BuildRequires:	java-11-openjdk-devel
 %else
 BuildRequires:	java-1_8_0-openjdk-devel
 %endif
@@ -21,7 +21,7 @@ BuildRequires:	jpackage-utils
 BuildRequires:	sed >= 4.0
 BuildRequires:	tcl-devel >= 8.6
 %if 0%{?suse_version} >= 1500
-Requires:       java-10-openjdk-devel
+Requires:       java-11-openjdk-devel
 %endif
 Requires:       tcl
 BuildRoot:	%{buildroot}
