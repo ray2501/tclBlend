@@ -623,6 +623,24 @@ AC_DEFUN([AC_JAVA_JNI_LIBS], [
             fi
         fi
 
+        # OpenJDK 1.8 for Aarch64 Linux (server JVM)
+
+        F=jre/lib/aarch64/libjava.so
+        if test "x$ac_java_jvm_jni_lib_flags" = "x" ; then
+            AC_MSG_LOG([Looking for $ac_java_jvm_dir/$F], 1)
+            if test -f $ac_java_jvm_dir/$F ; then
+                AC_MSG_LOG([Found $ac_java_jvm_dir/$F], 1)
+
+                D=`dirname $ac_java_jvm_dir/$F`
+                ac_java_jvm_jni_lib_runtime_path=$D
+                ac_java_jvm_jni_lib_flags="-L$D -ljava -lverify"
+
+                D=$ac_java_jvm_dir/jre/lib/aarch64/server
+                ac_java_jvm_jni_lib_runtime_path="${ac_java_jvm_jni_lib_runtime_path}:$D"
+                ac_java_jvm_jni_lib_flags="$ac_java_jvm_jni_lib_flags -L$D -ljvm"
+            fi
+        fi
+
         # OpenJDK 9 Linux (server JVM)
 
         F=lib/libjava.so
