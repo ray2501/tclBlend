@@ -119,3 +119,6 @@ Remove `_ANSI_ARGS_` flag
 Notice:
 Try to use `JNI_VERSION` flag
 
+Notoce:
+Use server JVM to replace client JVM in tcljava.m4 and configure file.
+
