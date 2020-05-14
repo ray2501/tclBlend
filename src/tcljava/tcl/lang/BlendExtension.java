@@ -54,6 +54,7 @@ throws TclException
     loadOnDemand(interp, "java::info",        "tcl.lang.JavaInfoCmd");
     loadOnDemand(interp, "java::instanceof",  "tcl.lang.JavaInstanceofCmd");
     loadOnDemand(interp, "java::isnull",      "tcl.lang.JavaIsNullCmd");
+    loadOnDemand(interp, "java::listify",     "tcl.lang.JavaListifyCmd");
     loadOnDemand(interp, "java::load",        "tcl.lang.JavaLoadCmd");
     loadOnDemand(interp, "java::new",         "tcl.lang.JavaNewCmd");
     loadOnDemand(interp, "java::null",        "tcl.lang.JavaNullCmd");

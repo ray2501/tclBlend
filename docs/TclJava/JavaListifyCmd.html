@@ -1,0 +1,164 @@
+<HTML>
+<TITLE>
+The java::listify Command
+</TITLE>
+
+<BODY>
+<HR>
+
+<H3>
+The java::listify Command
+</H3>
+
+<HR>
+
+<DL>
+
+<H3>
+Usage:
+</H3>
+
+<DD><B>java::listify</B> ?-noconvert|<I>class</I>? <I>collectionORenumeration</I>
+
+<P>
+
+The <B>java::listify</B> command trasforms a java <I>collection</I> or a java <I>enumeration</I> in a tcl-list.<BR>
+
+<p>
+The <I>collectionORenumertion</I> object is a handle to a Java object that implements the <code>java.util.Collection</code>
+interface or the <code>java.util.Enumeration</code> interface, or an handle to <B>null</B> 
+</p>
+If <I>CollectionOrenumeration</I> is an handle to <B>null</B>, <B>java::listify</B> returns an empty list.
+<P>
+The <B>java::listify</B> command is similar to the <B>getrange</B> method working
+on a java-array, except that elements can be of different classes.
+
+<p>
+In its simpler form (without <B>-noconvert</B>> or <I>class</I>),<B>java::listify</B>
+tries to convert the enum/collections's elements in simple tcl-types (i.e. strings !).
+<BR>
+This implicit conversions works only on basic elements (i.e. Integer, Double, .., String);
+otherwise the element is extracted as a java-object.
+<BR>
+Note that <B>null</B> elements are converted to the empty string.
+</p>
+
+<p>
+If <B>-noconvert</B> option is used, then all <I>collection</I>'s elements are returned
+as java.objects.
+<BR>
+If <I>class</I> is specified, then all <I>collection</I>'s elements are returned
+as <I>casted</I> java.objects. An error is raised if <I>class</I> is incompatible with any element.
+</p>
+
+
+</DL>
+
+<DL>
+
+<H3>Examples:</H3>
+
+<DD>
+
+<H4>
+Collection Example:
+</H4>
+
+<P>
+Assume for a moment that the user has defined a Java class.
+This class contains a static method that returns a
+collection object. The JDK 1.5 code to iterate over this
+collection would be:
+
+<code>
+<pre>
+Collection&lt;String&gt; c = MyJavaClass.getCollection();
+
+for (String elem : c) {
+    System.out.println("elem is " + elem);
+}
+</pre>
+</code>
+
+This same iteration could be implemented in Tcl, using
+the <b>java::listify</b> command.
+
+<code>
+<pre>
+set c [java::call MyJavaClass getCollection]
+
+foreach elem [java::listify {String} $c] {
+    puts "elem is $elem"
+}
+</pre>
+</code>
+
+</P>
+
+<H4>
+Elements in a Hashtable:
+</H4>
+
+<P>
+The <B>java::listify</B> command can be used to iterate
+over elements in a Hashtable or any other Map implementation.
+
+<code>
+<pre>
+java::import -package java.util Hashtable Map
+set t [java::new Hashtable]
+$t put "One" "onestr"
+$t put "Two" "twostr"
+
+foreach e [java::listify {java.util.Map.Entry} [$t entrySet]] {
+    set key [[$e getKey] toString]
+    set value [[$e getValue] toString]
+    puts "$key -> $value"
+}
+</pre>
+</code>
+
+The code above will print the following to the console:
+
+<code>
+<pre>
+One -> onestr
+Two -> twostr
+</pre>
+</code>
+
+</P>
+
+
+<H4>
+Automatic Type Conversion:
+</H4>
+
+<P>
+The <B>java::listify</B> command supports automatic conversion
+of a Java primitive wrapper in a collection to a Tcl
+value. For example, given a Vector of <code>java.lang.Integer</code>,
+its elements are automatically converted in Tcl-integers.
+
+<code>
+<pre>
+set v [java::new java.util.Vector]
+$v addElement [java::new Integer 0]
+$v addElement [java::new Integer 1]
+$v addElement [java::new Integer 2]
+
+puts "vector elements are: [java::listify $v]"
+</pre>
+</code>
+
+</DL>
+
+<br>
+
+<PRE>
+Based on TclBlend <A HREF="../license.html">Copyright</A> &#169; 1997-1998 Sun Microsystems, Inc.
+</PRE>
+<pre>JBlend is Copyright &copy; 2016 - Irrational Numbers.<br></pre>
+
+</BODY>
+</HTML>
