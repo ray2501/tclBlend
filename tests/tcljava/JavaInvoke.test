@@ -553,7 +553,7 @@ set values {
     {char foobar {1 {expected character but got "foobar"}}}
     {double 3.4 {0 3.4}}
     {double blat {1 {expected floating-point number but got "blat"}}}
-    {float 3.4 {0 3.40000009537}}
+    {float 3.4 {0 3.4000000953674316}}
     {float blat {1 {expected floating-point number but got "blat"}}}
     {int 2 {0 2}}
     {int 2147483647 {0 2147483647}}

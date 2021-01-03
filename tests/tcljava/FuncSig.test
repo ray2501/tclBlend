@@ -203,14 +203,9 @@ test FuncSig-2.3 {getAccessibleInstanceMethods} {
     set list
 } $FuncSig2_3
 
-# Signature differs in JDK 1.4 and 1.5
+# Signature for Java 11
 
-set FuncSig2_4 {copyValueOf copyValueOf valueOf valueOf valueOf valueOf valueOf valueOf valueOf valueOf valueOf}
-
-if {[info exists tcljava(java.version)] && \
-        [string match "1.5*" $tcljava(java.version)]} {
-    set FuncSig2_4 {copyValueOf copyValueOf format format valueOf valueOf valueOf valueOf valueOf valueOf valueOf valueOf valueOf}
-}
+set FuncSig2_4 {copyValueOf copyValueOf format format join join valueOf valueOf valueOf valueOf valueOf valueOf valueOf valueOf valueOf}
 
 test FuncSig-2.4 {getAccessibleStaticMethods} {
     set c [java::field String class]

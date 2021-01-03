@@ -666,7 +666,7 @@ test javaNewCmd-7.12 {parse Java type from String} {
     Infinity \
     -Infinity \
     NaN \
-    0.0010 \
+    0.001 \
     1.0E9 \
     $pmin \
     1 {double value too large to represent in a float} \
@@ -687,7 +687,7 @@ test javaNewCmd-7.13 {float stored in TclDouble} {
     lappend results [format %s [$F toString]]
     lappend results [format %s [$F floatValue]]
     set results
-} {1.40129846432e-045 1.4E-45 1.40129846432e-045}
+} {1.401298464324817e-45 1.4E-45 1.401298464324817e-45}
 
 test javaNewCmd-7.14 {float stored in TclDouble} {
     # Printing a double in Java via
@@ -700,13 +700,13 @@ test javaNewCmd-7.14 {float stored in TclDouble} {
 
     set sb [java::new StringBuffer]
     set min [java::field Float MIN_VALUE]
-    $sb {append double} $min
+    $sb {append float} $min
     list \
         [$sb toString] \
         [format %s $min]
 } [list \
-1.401298464324817E-45 \
-1.40129846432e-045 \
+1.4E-45 \
+1.401298464324817e-45 \
 ]
 
 test javaNewCmd-7.15 {float stored in TclDouble} {tip132} {
@@ -755,7 +755,7 @@ test javaNewCmd-7.16 {float stored in TclDouble} {
 
     set tcl_precision $save_tcl_precision
     set results
-} {1.401298464324817e-045 1.4E-45 1.401298464324817e-045}
+} {1.401298464324817e-45 1.4E-45 1.401298464324817e-45}
 
 test javaNewCmd-7.17 {parse Java type from String} {
     # Float.MIN_VALUE stored in a TclDouble is
@@ -796,10 +796,10 @@ test javaNewCmd-7.17 {parse Java type from String} {
     set tcl_precision $save_tcl_precision
     set results
 } [list \
-    1.401298464324817e-045 \
-    1.401298464324817e-045 \
+    1.401298464324817e-45 \
+    1.401298464324817e-45 \
     1.4E-45 \
-    1.401298464324817e-045 \
+    1.401298464324817e-45 \
     ]
 
 
@@ -829,7 +829,7 @@ test javaNewCmd-7.14 {parse Java type from String} {
     Infinity \
     -Infinity \
     NaN \
-    0.0010 \
+    0.001 \
     1.0E9 \
     $pmin \
     $pmax \

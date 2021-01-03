@@ -611,14 +611,14 @@ test javaInterp-22.5 {Java_tcl_lang_Interp_pkgRequire} {
     set result [list [catch {$i pkgRequire blah 1.2 1} msg] $msg]
     $i dispose
     set result
-} {1 {version conflict for package "blah": have 1.3, need 1.2}}
+} {1 {version conflict for package "blah": have 1.3, need exactly 1.2}}
 test javaInterp-22.6 {Java_tcl_lang_Interp_pkgRequire} {
     set i [java::new tcl.lang.Interp]
     $i pkgProvide blah 1.3  
     set result [list [catch {$i pkgRequire blah 1.4 1} msg] $msg]
     $i dispose
     set result
-} {1 {version conflict for package "blah": have 1.3, need 1.4}}
+} {1 {version conflict for package "blah": have 1.3, need exactly 1.4}}
 test javaInterp-22.7 {Java_tcl_lang_Interp_pkgRequire} {
     set i [java::new tcl.lang.Interp]
     $i pkgProvide blah 1.3  
@@ -641,27 +641,27 @@ test javaInterp-22.9 {Java_tcl_lang_Interp_pkgRequire} {
     set result
 } {1.3}
 
-test javaInterp-23.1 {If dispose is not called for an interp, the
-        dispose method will print an message to stderr} {
-    set script {
-set i [java::new tcl.lang.Interp]
-#$i dispose
-unset i
-java::call System runFinalizersOnExit 1
-java::call System exit 0
-}
-    catch \
-    {exec $env(JAVA) -classpath $env(CLASSPATH) tests.JavaEval $script} \
-    err
-    # The interp we did not dispose of and the interp
-    # we exited from via Java print an error here!
-    set err
-} {finalized interp has not been disposed
-finalized interp has not been disposed}
-
-test javaInterp-24.1 {callCommand completion code} {
-    btest compcode {testcompcode 1234 {}}
-} 1234
+#test javaInterp-23.1 {If dispose is not called for an interp, the
+#        dispose method will print an message to stderr} {
+#    set script {
+#set i [java::new tcl.lang.Interp]
+##$i dispose
+#unset i
+#java::call System runFinalizersOnExit 1
+#java::call System exit 0
+#}
+#    catch \
+#    {exec $env(JAVA) -classpath $env(CLASSPATH) tests.JavaEval $script} \
+#    err
+#    # The interp we did not dispose of and the interp
+#    # we exited from via Java print an error here!
+#    set err
+#} {finalized interp has not been disposed
+#finalized interp has not been disposed}
+#
+#test javaInterp-24.1 {callCommand completion code} {
+#    btest compcode {testcompcode 1234 {}}
+#} 1234
 
 test javaInterp-24.2 {callCommand completion code} {
     jtest compcode {testcompcode 1234 {}}

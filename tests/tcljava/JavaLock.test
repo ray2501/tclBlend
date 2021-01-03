@@ -44,14 +44,18 @@ test java::lock-1.6 {create a lock} {
 } {0}
 
 test java::lock-1.7 {create and remove a lock} {
+    -body {
     set x [java::new java.lang.Object]
     java::lock $x
     llength $x
     java::unlock $x
     llength $x
     catch {java::isnull $x} msg
-    string compare [list $msg] [format "{unknown java object \"%s\"}" $x]
-} {0}
+    }
+    -returnCodes error
+    -match glob
+    -result {unknown java object*}
+}
 
 test java::lock-1.8 {create and remove multiple locks} {
     set x [java::new java.lang.Object]
