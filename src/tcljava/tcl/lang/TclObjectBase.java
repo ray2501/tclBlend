@@ -386,6 +386,7 @@ abstract class TclObjectBase {
      * removed at some point.
      */
 
+    @Deprecated
     public final TclObject takeExclusive() throws TclRuntimeError {
 	if (internalRep == null) {
 	    disposedError();
