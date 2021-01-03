@@ -138,6 +138,7 @@ set tid [thread::create]
 thread::preserve $tid
 thread::send $tid {package require java}
 thread::release -wait $tid
+after 500
 exit 0
 } loading.tcl]
     exec $tcltest::tcltest $f >@stdout 2>@stderr
