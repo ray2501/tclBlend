@@ -143,9 +143,9 @@ its elements are automatically converted in Tcl-integers.
 <code>
 <pre>
 set v [java::new java.util.Vector]
-$v addElement [java::new Integer 0]
-$v addElement [java::new Integer 1]
-$v addElement [java::new Integer 2]
+$v addElement [java::call -noconvert Integer valueOf 0]
+$v addElement [java::call -noconvert Integer valueOf 1]
+$v addElement [java::call -noconvert Integer valueOf 2]
 
 puts "vector elements are: [java::listify $v]"
 </pre>

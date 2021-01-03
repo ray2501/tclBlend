@@ -65,7 +65,7 @@ public class JavaTest implements CommandWithDispose {
     public char ichar		= 'J';
     public String istr		= "test string";
 
-    public Integer iobj1	= new Integer(123);
+    public Integer iobj1	= Integer.valueOf(123);
     public String iobj2		= new String("test string obj");
     public Object iobj3		= new Vector();
     public Object iobjnull	= null;

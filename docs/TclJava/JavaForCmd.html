@@ -226,9 +226,9 @@ set v2 [java::new Vector]
 $v1 addElement [java::new String "Black"]
 $v1 addElement [java::new String "White"]
 
-$v2 addElement [java::new Integer 0]
-$v2 addElement [java::new Integer 1]
-$v2 addElement [java::new Integer 2]
+$v2 addElement [java::call -noconvert Integer valueOf 0]
+$v2 addElement [java::call -noconvert Integer valueOf 1]
+$v2 addElement [java::call -noconvert Integer valueOf 2]
 
 java::for {String s} $v1 {
     java::for {int i} $v2 {
@@ -333,9 +333,9 @@ following code:
 <code>
 <pre>
 set v [java::new java.util.Vector]
-$v addElement [java::new Integer 0]
-$v addElement [java::new Integer 1]
-$v addElement [java::new Integer 2]
+$v addElement [java::call -noconvert Integer valueOf 0]
+$v addElement [java::call -noconvert Integer valueOf 1]
+$v addElement [java::call -noconvert Integer valueOf 2]
 
 java::for {int e} $v {
     puts $e
@@ -349,9 +349,9 @@ as <code>java.lang.Integer</code> objects with the following code:
 <code>
 <pre>
 set v [java::new java.util.Vector]
-$v addElement [java::new Integer 0]
-$v addElement [java::new Integer 1]
-$v addElement [java::new Integer 2]
+$v addElement [java::call -noconvert Integer valueOf 0]
+$v addElement [java::call -noconvert Integer valueOf 1]
+$v addElement [java::call -noconvert Integer valueOf 2]
 
 java::for {Integer e} $v {
     puts [$e toString]

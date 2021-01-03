@@ -113,7 +113,7 @@ public TestEventThread2(Interp i) {
 public void addEvent(String script, int wtime)
 {
     scripts.addElement(script);
-    waitTime.addElement(new Integer(wtime));
+    waitTime.addElement(Integer.valueOf(wtime));
 }
 
 /*
