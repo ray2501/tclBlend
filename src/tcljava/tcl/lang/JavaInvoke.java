@@ -1170,10 +1170,10 @@ throws
 	    // around and calling code can't detect an overflow.
 
 	    int jint = parseJavaInt(interp, tclObj);
-	    return new Integer(jint);
+	    return Integer.valueOf(jint);
 
 	} else if ((type == Boolean.TYPE) || (type == Boolean.class)) {
-	    return new Boolean(TclBoolean.get(interp, tclObj));
+	    return Boolean.valueOf(TclBoolean.get(interp, tclObj));
 
 	} else if ((type == Long.TYPE) || (type == Long.class)) {
 	    // If an object is already a TclInteger type, then pass
@@ -1182,7 +1182,7 @@ throws
 	    // number is not an integer or is outside the long bounds.
 
 	    long jlong = parseJavaLong(interp, tclObj);
-	    return new Long(jlong);
+	    return Long.valueOf(jlong);
 
 	} else if ((type == Float.TYPE) || (type == Float.class)) {
 	    // Tcl stores floating point numbers as doubles,
@@ -1203,10 +1203,10 @@ throws
 	        throw new TclException(interp,
 	            "double value too large to represent in a float");
 	    }
-	    return new Float(jfloat);
+	    return Float.valueOf(jfloat);
 
 	} else if ((type == Double.TYPE) || (type == Double.class)) {
-	    return new Double(TclDouble.get(interp, tclObj));
+	    return Double.valueOf(TclDouble.get(interp, tclObj));
 
 	} else if ((type == Byte.TYPE) || (type == Byte.class)) {
 	    // Parse a Java int, then check valid byte range.
@@ -1216,7 +1216,7 @@ throws
 		throw new TclException(interp,
 		   "integer value too large to represent in a byte");
 	    }
-	    return new Byte((byte) jint);
+	    return Byte.valueOf((byte) jint);
 
 	} else if ((type == Short.TYPE) || (type == Short.class)) {
 	    // Parse a Java int, then check valid byte range.
@@ -1226,7 +1226,7 @@ throws
 		throw new TclException(interp,
 		    "integer value too large to represent in a short");
 	    }
-	    return new Short((short) jint);
+	    return Short.valueOf((short) jint);
 
 	} else if ((type == Character.TYPE) || (type == Character.class)) {
 	    String str = tclObj.toString();
@@ -1234,7 +1234,7 @@ throws
 	        throw new TclException(interp, "expected character but got \""
 		    + tclObj + "\"");
 	    }
-	    return new Character(str.charAt(0));
+	    return Character.valueOf(str.charAt(0));
 
 	} else if (type == TclObject.class) {
 	    // Pass a non ReflectObject TclObject directly to a Java method.

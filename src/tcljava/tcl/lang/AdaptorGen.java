@@ -1037,7 +1037,7 @@ hashPutShort(
     short num)			// Put this number under the given key
 				// in the hashtable.
 {
-    Short shortObj = new Short(num);
+    Short shortObj = Short.valueOf(num);
     hashtable.put(key, shortObj);
 }
 

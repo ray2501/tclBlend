@@ -62,9 +62,9 @@ TclDouble(
         String key = "TclDouble";
         Integer num = (Integer) TclObject.objRecordMap.get(key);
         if (num == null) {
-            num = new Integer(1);
+            num = Integer.valueOf(1);
         } else {
-            num = new Integer(num.intValue() + 1);
+            num = Integer.valueOf(num.intValue() + 1);
         }
         TclObject.objRecordMap.put(key, num);
     }
@@ -100,9 +100,9 @@ throws
         String key = "TclDouble";
         Integer num = (Integer) TclObject.objRecordMap.get(key);
         if (num == null) {
-            num = new Integer(1);
+            num = Integer.valueOf(1);
         } else {
-            num = new Integer(num.intValue() + 1);
+            num = Integer.valueOf(num.intValue() + 1);
         }
         TclObject.objRecordMap.put(key, num);
     }
@@ -130,9 +130,9 @@ public InternalRep duplicate()
         String key = "TclDouble.duplicate()";
         Integer num = (Integer) TclObject.objRecordMap.get(key);
         if (num == null) {
-            num = new Integer(1);
+            num = Integer.valueOf(1);
         } else {
-            num = new Integer(num.intValue() + 1);
+            num = Integer.valueOf(num.intValue() + 1);
         }
         TclObject.objRecordMap.put(key, num);
     }
@@ -216,9 +216,9 @@ throws
         String key = "TclString -> TclDouble";
         Integer num = (Integer) TclObject.objRecordMap.get(key);
         if (num == null) {
-            num = new Integer(1);
+            num = Integer.valueOf(1);
         } else {
-            num = new Integer(num.intValue() + 1);
+            num = Integer.valueOf(num.intValue() + 1);
         }
         TclObject.objRecordMap.put(key, num);
     }
