@@ -264,7 +264,7 @@ throws
 	}
 
 	try {
-	    adaptor = (EventAdaptor)adaptorCls.newInstance();
+	    adaptor = (EventAdaptor)adaptorCls.getDeclaredConstructor().newInstance();
 	} catch (InstantiationException e1) {
 	    /*
 	     * adaptor will remain null. This will trigger the
@@ -275,6 +275,12 @@ throws
 	     * adaptor will remain null. This will trigger the
 	     * exception later on.
 	     */
+	} catch (NoSuchMethodException e3) {
+	    /*
+	     * adaptor will remain null. This will trigger the
+	     * exception later on.
+	     */
+	} catch (InvocationTargetException e4) {
 	}
 
 	if (adaptor == null) {

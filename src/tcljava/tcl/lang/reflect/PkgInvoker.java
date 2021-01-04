@@ -233,7 +233,7 @@ getPkgInvoker(
 	try {
 	    if (cloader != null) {
 	        Class invCls = cloader.loadClass(pkg + ".TclPkgInvoker");
-	        invoker = (PkgInvoker) invCls.newInstance();
+	        invoker = (PkgInvoker) invCls.getDeclaredConstructor().newInstance();
 	    }
 	} catch (Exception e) {
 	    // The package doesn't include a PkgInvoker class. We use

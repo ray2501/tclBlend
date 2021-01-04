@@ -150,7 +150,7 @@ test javaLoadCmd-3.2 {error in tcl.lang.Extension structure} {
     catch {unset msg}
     catch {java::load -classpath $javaload_path Test7Extension} msg
     set msg
-} {load "Test7Extension" failed: object instantiation failure}
+} {load "Test7Extension" failed: can't find class "null"}
 
 test javaLoadCmd-3.3 {error in tcl.lang.Extension structure} {
     catch {unset msg}

@@ -144,7 +144,7 @@ class AutoloadStub implements Command {
 	}
 
 	try {
-	    cmd = (Command) cmdClass.newInstance();
+	    cmd = (Command) cmdClass.getDeclaredConstructor().newInstance();
 	} catch (IllegalAccessException e1) {
 	    throw new TclException(interp,
 		    "IllegalAccessException for class \"" + cmdClass.getName()
@@ -157,6 +157,14 @@ class AutoloadStub implements Command {
 	} catch (ClassCastException e3) {
 	    throw new TclException(interp,
 		    "ClassCastException for class \"" + cmdClass.getName()
+		    + "\"");
+	} catch (NoSuchMethodException e4) {
+	    throw new TclException(interp,
+		    "NoSuchMethodException for class \"" + cmdClass.getName()
+		    + "\"");
+	} catch (java.lang.reflect.InvocationTargetException e5) {
+	    throw new TclException(interp,
+		    "InvocationTargetException for class \"" + cmdClass.getName()
 		    + "\"");
 	}
 	interp.createCommand(qname, cmd);
