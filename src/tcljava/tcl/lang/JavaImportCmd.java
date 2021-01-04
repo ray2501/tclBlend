@@ -177,8 +177,15 @@ public class JavaImportCmd implements Command {
 			}
 
 			// Remove the package entry
-			if (packageTable.remove(elem) == null) {
-			    throw new TclRuntimeError("key " + elem + " not in packageTable");
+			//if (packageTable.remove(elem) == null) {
+			//    throw new TclRuntimeError("key " + elem + " not in packageTable");
+			//}
+			// Try to avoid ConcurrentModificationException
+			if (elem.equals(elem)) {
+			    if (debug) {
+			        System.out.println("remove key " + elem + " in packageTable");
+			    }
+			    iter.remove();
 			}
 		    }
 		}
