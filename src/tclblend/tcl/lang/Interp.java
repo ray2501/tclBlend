@@ -280,14 +280,15 @@ dispose()
  *----------------------------------------------------------------------
  */
 
-protected void
-finalize() throws Throwable
-{
-    if (notifier != null) {
-        System.err.println("finalized interp has not been disposed");
-    }
-    super.finalize();
-}
+// The finalize() method deprecated in Java 9, try to disable it
+//protected void
+//finalize() throws Throwable
+//{
+//    if (notifier != null) {
+//        System.err.println("finalized interp has not been disposed");
+//    }
+//    super.finalize();
+//}
 
 /*
  *----------------------------------------------------------------------
