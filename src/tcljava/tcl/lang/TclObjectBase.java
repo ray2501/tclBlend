@@ -479,7 +479,7 @@ abstract class TclObjectBase {
                 sb.append(num.intValue());
                 sb.append("\n");
             }
-            TclObject.objRecordMap = new Hashtable();
+            TclObject.objRecordMap = new Hashtable<String, Integer>();
             return sb.toString();
         } else {
             return "";
