@@ -102,26 +102,31 @@ And execute `make` and `make install`.
 
 Tcl 8.6.1-8.6.5 maybe need patch, please check [tclBlend](http://wiki.tcl.tk/1313).
 
-Notice:
-Now requires JDK >= 8.
+Notice:  
+Now requires JDK >= 8.  
 For JEP 313: Remove the Native-Header Generation Tool update
 
-Notice:
+Notice:  
 Fix Java unchecked message
 
-Notice:
-This package already replace CONST84 to const.
+Notice:  
+This package already replace CONST84 to const.  
 For TIP 503: End Tcl 8.3 Source Compatibility Support.
 
-Notice:
+Notice:  
 Remove `_ANSI_ARGS_` flag
 
-Notice:
+Notice:  
 Try to use `JNI_VERSION` flag
 
-Notice:
+Notice:  
 Use server JVM to replace client JVM in tcljava.m4 and configure file.
 
-Notice:
+Notice:  
 Porting TclJBlend command java::listify to tclBlend.
 
+Notice:  
+The class finalize() method deprecated in Java 9, try to disable it.  
+Fix to Java 9 newInstance() deprecated.  
+Update for Java 9, Integer(int) constructors are deprecated.  
+Try to avoid ConcurrentModificationException. (java::import -forget -package)
