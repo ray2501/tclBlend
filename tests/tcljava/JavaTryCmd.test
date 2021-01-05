@@ -469,7 +469,7 @@ test javatrycmd-3.8 {JavaTryCmd: different error in finally block} {
         }
     } err]
     list $ret $err $errorCode
-} {1 {wrong # args: should be "proc name args body"} NONE}
+} {1 {wrong # args: should be "proc name args body"} {TCL WRONGARGS}}
 
 test javatrycmd-3.9 {JavaTryCmd: catch error in body block, error in finally} {
     global errorCode
@@ -576,7 +576,7 @@ test javatrycmd-3.14 {JavaTryCmd: return value} {
         }
     } err]
     list $ret $err $i $errorCode
-} {0 2 3 NONE}
+} {0 2 3 {TCL LOOKUP VARNAME i}}
 
 test javatrycmd-3.15 {JavaTryCmd: return value} {
     global errorCode
@@ -589,7 +589,7 @@ test javatrycmd-3.15 {JavaTryCmd: return value} {
         }
     } err]
     list $ret $err $i $errorCode
-} {0 2 2 NONE}
+} {0 2 2 {TCL LOOKUP VARNAME i}}
 
 test javatrycmd-3.16 {JavaTryCmd: return value with caught error} {
     global errorCode
@@ -604,7 +604,7 @@ test javatrycmd-3.16 {JavaTryCmd: return value with caught error} {
         }
     } err]
     list $ret $err $i $errorCode
-} {0 3 3 NONE}
+} {0 3 3 {TCL LOOKUP VARNAME j}}
 
 test javatrycmd-3.17 {JavaTryCmd: return value with caught error + finally} {
     global errorCode
@@ -1220,7 +1220,7 @@ test javatrycmd-6.1 {JavaTryCmd: no exception} {
         }
     } err]
     list $ret $catch $err $errorCode
-} {0 0 hello NONE}
+} {0 0 hello {TCL LOOKUP VARNAME i}}
 
 test javatrycmd-6.2 {JavaTryCmd: do not catch return} {
     global errorCode
@@ -1235,7 +1235,7 @@ test javatrycmd-6.2 {JavaTryCmd: do not catch return} {
         }
     } err]
     list $ret $catch $err $errorCode
-} {0 0 5 NONE}
+} {0 0 5 {TCL LOOKUP VARNAME i}}
 
 test javatrycmd-6.3 {JavaTryCmd: do not catch return in proc} {
     global errorCode
@@ -1254,7 +1254,7 @@ test javatrycmd-6.3 {JavaTryCmd: do not catch return in proc} {
     } err]
     rename test_return {}
     list $ret $catch $err $errorCode
-} {0 0 2 NONE}
+} {0 0 2 {TCL LOOKUP VARNAME i}}
 
 test javatrycmd-6.4 {JavaTryCmd: catch incorrect break} {
     global errorCode
@@ -1269,7 +1269,7 @@ test javatrycmd-6.4 {JavaTryCmd: catch incorrect break} {
         }
     } err]
     list $ret $catch $err $errorCode
-} {0 1 {} NONE}
+} {0 1 {} {TCL LOOKUP VARNAME i}}
 
 test javatrycmd-6.5 {JavaTryCmd: do not catch incorrect break} {
     global errorCode
@@ -1283,7 +1283,7 @@ test javatrycmd-6.5 {JavaTryCmd: do not catch incorrect break} {
         }
     } err]
     list $ret $catch $err $errorCode
-} {3 0 {} NONE}
+} {3 0 {} {TCL LOOKUP VARNAME i}}
 
 test javatrycmd-6.6 {JavaTryCmd: catch incorrect break in proc} {
     global errorCode
@@ -1302,7 +1302,7 @@ test javatrycmd-6.6 {JavaTryCmd: catch incorrect break in proc} {
     } err]
     rename test_break {}
     list $ret $catch $err $errorCode
-} {0 1 {invoked "break" outside of a loop} NONE}
+} {0 1 {invoked "break" outside of a loop} {TCL RESULT UNEXPECTED}}
 
 test javatrycmd-6.7 {JavaTryCmd: do not catch incorrect break in proc} {
     global errorCode
@@ -1335,7 +1335,7 @@ test javatrycmd-6.8 {JavaTryCmd: catch incorrect continue} {
         }
     } err]
     list $ret $catch $err $errorCode
-} {0 1 {} NONE}
+} {0 1 {} {TCL LOOKUP VARNAME i}}
 
 test javatrycmd-6.9 {JavaTryCmd: do not catch incorrect continue} {
     global errorCode
@@ -1349,7 +1349,7 @@ test javatrycmd-6.9 {JavaTryCmd: do not catch incorrect continue} {
         }
     } err]
     list $ret $catch $err $errorCode
-} {4 0 {} NONE}
+} {4 0 {} {TCL LOOKUP VARNAME i}}
 
 test javatrycmd-6.10 {JavaTryCmd: catch incorrect continue in proc} {
     global errorCode
@@ -1368,7 +1368,7 @@ test javatrycmd-6.10 {JavaTryCmd: catch incorrect continue in proc} {
     } err]
     rename test_continue {}
     list $ret $catch $err $errorCode
-} {0 1 {invoked "continue" outside of a loop} NONE}
+} {0 1 {invoked "continue" outside of a loop} {TCL RESULT UNEXPECTED}}
 
 test javatrycmd-6.11 {JavaTryCmd: do not catch incorrect continue in proc} {
     global errorCode
@@ -1500,7 +1500,7 @@ test javatrycmd-8.1 {return in script} {
         }
     } err]
     list $ret $catch $err $errorCode
-} {0 0 5 NONE}
+} {0 0 5 {TCL LOOKUP VARNAME i}}
 
 test javatrycmd-8.2 {return in catch block} {
     global errorCode
