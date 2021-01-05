@@ -264,7 +264,7 @@ throws
 	}
 
 	try {
-	    adaptor = (EventAdaptor)adaptorCls.getDeclaredConstructor().newInstance();
+	    adaptor = (EventAdaptor)((Class<?>) adaptorCls).getDeclaredConstructor().newInstance();
 	} catch (InstantiationException e1) {
 	    /*
 	     * adaptor will remain null. This will trigger the

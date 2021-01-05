@@ -127,7 +127,7 @@ throws
 	// instantiated by the System ClassLoader.
 
 	validLoad = false;
-	pkg = (Extension)pkgClass.getDeclaredConstructor().newInstance();
+	pkg = (Extension)((Class<?>) pkgClass).getDeclaredConstructor().newInstance();
 
 	// Initialize the given package. Usually, some new commands will
 	// be created inside the interp.

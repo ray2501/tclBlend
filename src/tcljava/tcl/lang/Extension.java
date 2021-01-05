@@ -144,7 +144,7 @@ class AutoloadStub implements Command {
 	}
 
 	try {
-	    cmd = (Command) cmdClass.getDeclaredConstructor().newInstance();
+	    cmd = (Command) ((Class<?>) cmdClass).getDeclaredConstructor().newInstance();
 	} catch (IllegalAccessException e1) {
 	    throw new TclException(interp,
 		    "IllegalAccessException for class \"" + cmdClass.getName()
