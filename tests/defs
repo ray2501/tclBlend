@@ -1,12 +1,12 @@
 # This file contains support code for the Tcl test suite. It is
 # loaded by the all.tcl file in this directory.
 
-# It would be nice if we could purge if {$tcl_platform(platform) == "java"}
+# It would be nice if we could purge if {$::tcl_platform(platform) == "java"}
 # sorts of tests from the test suite !
 
 # Locate tcltest executable
 
-if {$tcl_platform(platform) != "java"} {
+if {$::tcl_platform(platform) != "java"} {
     set tcltest [list [info nameofexecutable]]
     if {$tcltest == "{}"} {
       set tcltest {}
@@ -27,7 +27,7 @@ proc setupJavaPackage {} {
         return
     }
 
-    if {$tcl_platform(platform) == "java"} {
+    if {$::tcl_platform(platform) == "java"} {
 	set cls tcl.lang.JavaTestExtension
     } else {
 	set cls tcl.lang.NativeTestExtension
@@ -77,7 +77,7 @@ proc testchmod { mode file args } {
 
 
 
-if {$tcl_platform(platform) == "java"} {
+if {$::tcl_platform(platform) == "java"} {
 
 # Try to set a variable, if it does not exist raise an error
 

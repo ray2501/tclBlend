@@ -54,7 +54,7 @@ set package @PACKAGE@
 cd $libdir
 puts "Making pkgIndex.tcl in [file join [pwd] $package]"
 
-if {$tcl_platform(platform) == "unix"} {
+if {$::tcl_platform(platform) == "unix"} {
     pkg_mkIndex $package ../*[info sharedlibextension] *.tcl
 } else {
     pkg_mkIndex $package [file join .. .. bin *[info sharedlibextension]]

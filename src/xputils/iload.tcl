@@ -200,7 +200,7 @@ proc XpUtils::iload {args} {
 proc XpUtils::__iload_stage1 { dirs pathsearch sharedlib extdbg extra_args } {
     global tcl_platform
 
-    if {$tcl_platform(platform) == "windows"} {
+    if {$::tcl_platform(platform) == "windows"} {
 	# Expand the pathname in case it is something like
 	# c:/Progra~1/Tcl/lib
 	# Without this expansion we have problems loading a .dll

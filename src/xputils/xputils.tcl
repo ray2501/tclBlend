@@ -7,7 +7,7 @@ proc XpUtils::getPathSeparator { } {
 
     # FIXME: Mac switch broken
 
-    switch $tcl_platform(platform) {
+    switch $::tcl_platform(platform) {
         unix {
             set PATH_SEPARATOR :
         }
@@ -16,7 +16,7 @@ proc XpUtils::getPathSeparator { } {
         }
         mac -
         default {
-            error "unsupported platform \"$tcl_platform(platform)\""	
+            error "unsupported platform \"$::tcl_platform(platform)\""	
         }
     }
 
@@ -29,7 +29,7 @@ proc XpUtils::expandSharedLibName { shortname {extdbg DEFAULT} } {
 
     # FIXME: Mac switch broken
 
-    switch $tcl_platform(platform) {
+    switch $::tcl_platform(platform) {
         unix {
 	    set SHLIB_PREFIX lib
 	    set SHLIB_SUFFIX [info sharedlibextension]
@@ -46,7 +46,7 @@ proc XpUtils::expandSharedLibName { shortname {extdbg DEFAULT} } {
         }
         mac -
         default {
-            error "unsupported platform \"$tcl_platform(platform)\""	
+            error "unsupported platform \"$::tcl_platform(platform)\""	
         }
     }
 
@@ -63,7 +63,7 @@ proc XpUtils::getTmpDir { } {
 
     # FIXME: Mac switch broken
 
-    switch $tcl_platform(platform) {
+    switch $::tcl_platform(platform) {
         unix {
             return /tmp
         }
@@ -80,7 +80,7 @@ proc XpUtils::getTmpDir { } {
         }
         mac -
         default {
-            error "unsupported platform \"$tcl_platform(platform)\""	
+            error "unsupported platform \"$::tcl_platform(platform)\""	
         }
     }
 }
@@ -201,7 +201,7 @@ if {0} {
 
 
 
-    switch $tcl_platform(platform) {
+    switch $::tcl_platform(platform) {
 	unix {
 	    # on a UNIX box shared libs can be found using the
 	    # LD_LIBRARY_PATH environmental variable or they can be
@@ -212,7 +212,7 @@ if {0} {
 	    set shlibdir lib
 	    
 	    # of course HP does it differently
-	    if {$tcl_platform(os) == "HP-UX"} {
+	    if {$::tcl_platform(os) == "HP-UX"} {
 		if {! [info exists env($VAR)]} {
                     set VAR SHLIB_PATH
 		}
@@ -234,7 +234,7 @@ if {0} {
 	}
 	mac -
 	default {
-	    error "unsupported platform \"$tcl_platform(platform)\""	
+	    error "unsupported platform \"$::tcl_platform(platform)\""	
 	}
     }
 

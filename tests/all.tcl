@@ -51,7 +51,7 @@ if {[info commands setupJavaPackage] == {}} {
 
 # Set verbose to max
 if {0} {
-    if {$tcl_platform(platform) == "java"} {
+    if {$::tcl_platform(platform) == "java"} {
         set tcltest::verbose pb
     } else {
         configure -verbose pb
@@ -120,7 +120,7 @@ puts stdout "Tests began at [eval $timeCmd]"
 
 cd [tcltest::testsDirectory]
 
-if {$tcl_platform(platform) == "java"} {
+if {$::tcl_platform(platform) == "java"} {
     # run the Jacl tests
 
     set tests [glob -nocomplain tcljava/*.test \
@@ -161,7 +161,7 @@ if {$tcl_platform(platform) == "java"} {
 
 # Run only parser tests
 if {0} {
-    if {$tcl_platform(platform) == "java"} {
+    if {$::tcl_platform(platform) == "java"} {
         set tcltest::verbose pb
     } else {
         configure -verbose pb

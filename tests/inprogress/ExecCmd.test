@@ -66,9 +66,9 @@ test exec-1.3 {unknown switch} {
 
 
 
-if {$tcl_platform(platform) == "unix" ||
-($tcl_platform(platform) == "java" &&
-	 $tcl_platform(host_platform) == "unix")} {
+if {$::tcl_platform(platform) == "unix" ||
+($::tcl_platform(platform) == "java" &&
+	 $::tcl_platform(host_platform) == "unix")} {
 
 test exec-unix-1.1 {basic exec operation} {unixExecs} {
     exec echo a b c
@@ -113,9 +113,9 @@ test exec-unix-1.5 {shell subst} {
 proc is_same_file { f1 f2 } {
   global tcl_platform
 
-  if {$tcl_platform(platform) == "windows" ||
-                     ($tcl_platform(platform) == "java" &&
-                     $tcl_platform(host_platform) == "windows")} {
+  if {$::tcl_platform(platform) == "windows" ||
+                     ($::tcl_platform(platform) == "java" &&
+                     $::tcl_platform(host_platform) == "windows")} {
 	set f1 [string tolower $f1]
 	set f2 [string tolower $f2]
   }

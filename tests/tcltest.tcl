@@ -215,12 +215,12 @@ namespace eval tcltest {
     # Internationalization support
     if {![info exists isoLocale]} {
 	variable isoLocale fr
-        switch $tcl_platform(platform) {
+        switch $::tcl_platform(platform) {
 	    "unix" {
 
 		# Try some 'known' values for some platforms:
 
-		switch -exact -- $tcl_platform(os) {
+		switch -exact -- $::tcl_platform(os) {
 		    "FreeBSD" {
 			set ::tcltest::isoLocale fr_FR.ISO_8859-1
 		    }
@@ -460,11 +460,11 @@ proc ::tcltest::initConstraints {} {
     ::tcltest::initConstraintsHook
 
     set ::tcltest::testConstraints(unixOnly) \
-	    [string equal $tcl_platform(platform) "unix"]
+	    [string equal $::tcl_platform(platform) "unix"]
     set ::tcltest::testConstraints(macOnly) \
-	    [string equal $tcl_platform(platform) "macintosh"]
+	    [string equal $::tcl_platform(platform) "macintosh"]
     set ::tcltest::testConstraints(pcOnly) \
-	    [string equal $tcl_platform(platform) "windows"]
+	    [string equal $::tcl_platform(platform) "windows"]
 
     set ::tcltest::testConstraints(unix) $::tcltest::testConstraints(unixOnly)
     set ::tcltest::testConstraints(mac) $::tcltest::testConstraints(macOnly)
@@ -480,11 +480,11 @@ proc ::tcltest::initConstraints {} {
 	    [expr {$::tcltest::testConstraints(mac) \
 	    || $::tcltest::testConstraints(unix)}]
 
-    set ::tcltest::testConstraints(nt) [string equal $tcl_platform(os) \
+    set ::tcltest::testConstraints(nt) [string equal $::tcl_platform(os) \
 	    "Windows NT"]
-    set ::tcltest::testConstraints(95) [string equal $tcl_platform(os) \
+    set ::tcltest::testConstraints(95) [string equal $::tcl_platform(os) \
 	    "Windows 95"]
-    set ::tcltest::testConstraints(98) [string equal $tcl_platform(os) \
+    set ::tcltest::testConstraints(98) [string equal $::tcl_platform(os) \
 	    "Windows 98"]
 
     # The following Constraints switches are used to mark tests that should
@@ -542,7 +542,7 @@ proc ::tcltest::initConstraints {} {
     set ::tcltest::testConstraints(root) 0
     set ::tcltest::testConstraints(notRoot) 1
     set user {}
-    if {[string equal $tcl_platform(platform) "unix"]} {
+    if {[string equal $::tcl_platform(platform) "unix"]} {
 	catch {set user [exec whoami]}
 	if {[string equal $user ""]} {
 	    catch {regexp {^[^(]*\(([^)]*)\)} [exec id] dummy user}
@@ -574,7 +574,7 @@ proc ::tcltest::initConstraints {} {
     # potential problem with select is apparently interfering.
     # (Mark Diekhans).
 
-    if {[string equal $tcl_platform(platform) "unix"]} {
+    if {[string equal $::tcl_platform(platform) "unix"]} {
 	if {[catch {exec uname -X | fgrep {Release = 3.2v}}] == 0} {
 	    set ::tcltest::testConstraints(asyncPipeClose) 0
 	} else {
@@ -596,11 +596,11 @@ proc ::tcltest::initConstraints {} {
     # present on this machine.
 
     set ::tcltest::testConstraints(unixExecs) 1
-    if {[string equal $tcl_platform(platform) "macintosh"]} {
+    if {[string equal $::tcl_platform(platform) "macintosh"]} {
 	set ::tcltest::testConstraints(unixExecs) 0
     }
     if {($::tcltest::testConstraints(unixExecs) == 1) && \
-	    ([string equal $tcl_platform(platform) "windows"])} {
+	    ([string equal $::tcl_platform(platform) "windows"])} {
 	if {[catch {exec cat defs}] == 1} {
 	    set ::tcltest::testConstraints(unixExecs) 0
 	}
@@ -1759,7 +1759,7 @@ proc ::tcltest::removeDirectory {name} {
 
 proc ::tcltest::viewFile {name} {
     global tcl_platform
-    if {([string equal $tcl_platform(platform) "macintosh"]) || \
+    if {([string equal $::tcl_platform(platform) "macintosh"]) || \
 	    ($::tcltest::testConstraints(unixExecs) == 0)} {
 	set f [open [file join $::tcltest::temporaryDirectory $name]]
 	set data [read -nonewline $f]

@@ -17,7 +17,7 @@ source defs
 
 # FIXME : fix path on mac
 
-switch $tcl_platform(platform) {
+switch $::tcl_platform(platform) {
   unix {
     set PATH_SEPARATOR :
   }
@@ -26,7 +26,7 @@ switch $tcl_platform(platform) {
   }
   mac -
   default {
-    error "unsupported platform \"$tcl_platform(platform)\""	
+    error "unsupported platform \"$::tcl_platform(platform)\""	
   }
 }
 
@@ -51,7 +51,7 @@ set SHLIB_SUFFIX [info sharedlibextension]
 set SHLIB_PREFIX ""
 
 
-if {$tcl_platform(platform) == "unix"} {
+if {$::tcl_platform(platform) == "unix"} {
   set SHLIB_PREFIX lib
 }
 
@@ -81,7 +81,7 @@ test 2.4 {expandSharedLibName : use passed in dbgx passed} {
 
 
 
-if {$tcl_platform(platform) == "unix"} {
+if {$::tcl_platform(platform) == "unix"} {
 
 test 2.5 {expandSharedLibName : automatic suffix based on platform} {
   XpUtils::expandSharedLibName foo
@@ -89,7 +89,7 @@ test 2.5 {expandSharedLibName : automatic suffix based on platform} {
 
 }
 
-if {$tcl_platform(platform) == "windows"} {
+if {$::tcl_platform(platform) == "windows"} {
 
 test 2.6 {expandSharedLibName : automatic suffix based on platform} {
   XpUtils::expandSharedLibName foo
@@ -97,7 +97,7 @@ test 2.6 {expandSharedLibName : automatic suffix based on platform} {
 
 }
 
-if {$tcl_platform(platform) == "mac"} {
+if {$::tcl_platform(platform) == "mac"} {
 
 # FIXME : add mac test case
 
@@ -116,7 +116,7 @@ if {$wasPlatformDebugSet} {
 
 # Test series 3 : XpUtils::getTmpDir function
 
-if {$tcl_platform(platform) == "unix"} {
+if {$::tcl_platform(platform) == "unix"} {
 
 test 3.0 {XpUtils::getTmpDir} {
   XpUtils::getTmpDir
@@ -124,7 +124,7 @@ test 3.0 {XpUtils::getTmpDir} {
 
 }
 
-if {$tcl_platform(platform) == "windows"} {
+if {$::tcl_platform(platform) == "windows"} {
 
 test 3.1 {XpUtils::getTmpDir} {
   if {[info exists env(TEMP)]} {
@@ -142,7 +142,7 @@ test 3.1 {XpUtils::getTmpDir} {
 
 }
 
-if {$tcl_platform(platform) == "mac"} {
+if {$::tcl_platform(platform) == "mac"} {
 
 # FIXME : add mac test case
 
@@ -155,7 +155,7 @@ if {$tcl_platform(platform) == "mac"} {
 # Test series 4 : XpUtils::splitpath function
 
 
-if {$tcl_platform(platform) == "unix"} {
+if {$::tcl_platform(platform) == "unix"} {
 
 test 4.0 {XpUtils::splitpath} {
   XpUtils::splitpath one:two
@@ -167,7 +167,7 @@ test 4.1 {XpUtils::splitpath} {
 
 }
 
-if {$tcl_platform(platform) == "windows"} {
+if {$::tcl_platform(platform) == "windows"} {
 
 test 4.2 {XpUtils::splitpath} {
   XpUtils::splitpath one\;two
@@ -179,7 +179,7 @@ test 4.3 {XpUtils::splitpath} {
 
 }
 
-if {$tcl_platform(platform) == "mac"} {
+if {$::tcl_platform(platform) == "mac"} {
 
 # FIXME : add mac test case
 
@@ -192,7 +192,7 @@ if {$tcl_platform(platform) == "mac"} {
 # Test series 5 : XpUtils::appendpath
 
 
-if {$tcl_platform(platform) == "unix"} {
+if {$::tcl_platform(platform) == "unix"} {
 
 test 5.1 {XpUtils::appendpath} {
   set env(TMP_PATH) one:two
@@ -204,7 +204,7 @@ test 5.1 {XpUtils::appendpath} {
 
 }
 
-if {$tcl_platform(platform) == "windows"} {
+if {$::tcl_platform(platform) == "windows"} {
 
 test 5.2 {XpUtils::appendpath} {
   set env(TMP_PATH) {one;two}
@@ -216,7 +216,7 @@ test 5.2 {XpUtils::appendpath} {
 
 }
 
-if {$tcl_platform(platform) == "mac"} {
+if {$::tcl_platform(platform) == "mac"} {
 
 # FIXME : add mac test case
 
@@ -227,7 +227,7 @@ if {$tcl_platform(platform) == "mac"} {
 # Test series 6 : XpUtils::prependpath
 
 
-if {$tcl_platform(platform) == "unix"} {
+if {$::tcl_platform(platform) == "unix"} {
 
 test 6.1 {XpUtils::prependpath} {
   set env(TMP_PATH) one:two
@@ -239,7 +239,7 @@ test 6.1 {XpUtils::prependpath} {
 
 }
 
-if {$tcl_platform(platform) == "windows"} {
+if {$::tcl_platform(platform) == "windows"} {
 
 test 6.2 {XpUtils::prependpath} {
   set env(TMP_PATH) {one;two}
@@ -251,7 +251,7 @@ test 6.2 {XpUtils::prependpath} {
 
 }
 
-if {$tcl_platform(platform) == "mac"} {
+if {$::tcl_platform(platform) == "mac"} {
 
 # FIXME : add mac test case
 
