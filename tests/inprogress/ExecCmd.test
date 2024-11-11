@@ -28,8 +28,8 @@ if {[info commands exec] == ""} {
 #system environment then use that executable name when invoking
 #the java VM, otherwise use the name "java"
 
-if {[info exists env(JAVA)]} {
-  set JAVA $env(JAVA)
+if {[info exists ::env(JAVA)]} {
+  set JAVA $::env(JAVA)
 } else {
   set JAVA java
 }
@@ -37,7 +37,7 @@ if {[info exists env(JAVA)]} {
 
 if {0} {
 puts "JAVA is \"$JAVA\""
-puts "CLASSPATH is \"$env(CLASSPATH)\""
+puts "CLASSPATH is \"$::env(CLASSPATH)\""
 }
 
 
@@ -135,7 +135,7 @@ test exec-2.1 {current directory test} {
     set name tmpdir
     file mkdir $name
     cd $name
-    set err [catch {exec $JAVA -classpath $env(CLASSPATH) tests.exec.PWD} cwd]
+    set err [catch {exec $JAVA -classpath $::env(CLASSPATH) tests.exec.PWD} cwd]
     cd $startdir
     file delete -force $name
     if {$err} {
@@ -154,7 +154,7 @@ test exec-2.2 {funny directory names} {
     set name "one two"
     file mkdir $name
     cd $name
-    set err [catch {exec $JAVA -classpath $env(CLASSPATH) tests.exec.PWD} cwd]
+    set err [catch {exec $JAVA -classpath $::env(CLASSPATH) tests.exec.PWD} cwd]
     cd $startdir
     file delete -force $name
     if {$err} {
@@ -168,7 +168,7 @@ test exec-2.3 {funny directory names} {
     set name "one\$two"
     file mkdir $name
     cd $name
-    set err [catch {exec $JAVA -classpath $env(CLASSPATH) tests.exec.PWD} cwd]
+    set err [catch {exec $JAVA -classpath $::env(CLASSPATH) tests.exec.PWD} cwd]
     cd $startdir
     file delete -force $name
     if {$err} {
@@ -182,7 +182,7 @@ test exec-2.3 {funny directory names} {
     set name "d%OS%r"
     file mkdir $name
     cd $name
-    set err [catch {exec $JAVA -classpath $env(CLASSPATH) tests.exec.PWD} cwd]
+    set err [catch {exec $JAVA -classpath $::env(CLASSPATH) tests.exec.PWD} cwd]
     cd $startdir
     file delete -force $name
     if {$err} {
@@ -196,7 +196,7 @@ test exec-2.4 {funny directory names} {
     set name reallylongdirname
     file mkdir $name
     cd $name
-    set err [catch {exec $JAVA -classpath $env(CLASSPATH) tests.exec.PWD} cwd]
+    set err [catch {exec $JAVA -classpath $::env(CLASSPATH) tests.exec.PWD} cwd]
     cd $startdir
     file delete -force $name
     if {$err} {
@@ -216,33 +216,33 @@ rename is_same_file ""
 #test return values of execed programs
 
 test exec-3.1 {exec return values} {
-    list [catch {exec $JAVA -classpath $env(CLASSPATH) tests.exec.ExecErr} err] $err
+    list [catch {exec $JAVA -classpath $::env(CLASSPATH) tests.exec.ExecErr} err] $err
 } "1 \{!stdout!\n!stderr!\}"
 
 test exec-3.2 {exec return values} {
-    list [catch {exec $JAVA -classpath $env(CLASSPATH) tests.exec.ExecNoErr} err] $err
+    list [catch {exec $JAVA -classpath $::env(CLASSPATH) tests.exec.ExecNoErr} err] $err
 } "1 \{!stdout!\n!stderr!\}"
 
 test exec-3.3 {exec return values} {
-    list [catch {exec $JAVA -classpath $env(CLASSPATH) tests.exec.ExecNoErr2} err] $err
+    list [catch {exec $JAVA -classpath $::env(CLASSPATH) tests.exec.ExecNoErr2} err] $err
 } "0 !stdout!"
 
 test exec-3.4 {exec return values} {
-    list [catch {exec $JAVA -classpath $env(CLASSPATH) tests.exec.ExecEmptyErr} err] $err
+    list [catch {exec $JAVA -classpath $::env(CLASSPATH) tests.exec.ExecEmptyErr} err] $err
 } {1 {child process exited abnormally}}
 
 test exec-3.5 {exec return values} {
-    list [catch {exec $JAVA -classpath $env(CLASSPATH) tests.exec.ExecEmptyErr2} err] $err
+    list [catch {exec $JAVA -classpath $::env(CLASSPATH) tests.exec.ExecEmptyErr2} err] $err
 } "1 \{!stdout!\nchild process exited abnormally\}"
 
 test exec-3.5 {exec return values} {
     set pair [list {tcl/lang/AfterCmd$AfterAssocData.class} \
 	 {tcl/lang/AfterCmd$TimerInfo.class}]
-    list [catch {exec $JAVA -classpath $env(CLASSPATH) tests.exec.PrintArgs $pair "last\$ one"} err] $err
+    list [catch {exec $JAVA -classpath $::env(CLASSPATH) tests.exec.PrintArgs $pair "last\$ one"} err] $err
 } "0 \{\{tcl/lang/AfterCmd\$AfterAssocData.class\} \{tcl/lang/AfterCmd\$TimerInfo.class\}\nlast\$ one\}"
 
 test exec-3.6 {exec with lots of stdout and stderr output} {
-    set status [catch {exec $JAVA -classpath $env(CLASSPATH) tests.exec.ExecLotsOutput} output]
+    set status [catch {exec $JAVA -classpath $::env(CLASSPATH) tests.exec.ExecLotsOutput} output]
 
     set expected "[string repeat OOO 1000]\n[string repeat EEE 1000]"
     if {[string compare $output $expected] == 0} {

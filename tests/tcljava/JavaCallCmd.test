@@ -110,9 +110,9 @@ test javaCall-7.3 {Interp.setResult(null)} {
 
 
 test javaCall-8.0 {load class from a jar on the TCL_CLASSPATH} {
-    set env(TCL_CLASSPATH) [file join $env(BUILD_DIR) btests hello hello.jar]
+    set ::env(TCL_CLASSPATH) [file join $::env(BUILD_DIR) btests hello hello.jar]
     set result [java::call hello.SayHello hello]
-    unset env(TCL_CLASSPATH)
+    unset ::env(TCL_CLASSPATH)
     set result
 } {hello}
 

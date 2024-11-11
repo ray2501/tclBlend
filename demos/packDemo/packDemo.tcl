@@ -1,7 +1,7 @@
 package require java
 
 #make sure . is in the CLASSPATH
-set env(TCL_CLASSPATH) .
+set ::env(TCL_CLASSPATH) .
 
 #define the java_pack comand
 source java_pack.tcl

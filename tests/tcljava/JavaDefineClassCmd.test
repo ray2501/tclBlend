@@ -21,8 +21,8 @@ setupJavaPackage
 
 set platform [testgetplatform]
 
-if {[info exists env(BUILD_DIR)]} {
-    set root_path [file join $env(BUILD_DIR) btests]
+if {[info exists ::env(BUILD_DIR)]} {
+    set root_path [file join $::env(BUILD_DIR) btests]
 } elseif {$platform == "windows"} {
     set root_path [file join .. win tests]
 } else {

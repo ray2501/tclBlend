@@ -23,8 +23,8 @@ setupJavaPackage
 
 set platform [testgetplatform]
 
-if {[info exists env(BUILD_DIR)]} {
-    set root_path [file join $env(BUILD_DIR) btests]
+if {[info exists ::env(BUILD_DIR)]} {
+    set root_path [file join $::env(BUILD_DIR) btests]
 } elseif {$platform == "windows"} {
     set root_path [file join .. win tests]
 } else {
@@ -178,9 +178,9 @@ test javaLoadCmd-4.3 {test loading of valid packages} {
 } {test works test works}
 
 test javaLoadCmd-4.4 {test loading of valid packages} {
-    set env(TCL_CLASSPATH) $javaload_path
+    set ::env(TCL_CLASSPATH) $javaload_path
     java::load Test6Extension
-    unset env(TCL_CLASSPATH)
+    unset ::env(TCL_CLASSPATH)
     test6
 } {test works}
 

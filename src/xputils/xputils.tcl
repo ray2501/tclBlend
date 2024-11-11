@@ -51,7 +51,7 @@ proc XpUtils::expandSharedLibName { shortname {extdbg DEFAULT} } {
     }
 
     # extext is only appended to a shared lib name in debug mode
-    if {! [info exists tcl_platform(debug)]} {
+    if {! [info exists ::tcl_platform(debug)]} {
 	set extdbg ""
     }
 
@@ -68,8 +68,8 @@ proc XpUtils::getTmpDir { } {
             return /tmp
         }
         windows {
-	    if {[info exists env(TEMP)]} {
-		return $env(TEMP)
+	    if {[info exists ::env(TEMP)]} {
+		return $::env(TEMP)
 	    } else {
 		set tmp C:/Temp
 		if {! [info exists $tmp]} {
@@ -213,7 +213,7 @@ if {0} {
 	    
 	    # of course HP does it differently
 	    if {$::tcl_platform(os) == "HP-UX"} {
-		if {! [info exists env($VAR)]} {
+		if {! [info exists ::env($VAR)]} {
                     set VAR SHLIB_PATH
 		}
 	    }

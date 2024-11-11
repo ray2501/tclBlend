@@ -651,7 +651,7 @@ test javaInterp-22.9 {Java_tcl_lang_Interp_pkgRequire} {
 #java::call System exit 0
 #}
 #    catch \
-#    {exec $env(JAVA) -classpath $env(CLASSPATH) tests.JavaEval $script} \
+#    {exec $::env(JAVA) -classpath $::env(CLASSPATH) tests.JavaEval $script} \
 #    err
 #    # The interp we did not dispose of and the interp
 #    # we exited from via Java print an error here!

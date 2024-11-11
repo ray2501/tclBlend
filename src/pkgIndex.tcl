@@ -51,23 +51,23 @@ proc loadtclblend {dir} {
     # arbitrary capitalization, so we need to copy it into the all-caps
     # form for later use.
 
-    if {! [info exists env(CLASSPATH)]} {
+    if {! [info exists ::env(CLASSPATH)]} {
 	foreach name [array names env] {
 	    if {[string equal -nocase $name "CLASSPATH"]} {
-		set env(CLASSPATH) $env($name)
+		set ::env(CLASSPATH) $::env($name)
 		break
 	    }
 	}
     }
 
-    if {! [info exists env(CLASSPATH)]} {
+    if {! [info exists ::env(CLASSPATH)]} {
         if {$debug_loadtclblend} {
-	    puts "setting env(CLASSPATH) to {}"
+	    puts "setting ::env(CLASSPATH) to {}"
         }
 
 	# Ack! We can not just set this to {} because that
 	# would unset the CLASSPATH under windows.
-	set env(CLASSPATH) [XpUtils::getPathSeparator]
+	set ::env(CLASSPATH) [XpUtils::getPathSeparator]
     }
 
     # now we need to search on the CLASSPATH to see if tclblend.jar
@@ -81,7 +81,7 @@ proc loadtclblend {dir} {
     # a huge bug in Tcl 8.0 which ends up deleting values in the env
     # array. This bug has been fixed in tcl8.1 but not in 8.0.4!
 
-    foreach path [XpUtils::splitpath $env(CLASSPATH)] {
+    foreach path [XpUtils::splitpath $::env(CLASSPATH)] {
 	if {[file tail $path] == $tb_name} {
 
 	    # If Jacl's jar file appears on the CLASSPATH before
@@ -89,14 +89,14 @@ proc loadtclblend {dir} {
 	    # message while loading. Don't let this happen!
 
 	    if {[info exists found_jacl]} {
-		error "$jacl_name found on env(CLASSPATH) before $tb_name"
+		error "$jacl_name found on ::env(CLASSPATH) before $tb_name"
 	    }
 
 	    if {! [info exists found_tclblend]} {
 		set found_tclblend $path
 	    } else {
 		if {$debug_loadtclblend} {
-		    puts "Warning: multiple $tb_name files found on env(CLASSPATH), found at $found_tclblend then $path"
+		    puts "Warning: multiple $tb_name files found on ::env(CLASSPATH), found at $found_tclblend then $path"
 		}
 	    }
 	}
@@ -106,7 +106,7 @@ proc loadtclblend {dir} {
 		set found_tcljava $path
 	    } else {
 		if {$debug_loadtclblend} {
-		    puts "Warning: multiple $tj_name files found on env(CLASSPATH), found at $found_tcljava then $path"
+		    puts "Warning: multiple $tj_name files found on ::env(CLASSPATH), found at $found_tcljava then $path"
 		}
 	    }
 	}
@@ -120,44 +120,44 @@ proc loadtclblend {dir} {
 
     if {$debug_loadtclblend} {
 	if {[info exists found_jacl]} {
-	    puts "found $jacl_name on env(CLASSPATH) at $found_jacl"
+	    puts "found $jacl_name on ::env(CLASSPATH) at $found_jacl"
 	}
 	if {[info exists found_tcljava]} {
-	    puts "found $tj_name on env(CLASSPATH) at $found_tcljava"
+	    puts "found $tj_name on ::env(CLASSPATH) at $found_tcljava"
 	}
 	if {[info exists found_tclblend]} {
-	    puts "found $tb_name on env(CLASSPATH) at $found_tclblend"
+	    puts "found $tb_name on ::env(CLASSPATH) at $found_tclblend"
 	}
 
-	set saved_classpath $env(CLASSPATH)
+	set saved_classpath $::env(CLASSPATH)
     }
 
     # prepend the tclblend jar onto the CLASSPATH if needed.
 
     if {! [info exists found_tclblend]} {
 	if {$debug_loadtclblend} {
-	    puts "prepending ${tb_jar} onto env(CLASSPATH)"
+	    puts "prepending ${tb_jar} onto ::env(CLASSPATH)"
 	}
 
-	XpUtils::prependpath env(CLASSPATH) $tb_jar
+	XpUtils::prependpath ::env(CLASSPATH) $tb_jar
     }
 
     # prepend the tcljava jar onto the CLASSPATH if needed.
 
     if {! [info exists found_tcljava]} {
 	if {$debug_loadtclblend} {
-	    puts "prepending ${tj_jar} onto env(CLASSPATH)"
+	    puts "prepending ${tj_jar} onto ::env(CLASSPATH)"
 	}
 
-	XpUtils::prependpath env(CLASSPATH) $tj_jar
+	XpUtils::prependpath ::env(CLASSPATH) $tj_jar
     }
 
     if {$debug_loadtclblend} {
-	if {$saved_classpath != $env(CLASSPATH)} {
-	  puts "before jar prepend env(CLASSPATH) was \"$env(CLASSPATH)\""
-	  puts "after  jar prepend env(CLASSPATH) was \"$env(CLASSPATH)\""
+	if {$saved_classpath != $::env(CLASSPATH)} {
+	  puts "before jar prepend ::env(CLASSPATH) was \"$::env(CLASSPATH)\""
+	  puts "after  jar prepend ::env(CLASSPATH) was \"$::env(CLASSPATH)\""
         } else {
-	  puts "before shared lib load, env(CLASSPATH) was \"$env(CLASSPATH)\""
+	  puts "before shared lib load, ::env(CLASSPATH) was \"$::env(CLASSPATH)\""
         }
     }
 

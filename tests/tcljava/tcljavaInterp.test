@@ -76,11 +76,11 @@ test tcljavaInterp-1.4 {load class defined on TCL_CLASSPATH, this makes use
         the TclClassLoader to search for classes at runtime} {
     # testext.jar must not appear on the CLASSPATH, it should
     # NOT be loaded by the system class loader.
-    set env(TCL_CLASSPATH) [file join [pwd] testext.jar]
+    set ::env(TCL_CLASSPATH) [file join [pwd] testext.jar]
     set cl [java::field testext.Dummy class]
     set cloader [$cl getClassLoader]
     set result [java::instanceof $cloader tcl.lang.TclClassLoader]
-    unset env(TCL_CLASSPATH) cl cloader
+    unset ::env(TCL_CLASSPATH) cl cloader
     set result
 } {1}
 
@@ -89,7 +89,7 @@ test tcljavaInterp-1.5 {load command defined in a class file that appears
         class makes use of the interp.classLoader to load a class} {
     # testext.jar must not appear on the CLASSPATH, it should not
     # be loaded by the system class loader.
-    set env(TCL_CLASSPATH) [file join [pwd] testext.jar]
+    set ::env(TCL_CLASSPATH) [file join [pwd] testext.jar]
     java::call tcl.lang.Extension loadOnDemand \
         [java::getinterp] \
         "testext_cmd" \
@@ -120,15 +120,15 @@ test tcljavaInterp-1.5 {load command defined in a class file that appears
         }
         unset icl ocl
     }
-    unset env(TCL_CLASSPATH)
+    unset ::env(TCL_CLASSPATH)
     set result
 } {OK}
 
 test tcljavaInterp-1.6 {load resource via TclClassLoader} {
-    # Load resource from testext.jar on env(TCL_CLASSPATH)
+    # Load resource from testext.jar on ::env(TCL_CLASSPATH)
     # testext.jar must not appear on the CLASSPATH, it should not
     # be loaded by the system class loader.
-    set env(TCL_CLASSPATH) [file join [pwd] testext.jar]
+    set ::env(TCL_CLASSPATH) [file join [pwd] testext.jar]
 
     if {$tcljava(tcljava) == "jacl"} {
         source resource:/testext/cmd.tcl
@@ -175,8 +175,8 @@ test tcljavaInterp-1.10 {TCL_CLASSPATH not set} {
     set i1 [interp create]
     set results [$i1 eval {
         package require java
-        if {[info exists env(TCL_CLASSPATH)]} {
-            unset env(TCL_CLASSPATH)
+        if {[info exists ::env(TCL_CLASSPATH)]} {
+            unset ::env(TCL_CLASSPATH)
         }
         list [catch {java::field testext.Dummy class} err] $err
     }]
@@ -189,7 +189,7 @@ test tcljavaInterp-1.11 {TCL_CLASSPATH not set} {
     set i1 [interp create]
     set results [$i1 eval {
         package require java
-        set env(TCL_CLASSPATH) ""
+        set ::env(TCL_CLASSPATH) ""
         list [catch {java::field testext.Dummy class} err] $err
     }]
     interp delete $i1
@@ -201,7 +201,7 @@ test tcljavaInterp-1.12 {TCL_CLASSPATH not set} {
     set i1 [interp create]
     set results [$i1 eval {
         package require java
-        set env(TCL_CLASSPATH) [file join [pwd] testext.jar]
+        set ::env(TCL_CLASSPATH) [file join [pwd] testext.jar]
         list [catch {java::field testext.Dummy class} err] $err
     }]
     interp delete $i1
@@ -218,11 +218,11 @@ test tcljavaInterp-1.13 {TCL_CLASSPATH not set} {
 
         package require java
 
-        set env(TCL_CLASSPATH) /whatever
+        set ::env(TCL_CLASSPATH) /whatever
 
         lappend results [catch {java::field testext.Dummy class} err] $err
 
-        set env(TCL_CLASSPATH) [file join [pwd] testext.jar]
+        set ::env(TCL_CLASSPATH) [file join [pwd] testext.jar]
 
         lappend results [catch {java::field testext.Dummy class} err] $err
 
@@ -242,11 +242,11 @@ test tcljavaInterp-1.14 {TCL_CLASSPATH not set} {
 
         package require java
 
-        set env(TCL_CLASSPATH) ""
+        set ::env(TCL_CLASSPATH) ""
 
         lappend results [catch {java::field testext.Dummy class} err] $err
 
-        set env(TCL_CLASSPATH) [file join [pwd] testext.jar]
+        set ::env(TCL_CLASSPATH) [file join [pwd] testext.jar]
 
         lappend results [catch {java::field testext.Dummy class} err] $err
 

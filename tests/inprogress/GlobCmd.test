@@ -93,19 +93,19 @@ test globCmd-1.11 {cmdProc} {
 
 test globCmd-1.12 {cmdProc tildeSubst} {
     testsetplatform unix
-    set home $env(HOME)
-    unset env(HOME)
+    set home $::env(HOME)
+    unset ::env(HOME)
     set x [list [catch {glob -nocomplain ~/*} msg] $msg]
-    set env(HOME) $home
+    set ::env(HOME) $home
     set x
 } {0 {}}
 
 test globCmd-1.13 {cmdProc tildeSubst} {
     testsetplatform unix
-    set home $env(HOME)
-    unset env(HOME)
+    set home $::env(HOME)
+    unset ::env(HOME)
     set x [list [catch {glob ~/*} msg] $msg]
-    set env(HOME) $home
+    set ::env(HOME) $home
     set x
 } {1 {couldn't find HOME environment variable to expand path}}
 
@@ -113,14 +113,14 @@ testsetplatform $platform
 
 test globCmd-1.14 {cmdProc} {
     list [catch {file join [lindex [glob ~] 0]} msg] $msg
-} [list 0 [file join $env(HOME)]]
+} [list 0 [file join $::env(HOME)]]
 
 # The following tests will work on Windows platforms only if MKS
 # toolkit is installed.
 
 catch {
-    set oldhome $env(HOME)
-    set env(HOME) [pwd]
+    set oldhome $::env(HOME)
+    set ::env(HOME) [pwd]
     file delete -force globTestJacl
     file mkdir globTestJacl/a1/b1
     file mkdir globTestJacl/a1/b2
@@ -138,11 +138,11 @@ catch {
 
 test globCmd-1.15 {cmdProc} {unixExecs} {
     list [catch {glob ~/globTestJacl} msg] $msg
-} [list 0 [list [file join $env(HOME) globTestJacl]]]
+} [list 0 [list [file join $::env(HOME) globTestJacl]]]
 
 test globCmd-1.16 {cmdProc} {unixExecs} {
     list [catch {glob ~\\/globTestJacl} msg] $msg
-} [list 0 [list [file join $env(HOME) globTestJacl]]]
+} [list 0 [list [file join $::env(HOME) globTestJacl]]]
 
 test globCmd-1.17 {cmdProc} {unixExecs} {
     list [catch {glob globTestJacl} msg] $msg
@@ -338,12 +338,12 @@ test globCmd-4.16 {asterisks, question marks, and brackets} {macOnly} {
 
 test globCmd-4.17 {asterisks, question marks, and brackets} {unixExecs} {
     global env
-    set temp $env(HOME)
-    set env(HOME) [file join $env(HOME) globTestJacl]
+    set temp $::env(HOME)
+    set ::env(HOME) [file join $::env(HOME) globTestJacl]
     set result [list [catch {glob ~/z*} msg] $msg]
-    set env(HOME) $temp
+    set ::env(HOME) $temp
     set result
-} [list 0 [list [file join $env(HOME) globTestJacl z1.c]]]
+} [list 0 [list [file join $::env(HOME) globTestJacl z1.c]]]
 
 test globCmd-4.18 {asterisks, question marks, and brackets} {unixExecs unixOrPc} {
     list [catch {lsort [glob globTestJacl/*.c goo/*]} msg] $msg
@@ -391,10 +391,10 @@ if {$platform == "unix"} {
     close [open globTestJacl/odd\\\[\]*?\{\}name w]
     test globCmd-5.3 {unix specific globbing} {
 	global env
-	set temp $env(HOME)
-	set env(HOME) $env(HOME)/globTestJacl/odd\\\[\]*?\{\}name
+	set temp $::env(HOME)
+	set ::env(HOME) $::env(HOME)/globTestJacl/odd\\\[\]*?\{\}name
 	set result [list [catch {glob ~} msg] $msg]
-	set env(HOME) $temp
+	set ::env(HOME) $temp
 	set result
     } [list 0 [list [glob ~]/globTestJacl/odd\\\[\]*?\{\}name]]
     exec rm -f globTestJacl/odd\\\[\]*?\{\}name
@@ -482,7 +482,7 @@ if {$platform == "windows"} {
 }
 
 removeDirectory globTestJacl
-set env(HOME) $oldhome
+set ::env(HOME) $oldhome
 
 testsetplatform $platform
 foreach index {macOnly pcOnly unixOnly unixOrPc macOrPc macOrUnix} {

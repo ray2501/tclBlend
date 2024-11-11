@@ -61,16 +61,16 @@ if {0} {
 # Setup TJC specific variables needed to get tests running
 # out of the build directory.
 
-#set env(TJC_LIBRARY) [file join [tcltest::testsDirectory] ../src/tjc/tjc/library]
-set env(TJC_LIBRARY) "resource:/tjc/library"
-set env(TJC_BUILD_DIR) $env(BUILD_DIR)
+#set ::env(TJC_LIBRARY) [file join [tcltest::testsDirectory] ../src/tjc/tjc/library]
+set ::env(TJC_LIBRARY) "resource:/tjc/library"
+set ::env(TJC_BUILD_DIR) $::env(BUILD_DIR)
 
-puts "env(TJC_LIBRARY) $env(TJC_LIBRARY)"
-puts "env(TJC_BUILD_DIR) $env(TJC_BUILD_DIR)"
+puts "::env(TJC_LIBRARY) $::env(TJC_LIBRARY)"
+puts "::env(TJC_BUILD_DIR) $::env(TJC_BUILD_DIR)"
 
 # Reset TclTest env vars to account for TJC entries
-set ::tcltest::originalEnv(TJC_LIBRARY) $env(TJC_LIBRARY)
-set ::tcltest::originalEnv(TJC_BUILD_DIR) $env(TJC_BUILD_DIR)
+set ::tcltest::originalEnv(TJC_LIBRARY) $::env(TJC_LIBRARY)
+set ::tcltest::originalEnv(TJC_BUILD_DIR) $::env(TJC_BUILD_DIR)
 
 # Define helper proc that will load TJC commands into the interp,
 # this method should be invoked at the start of a test file that
@@ -85,7 +85,7 @@ proc test_tjc_init {} {
 
     if {[info commands reload] == {}} {
         # Load TJC procs into Jacl
-        namespace eval :: {source $env(TJC_LIBRARY)/reload.tcl}
+        namespace eval :: {source $::env(TJC_LIBRARY)/reload.tcl}
     }
 }
 
@@ -144,7 +144,7 @@ if {$::tcl_platform(platform) == "java"} {
     foreach test $compile_tests {
         lappend tests $test
     }
-} elseif {[info exists env(TCLBLEND_RUN_ALL_TESTS)]} {
+} elseif {[info exists ::env(TCLBLEND_RUN_ALL_TESTS)]} {
     # run the Tcl Blend tests
 
     set tests [glob -nocomplain tcljava/*.test \
@@ -176,7 +176,7 @@ if {0} {
     }
 }
 
-cd $env(BUILD_DIR)
+cd $::env(BUILD_DIR)
 
 foreach i $tests {
 

@@ -42,7 +42,7 @@ test 1.1 {getPathSeparator} {
 # Test series 2.0 : shared lib expansion using expandSharedLibName
 
 # Record the state of tcl_platform(debug) so we can reset it later
-set wasPlatformDebugSet [info exists tcl_platform(debug)]
+set wasPlatformDebugSet [info exists ::tcl_platform(debug)]
 
 # The shared lib extension (like .dll or .so)
 set SHLIB_SUFFIX [info sharedlibextension]
@@ -55,7 +55,7 @@ if {$::tcl_platform(platform) == "unix"} {
   set SHLIB_PREFIX lib
 }
 
-catch {unset tcl_platform(debug)}
+catch {unset ::tcl_platform(debug)}
 
 test 2.0 {expandSharedLibName : no dbgx without tcl_platform(debug)} {
   XpUtils::expandSharedLibName foo
@@ -69,7 +69,7 @@ test 2.2 {expandSharedLibName : no dbgx without tcl_platform(debug)} {
   XpUtils::expandSharedLibName foo "g"
 } ${SHLIB_PREFIX}foo${SHLIB_SUFFIX}
 
-set tcl_platform(debug) 1
+set ::tcl_platform(debug) 1
 
 test 2.3 {expandSharedLibName : use passed in dbgx passed} {
   XpUtils::expandSharedLibName foo g
@@ -107,9 +107,9 @@ if {$::tcl_platform(platform) == "mac"} {
 # Cleanup after test series 2
 
 if {$wasPlatformDebugSet} {
-  set tcl_platform(debug) 1
+  set ::tcl_platform(debug) 1
 } else {
-  catch {unset tcl_platform(debug)}
+  catch {unset ::tcl_platform(debug)}
 }
 
 
@@ -127,15 +127,15 @@ test 3.0 {XpUtils::getTmpDir} {
 if {$::tcl_platform(platform) == "windows"} {
 
 test 3.1 {XpUtils::getTmpDir} {
-  if {[info exists env(TEMP)]} {
-    set old_tmp $env(TEMP)
+  if {[info exists ::env(TEMP)]} {
+    set old_tmp $::env(TEMP)
   }
-  set env(TEMP) C:/tmp
+  set ::env(TEMP) C:/tmp
   set res [XpUtils::getTmpDir]
   if {[info exists old_tmp]} {
-    set env(TEMP) $old_tmp
+    set ::env(TEMP) $old_tmp
   } else {
-    unset env(TEMP)
+    unset ::env(TEMP)
   }
   set res
 } C:/tmp
@@ -195,10 +195,10 @@ if {$::tcl_platform(platform) == "mac"} {
 if {$::tcl_platform(platform) == "unix"} {
 
 test 5.1 {XpUtils::appendpath} {
-  set env(TMP_PATH) one:two
-  XpUtils::appendpath env(TMP_PATH) three
-  set path $env(TMP_PATH)
-  unset env(TMP_PATH)
+  set ::env(TMP_PATH) one:two
+  XpUtils::appendpath ::env(TMP_PATH) three
+  set path $::env(TMP_PATH)
+  unset ::env(TMP_PATH)
   set path
 } {one:two:three}
 
@@ -207,10 +207,10 @@ test 5.1 {XpUtils::appendpath} {
 if {$::tcl_platform(platform) == "windows"} {
 
 test 5.2 {XpUtils::appendpath} {
-  set env(TMP_PATH) {one;two}
-  XpUtils::appendpath env(TMP_PATH) three
-  set path $env(TMP_PATH)
-  unset env(TMP_PATH)
+  set ::env(TMP_PATH) {one;two}
+  XpUtils::appendpath ::env(TMP_PATH) three
+  set path $::env(TMP_PATH)
+  unset ::env(TMP_PATH)
   set path
 } {one;two;three}
 
@@ -230,10 +230,10 @@ if {$::tcl_platform(platform) == "mac"} {
 if {$::tcl_platform(platform) == "unix"} {
 
 test 6.1 {XpUtils::prependpath} {
-  set env(TMP_PATH) one:two
-  XpUtils::prependpath env(TMP_PATH) three
-  set path $env(TMP_PATH)
-  unset env(TMP_PATH)
+  set ::env(TMP_PATH) one:two
+  XpUtils::prependpath ::env(TMP_PATH) three
+  set path $::env(TMP_PATH)
+  unset ::env(TMP_PATH)
   set path
 } {three:one:two}
 
@@ -242,10 +242,10 @@ test 6.1 {XpUtils::prependpath} {
 if {$::tcl_platform(platform) == "windows"} {
 
 test 6.2 {XpUtils::prependpath} {
-  set env(TMP_PATH) {one;two}
-  XpUtils::prependpath env(TMP_PATH) three
-  set path $env(TMP_PATH)
-  unset env(TMP_PATH)
+  set ::env(TMP_PATH) {one;two}
+  XpUtils::prependpath ::env(TMP_PATH) three
+  set path $::env(TMP_PATH)
+  unset ::env(TMP_PATH)
   set path
 } {three;one;two}
 
