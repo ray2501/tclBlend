@@ -40,9 +40,9 @@ typedef struct {
 
 static void		JavaCmdDeleteProc(ClientData clientData);
 static int		JavaCmdProc(ClientData clientData, Tcl_Interp *interp,
-			    int objc, Tcl_Obj *CONST objv[]);
+			    int objc, Tcl_Obj *const objv[]);
 static int		BTestCmd(ClientData clientData, Tcl_Interp *interp,
-			    int objc, Tcl_Obj *CONST objv[]);
+			    int objc, Tcl_Obj *const objv[]);
 static char *		JavaTraceProc(ClientData clientData,
 			    Tcl_Interp *interp,
 			    const char *name1,
@@ -1252,7 +1252,7 @@ JavaCmdProc(
     ClientData clientData,	/* Command object handle. */
     Tcl_Interp *interp,		/* Current interpreter. */
     int objc,			/* Number of arguments. */
-    Tcl_Obj *CONST objv[])	/* Argument objects. */
+    Tcl_Obj *const objv[])	/* Argument objects. */
 {
     jobject cmd = (jobject)clientData;
     jarray args;
@@ -1787,7 +1787,7 @@ Java_tcl_lang_Interp_pkgRequire(
     char *namePtr;
     char *versionPtr;
 #ifdef CONST84
-    CONST
+    const
 #endif
     char *resultPtr;
     int flag;
@@ -1879,10 +1879,10 @@ int BTestCmd(
 	ClientData clientData,
         Tcl_Interp *interp,
         int objc,
-        Tcl_Obj * CONST objv[])
+        Tcl_Obj * const objv[])
 {
     int index;
-    static CONST char *options[] = { 
+    static const char *options[] = { 
 	"compcode",
 	"isjniexceptionpending",
 	"isjobject",
@@ -1991,7 +1991,7 @@ Java_tcl_lang_Interp_initName(
     JNIEnv *env,		/* Java environment. */
     jclass interpClass)		/* Handle to Interp class. */
 {
-    CONST char * name;
+    const char * name;
 
     int wasTclLoad;
 
