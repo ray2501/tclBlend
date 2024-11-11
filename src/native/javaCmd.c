@@ -1515,7 +1515,7 @@ JavaGetString(
      * allocated buffer and make sure it is null terminated.
      */
 
-    memcpy((VOID *) buf, (VOID *) p, (size_t) (length * sizeof(char)));
+    memcpy((void *) buf, (void *) p, (size_t) (length * sizeof(char)));
     buf[length] = 0;
 
     Tcl_DStringFree(&ds);
