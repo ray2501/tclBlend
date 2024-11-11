@@ -1068,7 +1068,7 @@ JavaTraceProc(
 	tPtr->errMsg = NULL;
     }
 
-    if ((tPtr->flags & flags) && !(flags & TCL_INTERP_DESTROYED)) {
+    if (tPtr->flags & flags) {
 
 	interpObj = (jobject) Tcl_GetAssocData(interp, "java", NULL);
 
