@@ -283,7 +283,7 @@ Java_tcl_lang_Interp_evalString(
 
     if ((*env)->ExceptionOccurred(env)) {
 	(*env)->ExceptionDescribe(env);
-	panic("Java_tcl_lang_Interp_evalString : unexpected pending exception");
+	Tcl_Panic("Java_tcl_lang_Interp_evalString : unexpected pending exception");
     }
 
     interp = JavaGetInterp(env, interpObj);
@@ -316,7 +316,7 @@ Java_tcl_lang_Interp_evalString(
 
     if ((*env)->ExceptionOccurred(env)) {
 	(*env)->ExceptionDescribe(env);
-	panic("Java_tcl_lang_Interp_evalString : exception pending after eval");
+	Tcl_Panic("Java_tcl_lang_Interp_evalString : exception pending after eval");
     }
 
     Tcl_DecrRefCount(objPtr);
@@ -362,7 +362,7 @@ Java_tcl_lang_Interp_evalTclObject(
 
     if ((*env)->ExceptionOccurred(env)) {
 	(*env)->ExceptionDescribe(env);
-	panic("Java_tcl_lang_Interp_evalTclObject : unexpected pending exception");
+	Tcl_Panic("Java_tcl_lang_Interp_evalTclObject : unexpected pending exception");
     }
 
     interp = JavaGetInterp(env, interpObj);
@@ -382,7 +382,7 @@ Java_tcl_lang_Interp_evalTclObject(
 
 #ifdef TCL_MEM_DEBUG
     if (objPtr->refCount == 0x61616161) {
-	panic("Java_tcl_lang_Interp_evalTclObject : disposed object");
+	Tcl_Panic("Java_tcl_lang_Interp_evalTclObject : disposed object");
     }
 #endif
     } else {
@@ -412,7 +412,7 @@ Java_tcl_lang_Interp_evalTclObject(
 
     if ((*env)->ExceptionOccurred(env)) {
 	(*env)->ExceptionDescribe(env);
-	panic("Java_tcl_lang_Interp_evalTclObject : exception pending after eval");
+	Tcl_Panic("Java_tcl_lang_Interp_evalTclObject : exception pending after eval");
     }
 
     Tcl_DecrRefCount(objPtr);
@@ -1059,7 +1059,7 @@ JavaTraceProc(
 
     if ((*env)->ExceptionOccurred(env)) {
 	(*env)->ExceptionDescribe(env);
-	panic("JavaTraceProc : unexpected pending exception");
+	Tcl_Panic("JavaTraceProc : unexpected pending exception");
     }
 
     result = NULL;
@@ -1213,14 +1213,14 @@ JavaCmdDeleteProc(
 
     if ((*env)->ExceptionOccurred(env)) {
 	(*env)->ExceptionDescribe(env);
-	panic("JavaCmdDeleteProc : unexpected pending exception");
+	Tcl_Panic("JavaCmdDeleteProc : unexpected pending exception");
     }
 
     if ((*env)->IsInstanceOf(env, cmd, jcache->CommandWithDispose)) {
 	(*env)->CallVoidMethod(env, cmd, jcache->disposeCmd);
 	if ((*env)->ExceptionOccurred(env)) {
 	    (*env)->ExceptionDescribe(env);
-	    panic("JavaCmdDeleteProc : exception in CommandWithDispose.disposeCmd()");
+	    Tcl_Panic("JavaCmdDeleteProc : exception in CommandWithDispose.disposeCmd()");
 	}
     }
     (*env)->DeleteGlobalRef(env, (jobject)clientData);
@@ -1265,7 +1265,7 @@ JavaCmdProc(
 
     if ((*env)->ExceptionOccurred(env)) {
 	(*env)->ExceptionDescribe(env);
-	panic("JavaCmdProc : unexpected pending exception");
+	Tcl_Panic("JavaCmdProc : unexpected pending exception");
     }
 
 #ifdef TCLBLEND_DEBUG
@@ -1307,7 +1307,7 @@ JavaCmdProc(
 	(*env)->CallVoidMethod(env, value, jcache->preserve);
 	if ((*env)->ExceptionOccurred(env)) {
 	    (*env)->ExceptionDescribe(env);
-	    panic("JavaCmdProc : exception in TclObject._preserve()");
+	    Tcl_Panic("JavaCmdProc : exception in TclObject._preserve()");
 	}
 
 	/*
@@ -1340,7 +1340,7 @@ JavaCmdProc(
 
     if ((*env)->ExceptionOccurred(env)) {
 	(*env)->ExceptionDescribe(env);
-	panic("JavaCmdProc : Interp.callCommand() raised an Exception");
+	Tcl_Panic("JavaCmdProc : Interp.callCommand() raised an Exception");
     }
 
     /*
@@ -1358,7 +1358,7 @@ JavaCmdProc(
 	(*env)->CallVoidMethod(env, value, jcache->release);
 	if ((*env)->ExceptionOccurred(env)) {
 	    (*env)->ExceptionDescribe(env);
-	    panic("JavaCmdProc : exception in TclObject._release()");
+	    Tcl_Panic("JavaCmdProc : exception in TclObject._release()");
 	}
 	(*env)->DeleteLocalRef(env, value);
     }

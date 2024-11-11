@@ -74,7 +74,7 @@ Java_tcl_lang_TclList_append(
 
 #ifdef TCL_MEM_DEBUG
     if (oldListPtr->refCount == 0x61616161) {
-	panic("Java_tcl_lang_TclList_append : disposed object");
+	Tcl_Panic("Java_tcl_lang_TclList_append : disposed object");
     }
 #endif
 
@@ -144,7 +144,7 @@ Java_tcl_lang_TclList_getElements(
 
 #ifdef TCL_MEM_DEBUG
     if (listPtr->refCount == 0x61616161) {
-	panic("Java_tcl_lang_TclList_getElements : disposed object");
+	Tcl_Panic("Java_tcl_lang_TclList_getElements : disposed object");
     }
 #endif
 
@@ -203,7 +203,7 @@ Java_tcl_lang_TclList_index(
 
 #ifdef TCL_MEM_DEBUG
     if (listPtr->refCount == 0x61616161) {
-       panic("Java_tcl_lang_TclList_index : disposed object");
+       Tcl_Panic("Java_tcl_lang_TclList_index : disposed object");
     }
 #endif
 
@@ -262,7 +262,7 @@ Java_tcl_lang_TclList_listLength(
 
 #ifdef TCL_MEM_DEBUG
     if (listPtr->refCount == 0x61616161) {
-	panic("Java_tcl_lang_TclList_listLength : disposed object");
+	Tcl_Panic("Java_tcl_lang_TclList_listLength : disposed object");
     }
 #endif
 
@@ -315,7 +315,7 @@ Java_tcl_lang_TclList_replace(
 
 #ifdef TCL_MEM_DEBUG
     if (oldListPtr->refCount == 0x61616161) {
-	panic("Java_tcl_lang_TclList_replace : disposed object");
+	Tcl_Panic("Java_tcl_lang_TclList_replace : disposed object");
     }
 #endif
 

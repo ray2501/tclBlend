@@ -210,7 +210,7 @@ EXPORT(int,Tclblend_Init)(
 
     if ((*env)->ExceptionOccurred(env)) {
 	(*env)->ExceptionDescribe(env);
-	panic("Tclblend_Init : unexpected pending exception");
+	Tcl_Panic("Tclblend_Init : unexpected pending exception");
     }
 
 #ifdef TCLBLEND_DEBUG
@@ -839,7 +839,7 @@ JavaInterpDeleted(
 
     if ((*env)->ExceptionOccurred(env)) {
 	(*env)->ExceptionDescribe(env);
-	panic("JavaInterpDeleted : unexpected pending exception");
+	Tcl_Panic("JavaInterpDeleted : unexpected pending exception");
     }
 
     /*
@@ -858,7 +858,7 @@ JavaInterpDeleted(
 
     if ((*env)->ExceptionOccurred(env)) {
 	(*env)->ExceptionDescribe(env);
-	panic("JavaInterpDeleted : exception in Interp.dispose()");
+	Tcl_Panic("JavaInterpDeleted : exception in Interp.dispose()");
     }
 
     (*env)->DeleteGlobalRef(env, interpObj);
@@ -1005,7 +1005,7 @@ FreeJavaCache(ClientData clientData)
 
     if ((*env)->ExceptionOccurred(env)) {
 	(*env)->ExceptionDescribe(env);
-	panic("FreeJavaCache : unexpected pending exception");
+	Tcl_Panic("FreeJavaCache : unexpected pending exception");
     }
 
     /* We need to delete any global refs to Java classes */
@@ -1487,7 +1487,7 @@ JavaGetString(
     Tcl_DString ds;
     
     if (!str)
-	panic("JavaGetString : null str argument");
+	Tcl_Panic("JavaGetString : null str argument");
 
     ustr = (*env)->GetStringChars(env, str, NULL);
     length = (*env)->GetStringLength(env, str);

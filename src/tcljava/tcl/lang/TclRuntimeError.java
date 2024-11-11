@@ -15,7 +15,7 @@ package tcl.lang;
 
 /**
  * Signals that a unrecoverable run-time error in the interpreter.
- * Similar to the panic() function in C.
+ * Similar to the Tcl_Panic() function in C.
  */
 public class TclRuntimeError extends RuntimeException {
     /**

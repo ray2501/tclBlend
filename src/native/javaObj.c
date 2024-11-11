@@ -197,7 +197,7 @@ DupTclObject(
     (*env)->CallVoidMethod(env, object, jcache->preserve);
     if ((*env)->ExceptionOccurred(env)) {
         (*env)->ExceptionDescribe(env);
-	panic("DupTclObject : exception in TclObject._preserve()");
+	Tcl_Panic("DupTclObject : exception in TclObject._preserve()");
     }
 
     /*
@@ -253,7 +253,7 @@ FreeTclObject(
     (*env)->CallVoidMethod(env, object, jcache->release);
     if ((*env)->ExceptionOccurred(env)) {
         (*env)->ExceptionDescribe(env);
-	panic("FreeTclObject : exception in TclObject._release()");
+	Tcl_Panic("FreeTclObject : exception in TclObject._release()");
     }
     (*env)->DeleteGlobalRef(env, object);
     objPtr->internalRep.twoPtrValue.ptr2 = NULL;
@@ -344,7 +344,7 @@ UpdateTclObject(Tcl_Obj *objPtr)
     string = (*env)->CallObjectMethod(env, object, jcache->toString);
     if ((*env)->ExceptionOccurred(env)) {
         (*env)->ExceptionDescribe(env);
-	panic("UpdateTclObject : exception in TclObject.toString()");
+	Tcl_Panic("UpdateTclObject : exception in TclObject.toString()");
     }
     objPtr->bytes = JavaGetString(env, string, &objPtr->length);
     (*env)->DeleteLocalRef(env, string);
@@ -388,13 +388,13 @@ JavaGetTclObj(
 
     if ((*env)->ExceptionOccurred(env)) {
 	(*env)->ExceptionDescribe(env);
-	panic("JavaGetTclObj : unexpected pending exception");
+	Tcl_Panic("JavaGetTclObj : unexpected pending exception");
     }
 
     objRef = (*env)->CallLongMethod(env, object, jcache->getCObjectPtr);
     if ((*env)->ExceptionOccurred(env)) {
 	(*env)->ExceptionDescribe(env);
-	panic("JavaGetTclObj : exception in TclObject.getCObjectPtr()");
+	Tcl_Panic("JavaGetTclObj : exception in TclObject.getCObjectPtr()");
     }
 
     if (objRef != 0) {
@@ -406,7 +406,7 @@ JavaGetTclObj(
 
 #ifdef TCL_MEM_DEBUG
 	if (objPtr->refCount == 0x61616161) {
-	    panic("JavaGetTclObj : disposed object");
+	    Tcl_Panic("JavaGetTclObj : disposed object");
 	}
 #endif
     } else {
@@ -428,7 +428,7 @@ JavaGetTclObj(
 	(*env)->CallVoidMethod(env, object, jcache->preserve);
 	if ((*env)->ExceptionOccurred(env)) {
 	    (*env)->ExceptionDescribe(env);
-	    panic("JavaGetTclObj : exception in TclObject._preserve()");
+	    Tcl_Panic("JavaGetTclObj : exception in TclObject._preserve()");
 	}
     }
     return objPtr;
@@ -475,7 +475,7 @@ Java_tcl_lang_CObject_getString(
 
 #ifdef TCL_MEM_DEBUG
     if (objPtr->refCount == 0x61616161) {
-	panic("Java_tcl_lang_CObject_getString : disposed object");
+	Tcl_Panic("Java_tcl_lang_CObject_getString : disposed object");
     }
 #endif
 
@@ -627,7 +627,7 @@ Java_tcl_lang_CObject_makeRef(
 
 #ifdef TCL_MEM_DEBUG
     if (objPtr->refCount == 0x61616161) {
-	panic("Java_tcl_lang_CObject_makeRef : disposed object");
+	Tcl_Panic("Java_tcl_lang_CObject_makeRef : disposed object");
     }
 #endif
 
@@ -696,7 +696,7 @@ JavaBreakRef(
 
 #ifdef TCL_MEM_DEBUG
     if (objPtr->refCount == 0x61616161) {
-	panic("JavaBreakRef : disposed object");
+	Tcl_Panic("JavaBreakRef : disposed object");
     }
 #endif
 
@@ -707,7 +707,7 @@ JavaBreakRef(
 	inst = (*env)->CallIntMethod(env, object, jcache->getCObjectInst);
 	if ((*env)->ExceptionOccurred(env)) {
 	    (*env)->ExceptionDescribe(env);
-	    panic("JavaBreakRef : exception in TclObject.getCObjectInst()");
+	    Tcl_Panic("JavaBreakRef : exception in TclObject.getCObjectInst()");
 	}
 	/* Constants returned by getCObjectInst() to indicate type. */
 	isCObject = (inst == 1);
@@ -855,7 +855,7 @@ JavaGetTclObject(
 	
 	if ((*env)->ExceptionOccurred(env)) {
 	    (*env)->ExceptionDescribe(env);
-	    panic("JavaGetTclObject : exception in newInstance()");
+	    Tcl_Panic("JavaGetTclObject : exception in newInstance()");
 	}
 
 	/*
@@ -869,7 +869,7 @@ JavaGetTclObject(
 	(*env)->CallVoidMethod(env, object, jcache->preserve);
 	if ((*env)->ExceptionOccurred(env)) {
 	    (*env)->ExceptionDescribe(env);
-	    panic("JavaGetTclObject : exception in TclObject._preserve()");
+	    Tcl_Panic("JavaGetTclObject : exception in TclObject._preserve()");
 	}
 
 	if (isLocalPtr) {

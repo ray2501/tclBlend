@@ -273,7 +273,7 @@ JavaEventProc(
 
     if ((*env)->ExceptionOccurred(env)) {
 	(*env)->ExceptionDescribe(env);
-	panic("JavaEventProc : unexpected pending exception");
+	Tcl_Panic("JavaEventProc : unexpected pending exception");
     }
 
     /*
@@ -287,7 +287,7 @@ JavaEventProc(
                                  jcache->serviceEvent, flags);
     if ((*env)->ExceptionOccurred(env)) {
 	(*env)->ExceptionDescribe(env);
-	panic("JavaEventProc : exception in Notifier.serviceEvent()");
+	Tcl_Panic("JavaEventProc : exception in Notifier.serviceEvent()");
     }
 
     return 1;

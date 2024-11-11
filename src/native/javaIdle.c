@@ -142,7 +142,7 @@ JavaIdleProc(
 
     if ((*env)->ExceptionOccurred(env)) {
 	(*env)->ExceptionDescribe(env);
-	panic("JavaIdleProc : unexpected pending exception");
+	Tcl_Panic("JavaIdleProc : unexpected pending exception");
     }
 
     /*

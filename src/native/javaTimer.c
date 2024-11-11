@@ -128,7 +128,7 @@ JavaTimerProc(
 
     if ((*env)->ExceptionOccurred(env)) {
 	(*env)->ExceptionDescribe(env);
-	panic("JavaTimerProc : unexpected pending exception");
+	Tcl_Panic("JavaTimerProc : unexpected pending exception");
     }
 
     /*
