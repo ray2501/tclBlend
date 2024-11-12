@@ -29,9 +29,9 @@
 
 namespace eval XpUtils {}
 
-set XpUtils::iload_debug 0
+set ::XpUtils::iload_debug 0
 
-proc XpUtils::iload {args} {
+proc ::XpUtils::iload {args} {
     global tcl_platform env tcljava
 
     # FIXME : can this ever happen? If not remove it!
@@ -165,7 +165,7 @@ proc XpUtils::iload {args} {
     set sharedlib [lindex $args 0]
     set args [lreplace $args 0 0]
 
-    if {$XpUtils::iload_debug} {
+    if {$::XpUtils::iload_debug} {
 	puts "dirs are \{$dirs\}"
 	puts "pathsearch is \"$pathsearch\""
 	puts "sharedlib is \"$sharedlib\""
@@ -175,7 +175,7 @@ proc XpUtils::iload {args} {
 
     # Invoke the next stage of the iload process
 
-    XpUtils::__iload_stage1 $dirs $pathsearch $sharedlib $extdbg $args
+    ::XpUtils::__iload_stage1 $dirs $pathsearch $sharedlib $extdbg $args
 }
 
 
@@ -197,7 +197,7 @@ proc XpUtils::iload {args} {
 
 # extra_args can have from 0 to 2 args (packagename interp)
 
-proc XpUtils::__iload_stage1 { dirs pathsearch sharedlib extdbg extra_args } {
+proc ::XpUtils::__iload_stage1 { dirs pathsearch sharedlib extdbg extra_args } {
     global tcl_platform
 
     if {$::tcl_platform(platform) == "windows"} {
@@ -218,9 +218,9 @@ proc XpUtils::__iload_stage1 { dirs pathsearch sharedlib extdbg extra_args } {
     # want to set it to some value (like g, d, or _g)
 
     if {$extdbg == "DEFAULT"} {
-	set sharedlib [XpUtils::expandSharedLibName $sharedlib]
+	set sharedlib [::XpUtils::expandSharedLibName $sharedlib]
     } else {
-	set sharedlib [XpUtils::expandSharedLibName $sharedlib $extdbg]
+	set sharedlib [::XpUtils::expandSharedLibName $sharedlib $extdbg]
     }
 
     # Search for the shared lib on the dirs the user passed in.
@@ -230,7 +230,7 @@ proc XpUtils::__iload_stage1 { dirs pathsearch sharedlib extdbg extra_args } {
     foreach dir $dirs {
 	set fullpath [file join $dir $sharedlib]
 
-	if {$XpUtils::iload_debug} {
+	if {$::XpUtils::iload_debug} {
 	    puts "checking for fullpath \"$fullpath\""
 	}
 
@@ -247,11 +247,11 @@ proc XpUtils::__iload_stage1 { dirs pathsearch sharedlib extdbg extra_args } {
 	set fullpath $sharedlib
     }
 
-    if {$XpUtils::iload_debug} {
+    if {$::XpUtils::iload_debug} {
 	puts "fullpath is \"$fullpath\""
     }
 
-    XpUtils::__iload_stage2 $fullpath $extra_args
+    ::XpUtils::__iload_stage2 $fullpath $extra_args
 }
 
 
@@ -267,9 +267,9 @@ proc XpUtils::__iload_stage1 { dirs pathsearch sharedlib extdbg extra_args } {
 
 # extra_args can have from 0 to 2 args (packagename interp)
 
-proc XpUtils::__iload_stage2 { fullpath extra_args } {
-    if {$XpUtils::iload_debug} {
-	puts "XpUtils::__iload_stage2 \"$fullpath\" \{$extra_args\}"
+proc ::XpUtils::__iload_stage2 { fullpath extra_args } {
+    if {$::XpUtils::iload_debug} {
+	puts "::XpUtils::__iload_stage2 \"$fullpath\" \{$extra_args\}"
     }
     uplevel #0 [list load $fullpath] $extra_args 
 }

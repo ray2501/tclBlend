@@ -12,8 +12,8 @@ proc loadtclblend {dir} {
     }
 
     # We do not want to get bitten by env array bugs in old versions
-    # of Tcl, so we require that they use Tcl 8.3 or newer
-    package require Tcl 8.3
+    # of Tcl, so we require that they use Tcl 8.6 or newer
+    package require Tcl 8.6-
 
     # Load the XpUtils package
     package require XpUtils
@@ -67,7 +67,7 @@ proc loadtclblend {dir} {
 
 	# Ack! We can not just set this to {} because that
 	# would unset the CLASSPATH under windows.
-	set ::env(CLASSPATH) [XpUtils::getPathSeparator]
+	set ::env(CLASSPATH) [::XpUtils::getPathSeparator]
     }
 
     # now we need to search on the CLASSPATH to see if tclblend.jar
@@ -81,7 +81,7 @@ proc loadtclblend {dir} {
     # a huge bug in Tcl 8.0 which ends up deleting values in the env
     # array. This bug has been fixed in tcl8.1 but not in 8.0.4!
 
-    foreach path [XpUtils::splitpath $::env(CLASSPATH)] {
+    foreach path [::XpUtils::splitpath $::env(CLASSPATH)] {
 	if {[file tail $path] == $tb_name} {
 
 	    # If Jacl's jar file appears on the CLASSPATH before
@@ -139,7 +139,7 @@ proc loadtclblend {dir} {
 	    puts "prepending ${tb_jar} onto ::env(CLASSPATH)"
 	}
 
-	XpUtils::prependpath ::env(CLASSPATH) $tb_jar
+	::XpUtils::prependpath ::env(CLASSPATH) $tb_jar
     }
 
     # prepend the tcljava jar onto the CLASSPATH if needed.
@@ -149,7 +149,7 @@ proc loadtclblend {dir} {
 	    puts "prepending ${tj_jar} onto ::env(CLASSPATH)"
 	}
 
-	XpUtils::prependpath ::env(CLASSPATH) $tj_jar
+	::XpUtils::prependpath ::env(CLASSPATH) $tj_jar
     }
 
     if {$debug_loadtclblend} {
@@ -168,8 +168,8 @@ proc loadtclblend {dir} {
     #set extdbg _g
     set extdbg ""
 
-    if {[catch {XpUtils::iload -d $dir -extdbg "" tclblend} errMsg]} {
-        error "\"XpUtils::iload -d $dir tclblend\" failed:\n $errMsg"
+    if {[catch {::XpUtils::iload -d $dir -extdbg "" tclblend} errMsg]} {
+        error "\"::XpUtils::iload -d $dir tclblend\" failed:\n $errMsg"
     }
 
     # See src/tcljava/tcl/lang/BlendExtension.java

@@ -1,4 +1,4 @@
-# This will test the XpUtils::iload command implementation
+# This will test the ::XpUtils::iload command implementation
 
 # We assume that these tests are run from tcljava/src/xputils,
 # if this changes the path to the defs file will need to be fixed
@@ -21,31 +21,31 @@ set usage "iload ?-dirs dirlist? ?-extdbg ext? ?-nopath? libname ?packageName? ?
 # Test series 1, check things related to the -dirs argument
 
 test 1.1 {incorrect usage : -dirs needs an argument} {
-  list [catch {XpUtils::iload -d} err] $err
+  list [catch {::XpUtils::iload -d} err] $err
 } [list 1 $usage]
 
 test 1.2 {incorrect usage : -dirs needs an argument} {
-  list [catch {XpUtils::iload -dirs} err] $err
+  list [catch {::XpUtils::iload -dirs} err] $err
 } [list 1 $usage]
 
 test 1.3 {incorrect usage : need to supply a libname} {
-  list [catch {XpUtils::iload -dirs libname} err] $err
+  list [catch {::XpUtils::iload -dirs libname} err] $err
 } [list 1 $usage]
 
 test 1.4 {incorrect usage : two -dirs options is not allowed} {
-  list [catch {XpUtils::iload -d /tmp -d /foo libname} err] $err
+  list [catch {::XpUtils::iload -d /tmp -d /foo libname} err] $err
 } [list 1 $usage]
 
 test 1.5 {incorrect usage : -dirs followed by string with - is not correct} {
-  list [catch {XpUtils::iload -d -foo libname} err] $err
+  list [catch {::XpUtils::iload -d -foo libname} err] $err
 } [list 1 $usage]
 
 test 1.6 {incorrect usage : -dirs followed by string with - is not correct} {
-  list [catch {XpUtils::iload -dirs -foo libname} err] $err
+  list [catch {::XpUtils::iload -dirs -foo libname} err] $err
 } [list 1 $usage]
 
 test 1.7 {incorrect usage : can not have more than 3 regular arguments} {
-  list [catch {XpUtils::iload -dirs /tmp libname name interp foo} err] $err
+  list [catch {::XpUtils::iload -dirs /tmp libname name interp foo} err] $err
 } [list 1 $usage]
 
 
@@ -53,65 +53,65 @@ test 1.7 {incorrect usage : can not have more than 3 regular arguments} {
 # Test series 2, check things related to the -extdbg argument
 
 test 2.1 {incorrect usage : -extdbg needs an argument} {
-  list [catch {XpUtils::iload -e} err] $err
+  list [catch {::XpUtils::iload -e} err] $err
 } [list 1 $usage]
 
 test 2.2 {incorrect usage : -extdbg needs an argument} {
-  list [catch {XpUtils::iload -extdbg} err] $err
+  list [catch {::XpUtils::iload -extdbg} err] $err
 } [list 1 $usage]
 
 test 2.3 {incorrect usage : need to supply a libname} {
-  list [catch {XpUtils::iload -extdbg libname} err] $err
+  list [catch {::XpUtils::iload -extdbg libname} err] $err
 } [list 1 $usage]
 
 test 2.4 {incorrect usage : two -extdbg options is not allowed} {
-  list [catch {XpUtils::iload -ext _g -ext _g libname} err] $err
+  list [catch {::XpUtils::iload -ext _g -ext _g libname} err] $err
 } [list 1 $usage]
 
 test 2.5 {incorrect usage : can not have more than 3 regular arguments} {
-  list [catch {XpUtils::iload -ext _g libname name interp foo} err] $err
+  list [catch {::XpUtils::iload -ext _g libname name interp foo} err] $err
 } [list 1 $usage]
 
 
 # Test series 3, check things related to the -nopath argument
 
 test 3.1 {incorrect usage : -nopath without a libname} {
-  list [catch {XpUtils::iload -d /tmp -nopath} err] $err
+  list [catch {::XpUtils::iload -d /tmp -nopath} err] $err
 } [list 1 $usage]
 
 test 3.2 {incorrect usage : -nopath without -dirs would search nothing} {
-  list [catch {XpUtils::iload -nopath libname} err] $err
+  list [catch {::XpUtils::iload -nopath libname} err] $err
 } [list 1 $usage]
 
 test 3.2 {incorrect usage : -nopath without -dirs would search nothing} {
-  list [catch {XpUtils::iload -extdbg _g -nopath libname} err] $err
+  list [catch {::XpUtils::iload -extdbg _g -nopath libname} err] $err
 } [list 1 $usage]
 
 test 3.3 {incorrect usage : -nopath can no be given twice} {
-  list [catch {XpUtils::iload -d /tmp -nopath -nopath libname} err] $err
+  list [catch {::XpUtils::iload -d /tmp -nopath -nopath libname} err] $err
 } [list 1 $usage]
 
 
 # Test series 4, generic error conditions
 
 test 4.1 {incorrect usage : can not have more than 3 regular arguments} {
-  list [catch {XpUtils::iload libname name interp foo} err] $err
+  list [catch {::XpUtils::iload libname name interp foo} err] $err
 } [list 1 $usage]
 
 test 4.2 {incorrect usage : need to supply a libname} {
-  list [catch {XpUtils::iload -d /tmp -extdbg _g} err] $err
+  list [catch {::XpUtils::iload -d /tmp -extdbg _g} err] $err
 } [list 1 $usage]
 
 test 4.3 {incorrect usage : need to supply a libname} {
-  list [catch {XpUtils::iload -extdbg _g -d /tmp} err] $err
+  list [catch {::XpUtils::iload -extdbg _g -d /tmp} err] $err
 } [list 1 $usage]
 
 test 4.4 {incorrect usage : need to supply a libname} {
-  list [catch {XpUtils::iload -extdbg _g -d /tmp -nopath} err] $err
+  list [catch {::XpUtils::iload -extdbg _g -d /tmp -nopath} err] $err
 } [list 1 $usage]
 
 test 4.5 {incorrect usage : need to supply a libname} {
-  list [catch {XpUtils::iload -nopath -extdbg _g -d /tmp} err] $err
+  list [catch {::XpUtils::iload -nopath -extdbg _g -d /tmp} err] $err
 } [list 1 $usage]
 
 
@@ -119,14 +119,14 @@ test 4.5 {incorrect usage : need to supply a libname} {
 # Test series 5, hook the iload command and return the results
 # of the argument parse process.
 
-rename XpUtils::__iload_stage1  XpUtils::tmp__iload_stage1
+rename ::XpUtils::__iload_stage1  ::XpUtils::tmp__iload_stage1
 
-proc XpUtils::__iload_stage1 { dirs pathsearch sharedlib extdbg extra_args } {
+proc ::XpUtils::__iload_stage1 { dirs pathsearch sharedlib extdbg extra_args } {
   variable hook
   set hook [list $dirs $pathsearch $sharedlib $extdbg $extra_args]
 }
 
-proc XpUtils::getHook { } {
+proc ::XpUtils::getHook { } {
   variable hook
   return $hook
 }
@@ -134,124 +134,124 @@ proc XpUtils::getHook { } {
 
 
 test 5.1 {basic usage} {
-  XpUtils::iload tclblend
-  XpUtils::getHook
+  ::XpUtils::iload tclblend
+  ::XpUtils::getHook
 } [list {} 1 tclblend DEFAULT {}]
 
 test 5.2 {basic usage} {
-  XpUtils::iload -d /tmp tclblend
-  XpUtils::getHook
+  ::XpUtils::iload -d /tmp tclblend
+  ::XpUtils::getHook
 } [list /tmp 1 tclblend DEFAULT {}]
 
 test 5.3 {basic usage} {
-  XpUtils::iload -d {/tmp /f} tclblend
-  XpUtils::getHook
+  ::XpUtils::iload -d {/tmp /f} tclblend
+  ::XpUtils::getHook
 } [list {/tmp /f} 1 tclblend DEFAULT {}]
 
 test 5.4 {basic usage} {
-  XpUtils::iload -extdbg _g tclblend
-  XpUtils::getHook
+  ::XpUtils::iload -extdbg _g tclblend
+  ::XpUtils::getHook
 } [list {} 1 tclblend _g {}]
 
 test 5.5 {basic usage} {
-  XpUtils::iload -d {/tmp} -nopath tclblend
-  XpUtils::getHook
+  ::XpUtils::iload -d {/tmp} -nopath tclblend
+  ::XpUtils::getHook
 } [list /tmp 0 tclblend DEFAULT {}]
 
 test 5.6 {basic usage} {
-  XpUtils::iload -d {/tmp} -nopath -extdbg _f tclblend
-  XpUtils::getHook
+  ::XpUtils::iload -d {/tmp} -nopath -extdbg _f tclblend
+  ::XpUtils::getHook
 } [list /tmp 0 tclblend _f {}]
 
 test 5.7 {basic usage} {
-  XpUtils::iload -nopath -d {/tmp} -extdbg _f tclblend
-  XpUtils::getHook
+  ::XpUtils::iload -nopath -d {/tmp} -extdbg _f tclblend
+  ::XpUtils::getHook
 } [list /tmp 0 tclblend _f {}]
 
 test 5.8 {basic usage} {
-  XpUtils::iload -d {/tmp} tclblend package
-  XpUtils::getHook
+  ::XpUtils::iload -d {/tmp} tclblend package
+  ::XpUtils::getHook
 } [list /tmp 1 tclblend DEFAULT {package}]
 
 test 5.9 {basic usage} {
-  XpUtils::iload -d {/tmp} tclblend package interp
-  XpUtils::getHook
+  ::XpUtils::iload -d {/tmp} tclblend package interp
+  ::XpUtils::getHook
 } [list /tmp 1 tclblend DEFAULT {package interp}]
 
 test 5.10 {basic usage} {
-  XpUtils::iload -d [list {D:\tmp}] tclblend
-  XpUtils::getHook
+  ::XpUtils::iload -d [list {D:\tmp}] tclblend
+  ::XpUtils::getHook
 } [list {{D:\tmp}} 1 tclblend DEFAULT {}]
 
 
 
 # Clean up after test series 5
 
-rename XpUtils::__iload_stage1 {}
-rename XpUtils::tmp__iload_stage1 XpUtils::__iload_stage1
-rename XpUtils::getHook {}
+rename ::XpUtils::__iload_stage1 {}
+rename ::XpUtils::tmp__iload_stage1 ::XpUtils::__iload_stage1
+rename ::XpUtils::getHook {}
 
 
 
 # Test series 6, hook the iload command and return the results
 # of the directory search and shared lib expansion process.
 
-rename XpUtils::__iload_stage2  XpUtils::tmp__iload_stage2
+rename ::XpUtils::__iload_stage2  ::XpUtils::tmp__iload_stage2
 
-proc XpUtils::__iload_stage2 { fullpath extra_args } {
+proc ::XpUtils::__iload_stage2 { fullpath extra_args } {
   variable hook
   set hook [list $fullpath $extra_args]
 }
 
-proc XpUtils::getHook { } {
+proc ::XpUtils::getHook { } {
   variable hook
   return $hook
 }
 
-# We assume that the XpUtils::expandSharedLibName method is working
+# We assume that the ::XpUtils::expandSharedLibName method is working
 # at this point so that we do not need to duplicate the testing
 # of this method that is done in xputils.test
 
 test 6.1 {basic usage} {
-  XpUtils::iload tclblend
-  XpUtils::getHook
-} [list [XpUtils::expandSharedLibName tclblend] {}]
+  ::XpUtils::iload tclblend
+  ::XpUtils::getHook
+} [list [::XpUtils::expandSharedLibName tclblend] {}]
 
 test 6.2 {basic usage} {
-  XpUtils::iload -extdbg _g tclblend
-  XpUtils::getHook
-} [list [XpUtils::expandSharedLibName tclblend _g] {}]
+  ::XpUtils::iload -extdbg _g tclblend
+  ::XpUtils::getHook
+} [list [::XpUtils::expandSharedLibName tclblend _g] {}]
 
 test 6.3 {basic usage} {
-  XpUtils::iload -extdbg _g tclblend package interp
-  XpUtils::getHook
-} [list [XpUtils::expandSharedLibName tclblend _g] {package interp}]
+  ::XpUtils::iload -extdbg _g tclblend package interp
+  ::XpUtils::getHook
+} [list [::XpUtils::expandSharedLibName tclblend _g] {package interp}]
 
 test 6.4 {create fake shared lib, look for it on path} {
-  set shlib [XpUtils::expandSharedLibName tclblend]
-  set tmp [XpUtils::getTmpDir]
+  set shlib [::XpUtils::expandSharedLibName tclblend]
+  set tmp [::XpUtils::getTmpDir]
   set fullpath [file join $tmp $shlib]
   # create "fake" shared lib
   set fd [open $fullpath w]
   close $fd
-  XpUtils::iload -d $tmp tclblend
+  ::XpUtils::iload -d $tmp tclblend
   file delete -force $fullpath
-  XpUtils::getHook
+  ::XpUtils::getHook
 } [list $fullpath {}]
 
 test 6.5 {check for error in case shared lib can not be found on the path} {
   # Make sure the shared lib does not already exist!
-  set shlib [XpUtils::expandSharedLibName tclblend]
-  set tmp [XpUtils::getTmpDir]
+  set shlib [::XpUtils::expandSharedLibName tclblend]
+  set tmp [::XpUtils::getTmpDir]
   set fullpath [file join $tmp $shlib]
   file delete -force $fullpath
-  list [catch {XpUtils::iload -d [list $tmp $tmp] -nopath tclblend} err] $err
+  list [catch {::XpUtils::iload -d [list $tmp $tmp] -nopath tclblend} err] $err
 } "1 \{could not find \"$shlib\" on path \{[list $tmp $tmp]\}\}"
 
 
 # Clean up after test series 6
 
-rename XpUtils::__iload_stage2 {}
-rename XpUtils::tmp__iload_stage2 XpUtils::__iload_stage2
-rename XpUtils::getHook {}
+rename ::XpUtils::__iload_stage2 {}
+rename ::XpUtils::tmp__iload_stage2 ::XpUtils::__iload_stage2
+rename ::XpUtils::getHook {}
 

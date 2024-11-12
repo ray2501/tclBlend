@@ -2,7 +2,7 @@
 
 namespace eval XpUtils {}
 
-proc XpUtils::getPathSeparator { } {
+proc ::XpUtils::getPathSeparator { } {
     global tcl_platform
 
     # FIXME: Mac switch broken
@@ -24,7 +24,7 @@ proc XpUtils::getPathSeparator { } {
 }
 
 
-proc XpUtils::expandSharedLibName { shortname {extdbg DEFAULT} } {
+proc ::XpUtils::expandSharedLibName { shortname {extdbg DEFAULT} } {
     global tcl_platform
 
     # FIXME: Mac switch broken
@@ -58,7 +58,7 @@ proc XpUtils::expandSharedLibName { shortname {extdbg DEFAULT} } {
     return ${SHLIB_PREFIX}${shortname}${extdbg}${SHLIB_SUFFIX}
 }
 
-proc XpUtils::getTmpDir { } {
+proc ::XpUtils::getTmpDir { } {
     global tcl_platform
 
     # FIXME: Mac switch broken
@@ -89,8 +89,8 @@ proc XpUtils::getTmpDir { } {
 # path is a list of files or directories separated by a system
 # define character like : or ;
 
-proc XpUtils::splitpath { path } {
-    set sep [XpUtils::getPathSeparator]
+proc ::XpUtils::splitpath { path } {
+    set sep [::XpUtils::getPathSeparator]
 
     set path_list [list]
 
@@ -106,8 +106,8 @@ proc XpUtils::splitpath { path } {
 # This command will append a value onto a path. This provides
 # a handy way to avoid platform dependent nightmares!
 
-proc XpUtils::appendpath { var elem } {
-    set sep [XpUtils::getPathSeparator]
+proc ::XpUtils::appendpath { var elem } {
+    set sep [::XpUtils::getPathSeparator]
     uplevel 1 [list append $var $sep$elem]
 }
 
@@ -115,8 +115,8 @@ proc XpUtils::appendpath { var elem } {
 # This command will prepend a value onto a path. This provides
 # a handy way to avoid platform dependent nightmares!
 
-proc XpUtils::prependpath { var elem } {
-    set sep [XpUtils::getPathSeparator]
+proc ::XpUtils::prependpath { var elem } {
+    set sep [::XpUtils::getPathSeparator]
 
     set tmp [uplevel 1 [list set $var]]
     uplevel 1 [list set $var ${elem}${sep}]
