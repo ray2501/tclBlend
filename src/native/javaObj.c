@@ -193,7 +193,7 @@ DupTclObject(
 
     object = (*env)->NewGlobalRef(env, object);
     destPtr->typePtr = srcPtr->typePtr;
-    destPtr->internalRep.twoPtrValue.ptr2 = (VOID*) object;
+    destPtr->internalRep.twoPtrValue.ptr2 = (void*) object;
     (*env)->CallVoidMethod(env, object, jcache->preserve);
     if ((*env)->ExceptionOccurred(env)) {
         (*env)->ExceptionDescribe(env);
@@ -419,7 +419,7 @@ JavaGetTclObj(
 	objPtr = Tcl_NewObj();
 	objPtr->bytes = NULL;
 	objPtr->typePtr = &tclObjectType;
-	objPtr->internalRep.twoPtrValue.ptr2 = (VOID*) object;
+	objPtr->internalRep.twoPtrValue.ptr2 = (void*) object;
 
 	/*
 	 * Increment the reference count on the TclObject.
@@ -653,7 +653,7 @@ Java_tcl_lang_CObject_makeRef(
     object = (*env)->NewGlobalRef(env, object);
     if (!non_tclobject_cmd)
 	objPtr->typePtr = &tclObjectType;
-    objPtr->internalRep.twoPtrValue.ptr2 = (VOID*) object;
+    objPtr->internalRep.twoPtrValue.ptr2 = (void*) object;
 
     /*
      * Note that we don't change the TclObject ref count or
@@ -978,7 +978,7 @@ SetJavaCmdFromAny(
     if ((objPtr->typePtr == &tclObjectType) ||
 	    ((objPtr->typePtr == cmdTypePtr) &&
 		    (objPtr->internalRep.twoPtrValue.ptr2 != NULL))) {
-	VOID *ptr2;
+	void *ptr2;
 	if (objPtr->bytes == NULL) {
 	    UpdateTclObject(objPtr);
 	}
