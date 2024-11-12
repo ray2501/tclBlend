@@ -1498,7 +1498,11 @@ JavaGetString(
      */
 
     Tcl_DStringInit(&ds);
+#if TCL_MAJOR_VERSION < 9
     Tcl_UniCharToUtfDString(ustr, length, &ds);
+#else
+    Tcl_Char16ToUtfDString(ustr, length, &ds);
+#endif
 
     /*
      * Now get the UTF-8 encoded string from the DString

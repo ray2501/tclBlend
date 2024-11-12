@@ -466,7 +466,12 @@ Java_tcl_lang_CObject_getString(
     jstring result;
     int length;
     char *p, *end;
+#if TCL_MAJOR_VERSION < 9
     Tcl_UniChar *w;
+#else
+    unsigned short *w;
+#endif
+
 
     if (!objPtr) {
 	ThrowNullPointerException(env, NULL);
@@ -495,7 +500,11 @@ Java_tcl_lang_CObject_getString(
 		  ((int) (p - str)), ((int) *p), *p);
 	  */
 
+#if TCL_MAJOR_VERSION < 9
 	  p += Tcl_UtfToUniChar(p, w);
+#else
+	  p += Tcl_UtfToChar16(p, w);
+#endif
 	  /*
 	  if (((unsigned int) *w) > ((unsigned int) 254)) {
 	    fprintf(stderr, "unicode char %d added\n", *w);
