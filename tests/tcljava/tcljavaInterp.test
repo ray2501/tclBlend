@@ -30,7 +30,7 @@ proc test_lengths { args } {
 }
 
 set fd [open tl.tcl w]
-fconfigure $fd -translation binary -encoding binary
+fconfigure $fd -translation binary -encoding iso8859-1
 puts $fd "test_lengths a b \\\r\nc d"
 close $fd
 

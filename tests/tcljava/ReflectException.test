@@ -45,9 +45,9 @@ set t [java::new Throwable "some error msg"]
 test ReflectException-1.3 {constructor, error during setting errorCode} {
     set stringrep [format %s $t]
     set errorCode ""
-    trace variable errorCode w bad
+    trace add variable errorCode write bad
     java::new tcl.lang.ReflectException [java::getinterp] $t
-    trace vdelete errorCode w bad
+    trace remove variable errorCode write bad
 
     set kk ""
     lappend kk [list [catch {$stringrep} msg] $msg]
