@@ -1004,7 +1004,7 @@ if test $TCLJAVA = "tclblend" || test $TCLJAVA = "both"; then
   fi
 
   echo '
-        if {[[catch {package require Tcl 8.3} err]]} {
+        if {[[catch {package require Tcl 8.6-} err]]} {
           puts stderr $err
           exit -1
         }
@@ -1017,18 +1017,23 @@ if test $TCLJAVA = "tclblend" || test $TCLJAVA = "both"; then
       rm -f tcl_version.tcl
   else
       rm -f tcl_version.tcl
-      AC_MSG_ERROR([$TCLSH_LOC is not version 8.3.2 or newer])
+      AC_MSG_ERROR([$TCLSH_LOC is not version 8.6 or newer])
   fi
 
   # Check that Tcl was compiled with thread support.
 
   echo '
-        if {! [[info exists tcl_platform(threaded)]]} {
-          puts stderr $err
-          exit -1
-        }
-        puts 1
-        exit 0
+        if {[[package vsatisfies [package provide Tcl] 9.0-]]} {
+          puts 1
+          exit 0
+        } else {
+          if {! [[info exists tcl_platform(threaded)]]} {
+            puts stderr $err
+            exit -1
+          }
+          puts 1
+          exit 0
+       }
        ' > tcl_threads.tcl
 
   if test "`$TCLSH_LOC tcl_threads.tcl 2>&AS_MESSAGE_LOG_FD`" = "1"; then
