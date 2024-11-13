@@ -224,7 +224,7 @@ test javaInterp-9.7 {Java_tcl_lang_Interp_setVar: error result} {
     set result
 } {1 {can't set "foo(bar)": variable isn't array}}
 test javaInterp-9.8 {Java_tcl_lang_Interp_setVar: different result} {
-    trace var x w foo
+    trace add variable x write foo
     proc foo {var1 var2 op} {
 	uplevel 1 set $var1 42
     }
