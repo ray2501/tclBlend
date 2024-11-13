@@ -36,14 +36,14 @@
 
 
 proc java::lock { javaObj } {
-    global java::objLockedList
+    global ::java::objLockedList
 
     # Copy string data into new object
     set copy [format %s $javaObj]
     
     # Convert copy into a ReflectObject
     if {! [java::isnull $copy]} {
-        lappend java::objLockedList $copy
+        lappend ::java::objLockedList $copy
     }
     return $copy
 }
@@ -65,11 +65,11 @@ proc java::lock { javaObj } {
 # 	does not contain a java object or is not "all".
 
 proc java::unlock { javaObj } {
-    global java::objLockedList
+    global ::java::objLockedList
 
     # check to see if the special "all" argument was given
     if {$javaObj == "all"} {
-	catch {unset java::objLockedList}
+	catch {unset ::java::objLockedList}
         return
     }
 
@@ -80,11 +80,11 @@ proc java::unlock { javaObj } {
 
     # Remove the copy of the reference.
 
-    set index [lsearch -exact $java::objLockedList $javaObj]
+    set index [lsearch -exact $::java::objLockedList $javaObj]
     if {$index < 0} {
 	error "unknown java object \"$javaObj\""
     } else {
-	set java::objLockedList [lreplace $java::objLockedList $index $index]
+	set ::java::objLockedList [lreplace $::java::objLockedList $index $index]
     }
     return
 }

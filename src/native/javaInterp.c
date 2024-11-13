@@ -1587,7 +1587,7 @@ Java_tcl_lang_Interp_addErrorInfo(
     jstring string)		/* String to add to errorInfo. */
 {
     char *str;
-    int length;
+    Tcl_Size length;
     Tcl_Interp *interp = JavaGetInterp(env, interpObj);
 
     if (!interp) {
@@ -1786,10 +1786,7 @@ Java_tcl_lang_Interp_pkgRequire(
     Tcl_Interp *interp = JavaGetInterp(env, interpObj);
     char *namePtr;
     char *versionPtr;
-#ifdef CONST84
-    const
-#endif
-    char *resultPtr;
+    const char *resultPtr;
     int flag;
     jstring string;
 

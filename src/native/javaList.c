@@ -133,7 +133,8 @@ Java_tcl_lang_TclList_getElements(
 {
     Tcl_Obj *listPtr = *(Tcl_Obj **)&list;
     Tcl_Obj **objvPtr;
-    int objc, i;
+    Tcl_Size objc;
+    int i;
     jarray array;
     JavaInfo* jcache = JavaGetCache();
 
@@ -250,7 +251,7 @@ Java_tcl_lang_TclList_listLength(
 {
     Tcl_Obj *listPtr = *(Tcl_Obj **)&list;
     Tcl_Interp *interp = *(Tcl_Interp **)&interpPtr;
-    int length;
+    Tcl_Size length;
 
     if (!listPtr) {
 	ThrowNullPointerException(env, NULL);
@@ -425,7 +426,7 @@ Java_tcl_lang_TclList_splitList(
 {
     Tcl_Interp *interp = *(Tcl_Interp **)&interpPtr;
     Tcl_Obj *listPtr;
-    int length;
+    Tcl_Size length;
     jlong list;
     
     /*

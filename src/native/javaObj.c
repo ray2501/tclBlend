@@ -464,7 +464,7 @@ Java_tcl_lang_CObject_getString(
     jchar *buf;
     char *str;
     jstring result;
-    int length;
+    Tcl_Size length;
     char *p, *end;
 #if TCL_MAJOR_VERSION < 9
     Tcl_UniChar *w;
@@ -699,7 +699,8 @@ JavaBreakRef(
     Tcl_Obj *objPtr)		/* Object to check. */
 {
     jobject object;
-    int isTclList, isCObject, dummy;
+    int isTclList, isCObject;
+    Tcl_Size dummy;
     int inst;
     JavaInfo* jcache = JavaGetCache();
 

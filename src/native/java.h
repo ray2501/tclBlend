@@ -98,6 +98,15 @@
 #endif
 
 /*
+ * Added Tcl_Size definition
+ */
+#if TCL_MAJOR_VERSION < 9
+    #ifndef Tcl_Size
+        typedef int Tcl_Size;
+    #endif
+#endif
+
+/*
  * The following structure contains cached class information.
  */
 
@@ -149,7 +158,7 @@ TCLBLEND_EXTERN JavaInfo *	JavaGetCache();
 TCLBLEND_EXTERN int		JavaWasJavaThreadInit();
 TCLBLEND_EXTERN Tcl_Interp *	JavaGetInterp(JNIEnv *env, jobject interpObj);
 TCLBLEND_EXTERN char *		JavaGetString(JNIEnv *env, jstring str,
-			    	    int *lengthPtr);
+			    	    Tcl_Size *lengthPtr);
 TCLBLEND_EXTERN Tcl_Obj *	JavaGetTclObj(JNIEnv *env, jobject object);
 TCLBLEND_EXTERN jobject		JavaGetTclObject(JNIEnv *env, Tcl_Obj *objPtr,
 			    	    int *isLocal);

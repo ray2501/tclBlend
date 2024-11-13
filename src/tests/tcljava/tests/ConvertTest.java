@@ -116,13 +116,13 @@ public class ConvertTest {
     public Boolean trueBooleanObjectMethod() {
 	// The Tcl result should be a Boolean Java object.
 
-	return new Boolean(true);
+	return Boolean.TRUE;
     }
 
     public Boolean falseBooleanObjectMethod() {
 	// The Tcl result should be a Boolean Java object.
 
-	return new Boolean(false);
+	return Boolean.FALSE;
     }
 
     public boolean trueBooleanMethod() {

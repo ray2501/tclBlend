@@ -431,7 +431,8 @@ JavaInitEnv(
     JavaVMOption *options;
     JavaVMInitArgs vm_args;
     Tcl_Obj *tclblend_init;
-    int i, tclblend_init_len;
+    int i;
+    Tcl_Size tclblend_init_len;
 #elif defined TCLBLEND_KAFFE /* FIXME: Can we pass options to Kaffe ?? */
     JavaVMInitArgs vm_args;
 #else
@@ -1392,7 +1393,7 @@ ToString(
     jobject obj)		/* Object whose string should be retrieved. */
 {
     jstring str;
-    int length;
+    Tcl_Size length;
     char *buf;
     jobject exc;
     JavaInfo* jcache = JavaGetCache();
@@ -1477,7 +1478,7 @@ char *
 JavaGetString(
     JNIEnv *env,		/* Java environment pointer. */
     jstring str,		/* String to convert. */
-    int *lengthPtr)		/* Pointer to where length should be stored,
+    Tcl_Size *lengthPtr)		/* Pointer to where length should be stored,
 				 * or NULL. */
 {
     const jchar *ustr;

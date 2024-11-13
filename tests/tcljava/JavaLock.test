@@ -99,13 +99,13 @@ test java::unlock-1.3 {error checking} {
 # should be empty, or I've construced some bad tests.
 
 test java::objLockedList-1.11 {error in test suite} {
-    set java::objLockedList
+    set ::java::objLockedList
 } {}
 
 # Now unset the java::objLockedList so the error dosen't 
 # stick around if the test file is sourced again.
 
 # cleanup
-catch {unset java::objLockedList}
+catch {unset ::java::objLockedList}
 ::tcltest::cleanupTests
 return
