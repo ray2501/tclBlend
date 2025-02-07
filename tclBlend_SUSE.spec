@@ -44,7 +44,7 @@ autoconf
         --prefix=%{directory} --libdir=%{directory}/%{_lib}/tcl \
 	--with-jdk=$JAVA_HOME \
 	--with-tcl=%{directory}/%{_lib} \
-	--with-thread=$(echo %{directory}/%{_lib}/tcl/thread2.*)
+	--with-thread=$(echo %{directory}/%{_lib}/tcl/thread*.*)
 make
 
 %install
