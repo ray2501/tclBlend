@@ -139,7 +139,7 @@ throws TclException
     // win/makefile.vc
     // unix/configure.in
 
-    interp.eval("package provide java 1.4.9");
+    interp.eval("package provide java 1.4.10");
 
 }
 

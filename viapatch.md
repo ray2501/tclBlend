@@ -87,11 +87,7 @@ First step is to update tcljava.m4.
 
 Then do `autoconf` to update configure file.
 
-Next step is to execute configure (Environment - Open JDK 8, thread extension version is 2.7.0):
-
-    ./configure --prefix=/usr --with-jdk=/usr/lib/jvm/java-8-openjdk-amd64 --with-tcl=/usr/lib
-    --with-thread=/usr/lib/tcltk/thread2.7.0
-
+Next step is to execute configure (Environment - Open JDK 21, thread extension version is 2.8.10).
 openSUSE (64bit) Tcl extension folder is at /usr/lib64/tcl,
 so I add libdir option to handle this case:
 
