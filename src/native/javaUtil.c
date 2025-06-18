@@ -60,20 +60,20 @@ Java_tcl_lang_Util_getBoolean(
     jobject interpObj,		/* Interp object. */
     jstring string)		/* String to convert. */
 {
-    int bool;
+    int boolflag;
     const char *str;
     Tcl_Interp *interp = JavaGetInterp(env, interpObj);
 
     str = (string) ? (*env)->GetStringUTFChars(env, string, NULL) : "";
 
-    if (Tcl_GetBoolean(interp, (/*UNCONST*/ char*) str, &bool) != TCL_OK) {
+    if (Tcl_GetBoolean(interp, (/*UNCONST*/ char*) str, &boolflag) != TCL_OK) {
 	JavaThrowTclException(env, interp, TCL_ERROR);
     }
     
     if (string) {
 	(*env)->ReleaseStringUTFChars(env, string, str);
     }
-    return (bool) ? JNI_TRUE : JNI_FALSE;
+    return (boolflag) ? JNI_TRUE : JNI_FALSE;
 }
 
 /*
