@@ -87,12 +87,12 @@ First step is to update tcljava.m4.
 
 Then do `autoconf` to update configure file.
 
-Next step is to execute configure (Environment - Open JDK 21, thread extension version is 2.8.10).
+Next step is to execute configure (Environment - Open JDK 21, thread extension version is 2.8.11).
 openSUSE (64bit) Tcl extension folder is at /usr/lib64/tcl,
 so I add libdir option to handle this case:
 
     ./configure --prefix=/usr --libdir=/usr/lib64/tcl --with-tcl=/usr/lib64 \
-    --with-jdk=/usr/lib64/jvm/java-21-openjdk --with-thread=/usr/lib64/tcl/thread2.8.10
+    --with-jdk=/usr/lib64/jvm/java-21-openjdk --with-thread=/usr/lib64/tcl/thread2.8.11
 
 And execute `make` and `make install`.
 
