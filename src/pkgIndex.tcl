@@ -175,7 +175,7 @@ proc loadtclblend {dir} {
     # See src/tcljava/tcl/lang/BlendExtension.java
     # for other places the version info is hardcoded
 
-    package provide java 1.4.10
+    package provide java 1.4.11
 
     # Delete proc from interp, if other interps do a package require
     # they will source this file again anyway
@@ -183,4 +183,4 @@ proc loadtclblend {dir} {
     rename loadtclblend {}
 }
 
-package ifneeded java 1.4.10 [list loadtclblend $dir]
+package ifneeded java 1.4.11 [list loadtclblend $dir]
