@@ -12,11 +12,11 @@ Source0:	%{name}-%{version}.tar.gz
 URL:		https://github.com/ray2501/tclBlend
 BuildRequires:	autoconf >= 2.50
 BuildRequires:	gcc
-BuildRequires:	java-21-openjdk-devel
+BuildRequires:	java-25-openjdk-devel
 BuildRequires:	jpackage-utils
 BuildRequires:	sed >= 4.0
 BuildRequires:	tcl-devel >= 8.6
-Requires:       java-21-openjdk-devel
+Requires:       java-25-openjdk-devel
 Requires:       tcl
 BuildRoot:	%{buildroot}
 
