@@ -126,3 +126,14 @@ The class finalize() method deprecated in Java 9, try to disable it.
 Fix to Java 9 newInstance() deprecated.  
 Update for Java 9, Integer(int) constructors are deprecated.  
 Try to avoid ConcurrentModificationException. (java::import -forget -package)
+
+Notice:  
+JEP 472 issue warnings about uses of the Java Native Interface (JNI) and
+adjust the Foreign Function & Memory (FFM) API to issue warnings in a
+consistent manner (since Java 24). Now I use a workaround in my Tcl
+script -  setup tclblend_init variable before load tclBlend to disable
+warnings.  
+For example:
+
+    set tclblend_init {--enable-native-access=ALL-UNNAMED}
+
